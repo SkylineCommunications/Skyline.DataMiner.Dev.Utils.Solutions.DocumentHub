@@ -97,7 +97,7 @@
 
 			_drive = drives.FirstOrDefault(d => d.Name.Equals(_sharePoint.DocumentLibraryName, StringComparison.OrdinalIgnoreCase));
 			if (_drive == null)
-				throw new Exception($"Library '{_sharePoint.DocumentLibraryName}' not found.");
+				throw new NullReferenceException($"Library '{_sharePoint.DocumentLibraryName}' not found.");
 		}
 
         #endregion
@@ -193,9 +193,6 @@
             {
                 if (_nextPageRequest == null)
                 {
-                    if (_folderQueue.Count == 0)
-                        return new List<DriveItem>();
-
                     var folderId = _folderQueue.Dequeue();
 
                     _nextPageRequest = _graphClient
@@ -284,7 +281,7 @@
 			}
 			catch (Exception e)
 			{
-				throw new Exception(ExtractMessage(e));
+				throw new IOException(ExtractMessage(e));
 			}
 		}
 
@@ -313,7 +310,7 @@
 			}
 			catch (Exception e)
 			{
-                throw new Exception(ExtractMessage(e));
+                throw new IOException(ExtractMessage(e));
             }
 		}
 
@@ -377,7 +374,7 @@
 				}
 				catch (Exception e)
 				{
-                    throw new Exception(e.ToString());
+                    throw new IOException(e.ToString());
                 }
 			}
 		}
