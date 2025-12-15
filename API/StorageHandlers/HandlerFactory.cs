@@ -1,10 +1,9 @@
-﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.UploadHandlers
+﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
 {
 	using System;
     using System.Collections.Generic;
     using System.Drawing;
     using Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub;
-    using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers;
     using static DomHelpers.SlcDocumenthub.SlcDocumenthubIds.Enums;
 
 	#region Interface
@@ -16,7 +15,7 @@
 	/// Implementations of this interface (e.g., <see cref="LocalHandler"/> and <see cref="SharePointHandler"/>)
 	/// handle how files or images are uploaded and verified in their respective storage environments.
 	/// </remarks>
-	public interface IStorageHandler
+	internal interface IStorageHandler
 	{
 		/// <summary>
 		/// Checks whether a file with the specified name already exists in the given directory.
@@ -64,7 +63,7 @@
 	/// It encapsulates the logic for constructing each handler, ensuring the rest of the system remains decoupled
 	/// from concrete storage implementations.
 	/// </remarks>
-	public static class StorageHandlerFactory
+	internal static class StorageHandlerFactory
 	{
         /// <summary>
         /// Creates a new instance of a storage handler that matches the specified <see cref="Storage"/> type.

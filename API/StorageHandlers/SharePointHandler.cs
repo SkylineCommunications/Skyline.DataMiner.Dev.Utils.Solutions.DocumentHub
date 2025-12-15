@@ -1,10 +1,8 @@
-﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.UploadHandlers
+﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
 {
     using Azure.Identity;
     using Microsoft.Graph;
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub;
-    using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers;
     using System;
     using System.Collections.Generic;
     using System.Drawing;
@@ -30,24 +28,24 @@
 		/// <summary>
 		/// Holds SharePoint instance configuration from the DOM.
 		/// </summary>
-		private Models.SharePointConfiguration _sharePoint;
+		private readonly Models.SharePointConfiguration _sharePoint;
 
 		/// <summary>
 		/// Client used to access Microsoft Graph API.
 		/// </summary>
-		private GraphServiceClient _graphClient;
+		private readonly GraphServiceClient _graphClient;
 
 		/// <summary>
 		/// Represents the SharePoint site.
 		/// </summary>
-		private Site _site;
+		private readonly Site _site;
 
 		/// <summary>
 		/// Represents the document library (drive) in SharePoint.
 		/// </summary>
-		private Drive _drive;
+		private readonly Drive _drive;
 
-        private Queue<string> _folderQueue; // Queue to manage folder traversal in breadth-first order.
+        private readonly Queue<string> _folderQueue; // Queue to manage folder traversal in breadth-first order.
         private IDriveItemChildrenCollectionRequest _nextPageRequest; // Tracks the next page of Graph API results.
 
         #endregion
@@ -57,9 +55,9 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="SharePointHandler"/> class.
         /// </summary>
-        /// <param name="domHelper">The DOM helper for accessing SharePoint configuration.</param>
+        /// <param name="helpers">The DOM helper for accessing SharePoint configuration.</param>
         /// <exception cref="Exception">Thrown if the SharePoint library cannot be found.</exception>
-        public SharePointHandler(DataHelpersDocumentHub helpers)
+        internal SharePointHandler(DataHelpersDocumentHub helpers)
 		{
 			// Avoid re-initialization if client and drive are already set
 			if (_graphClient != null && _drive != null)

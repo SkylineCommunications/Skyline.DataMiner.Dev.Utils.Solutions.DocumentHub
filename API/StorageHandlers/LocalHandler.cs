@@ -1,12 +1,11 @@
-﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.UploadHandlers
+﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
 {
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub;
-    using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers;
+    using Skyline.DataMiner.Utils.SecureCoding.SecureIO;
     using System;
     using System.Collections.Generic;
     using System.Drawing;
-	using System.IO;
+    using System.IO;
     using System.Linq;
 
     /// <summary>
@@ -24,12 +23,12 @@
         /// <summary>
         /// Checks if a file exists at the given directory path.
         /// </summary>
-        /// <param name="directoryPath">The directory to search in.</param>
-        /// <param name="filename">The filename to check.</param>
+        /// <param name="directory">The directory to search in.</param>
+        /// <param name="name">The filename to check.</param>
         /// <returns>True if the file exists; otherwise false.</returns>
-        public bool FileExists(string directoryPath, string filename)
+        public bool FileExists(string directory, string name)
 		{
-			string filePath = Path.Combine(directoryPath, $"{filename}");
+			string filePath = SecurePath.ConstructSecurePath(directory, $"{name}");
 			return File.Exists(filePath);
 		}
 
@@ -37,18 +36,18 @@
 		/// Saves a <see cref="Bitmap"/> image to the specified directory as a JPEG file.
 		/// </summary>
 		/// <param name="image">The image to save.</param>
-		/// <param name="directoryPath">The target directory path.</param>
-		/// <param name="imageName">The desired filename (without extension).</param>
-		public void UploadImage(Bitmap image, string directoryPath, string imageName)
+		/// <param name="directory">The target directory path.</param>
+		/// <param name="name">The desired filename (without extension).</param>
+		public void UploadImage(Bitmap image, string directory, string name)
 		{
 			// Ensure the target directory exists
-			if (!Directory.Exists(directoryPath))
+			if (!Directory.Exists(directory))
 			{
-				Directory.CreateDirectory(directoryPath);
+				Directory.CreateDirectory(directory);
 			}
 
 			// Construct the full file path and save the image as JPEG
-			string filePath = Path.Combine(directoryPath, $"{imageName}.jpeg");
+			string filePath = SecurePath.ConstructSecurePath(directory, $"{name}.jpeg");
 			image.Save(filePath);
 		}
 
@@ -56,27 +55,27 @@
 		/// Copies a local file to the DataMiner Webpages folder under the specified relative path.
 		/// </summary>
 		/// <param name="filePath">The full path to the source file.</param>
-		/// <param name="relativePath">The relative path under the WebFileManager folder.</param>
+		/// <param name="directory">The relative path under the WebFileManager folder.</param>
 		/// <param name="name">The target filename including extension.</param>
-		public void UploadFile(string filePath, string relativePath, string name)
+		public void UploadFile(string filePath, string directory, string name)
 		{
 			// Root path for DataMiner WebFileManager
 			var root = @"C:\Skyline DataMiner\Webpages\Public\WebFileManager";
 
 			// Remove leading slashes from relative path
-			relativePath = relativePath.TrimStart('/', '\\');
+			directory = directory.TrimStart('/', '\\');
 
 			// Combine root and relative path to get full target directory
-			var directory = Path.Combine(root, relativePath);
+			var targetDirectory = SecurePath.ConstructSecurePath(root, directory);
 
 			// Ensure the target directory exists
-			if (!Directory.Exists(directory))
+			if (!Directory.Exists(targetDirectory))
 			{
-				Directory.CreateDirectory(directory);
+				Directory.CreateDirectory(targetDirectory);
 			}
 
 			// Combine directory and target filename
-			string targetPath = Path.Combine(directory, name);
+			string targetPath = SecurePath.ConstructSecurePath(targetDirectory, name);
 
 			// Copy the file to the target location (overwrite if exists)
 			File.Copy(filePath, targetPath, overwrite: true);
@@ -91,7 +90,7 @@
 
             if (category != null && !string.IsNullOrWhiteSpace(category.UploadPath))
             {
-                root = Path.Combine(root, category.UploadPath.TrimStart('\\', '/'));
+                root = SecurePath.ConstructSecurePathWithSubDirectories(root, category.UploadPath.TrimStart('\\', '/'));
             }
 
             // Initialize enumeration only once or when root changes
