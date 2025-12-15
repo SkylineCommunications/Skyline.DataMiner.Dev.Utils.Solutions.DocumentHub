@@ -1,5 +1,7 @@
-﻿using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+﻿using Skyline.DataMiner.Net;
+using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 using Skyline.DataMiner.Net.Messages.SLDataGateway;
+using Skyline.DataMiner.Net.Serialization;
 using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers;
 using Skyline.DataMiner.Utils.DocumentHub.API.UploadHandlers;
 using Skyline.DataMiner.Utils.DocumentHub.SDM;
@@ -13,43 +15,32 @@ namespace Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub
 {
     public class Client
     {
+        private IConnection _connection;
+
+        public Client(Net.IConnection connection)
+        {
+            _connection = connection;
+            Helpers = new DataHelpersDocumentHub(_connection);
+
+            Categories = new Categories(Helpers);
+            Files = new Files(Helpers);
+        }
         internal DataHelpersDocumentHub Helpers { get; set; }
 
-        public void CreateOrUpdateCategory(Models.DocumentCategory category)
+        public Categories Categories { get; set; }
+
+        public Files Files { get; set; }
+
+    }
+
+    public class Files
+    {
+        internal Files(DataHelpersDocumentHub helpers)
         {
-            Helpers.DocumentCategories.CreateOrUpdate(category);
+            Helpers = helpers;
         }
 
-        public List<Models.DocumentCategory> GetAllCategories()
-        {
-            return Helpers.DocumentCategories.Read();
-        }
-
-        public Models.DocumentCategory GetCategoryById(Guid id)
-        {
-            var filter = CategoryExposers.Id.Equal(id);
-            return Helpers.DocumentCategories.Read(filter).SingleOrDefault();
-        }
-
-        public bool TryDeleteCategory(IEnumerable<Models.DocumentCategory> items)
-        {
-             return Helpers.DocumentCategories.TryDelete(items);
-        }
-
-        public string[] GetAllowedExtensions(Models.DocumentCategory category)
-        {
-            var input = category.Extensions;
-            if (string.IsNullOrWhiteSpace(input))
-            {
-                return new string[0];
-            }
-
-            // Split by comma, trim whitespace, and prepend a dot to each extension.
-            return input
-                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(ext => "." + ext.Trim())
-                .ToArray();
-        }
+        internal DataHelpersDocumentHub Helpers { get; set; }
 
         public void UploadFile(Models.DocumentCategory category, string filePath, string name = null)
         {
@@ -73,7 +64,7 @@ namespace Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub
 
         public List<IDocHubFile> ReadFiles(Storagetype storagetype)
         {
-            var storageHandler =  StorageHandlerFactory.Create(storagetype, Helpers);
+            var storageHandler = StorageHandlerFactory.Create(storagetype, Helpers);
             return storageHandler.ReadFiles(null, null);
         }
 
@@ -86,14 +77,55 @@ namespace Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub
         public List<IDocHubFile> ReadFiles(Storagetype storagetype, string filter)
         {
             var storageHandler = StorageHandlerFactory.Create(storagetype, Helpers);
-            return storageHandler.ReadFiles(null , filter);
+            return storageHandler.ReadFiles(null, filter);
 
         }
 
         public List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter)
         {
             var storageHandler = StorageHandlerFactory.Create(category.StorageType, Helpers);
-            return storageHandler.ReadFiles (category, filter);
+            return storageHandler.ReadFiles(category, filter);
+        }
+    }
+
+    public class Categories
+    {
+        internal Categories(DataHelpersDocumentHub helpers)
+        {
+            Helpers = helpers;
+        }
+
+        internal DataHelpersDocumentHub Helpers { get; set; }
+
+        public void CreateOrUpdateCategory(Models.DocumentCategory category)
+        {
+            Helpers.DocumentCategories.CreateOrUpdate(category);
+        }
+
+        public List<Models.DocumentCategory> GetCategories()
+        {
+            return Helpers.DocumentCategories.Read();
+        }
+
+        public List<Models.DocumentCategory> GetCategory(List<Guid> ids)
+        {
+
+            FilterElement<Models.DocumentCategory> filter = new ORFilterElement<Models.DocumentCategory>();
+            foreach (var id in ids)
+            {
+                filter = filter.OR(CategoryExposers.Id.Equal(id));
+            }
+            return Helpers.DocumentCategories.Read(filter);
+        }
+
+        public List<Models.DocumentCategory> GetCategory(FilterElement<Models.DocumentCategory> filter)
+        {
+            return Helpers.DocumentCategories.Read(filter);
+        }
+
+        public bool TryDeleteCategory(IEnumerable<Models.DocumentCategory> items)
+        {
+            return Helpers.DocumentCategories.TryDelete(items);
         }
     }
 }
