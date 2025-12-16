@@ -47,7 +47,7 @@
 			}
 
 			// Construct the full file path and save the image as JPEG
-			string filePath = SecurePath.ConstructSecurePath(directory, $"{name}.jpeg");
+			string filePath = Path.Combine(directory, $"{name}.jpeg");
 			image.Save(filePath);
 		}
 
@@ -66,7 +66,7 @@
 			directory = directory.TrimStart('/', '\\');
 
 			// Combine root and relative path to get full target directory
-			var targetDirectory = SecurePath.ConstructSecurePath(root, directory);
+			var targetDirectory = Path.Combine(root, directory);
 
 			// Ensure the target directory exists
 			if (!Directory.Exists(targetDirectory))
@@ -75,7 +75,7 @@
 			}
 
 			// Combine directory and target filename
-			string targetPath = SecurePath.ConstructSecurePath(targetDirectory, name);
+			string targetPath = Path.Combine(targetDirectory, name);
 
 			// Copy the file to the target location (overwrite if exists)
 			File.Copy(filePath, targetPath, overwrite: true);
@@ -90,7 +90,7 @@
 
             if (category != null && !string.IsNullOrWhiteSpace(category.UploadPath))
             {
-                root = SecurePath.ConstructSecurePathWithSubDirectories(root, category.UploadPath.TrimStart('\\', '/'));
+                root = Path.Combine(root, category.UploadPath.TrimStart('\\', '/'));
             }
 
             // Initialize enumeration only once or when root changes
