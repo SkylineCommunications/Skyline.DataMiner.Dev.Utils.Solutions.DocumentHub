@@ -9,7 +9,7 @@ namespace Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub
 {
     internal class DataHelperSharePointConfiguration : DataHelper<Models.SharePointConfiguration>
     {
-        internal DataHelperSharePointConfiguration(IConnection connection) : base(connection, SlcDocumenthubIds.Definitions.DocumentCategory)
+        internal DataHelperSharePointConfiguration(IConnection connection) : base(connection, SlcDocumenthubIds.Definitions.Sharepoint)
         {
         }
 
