@@ -1,7 +1,6 @@
 ﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
 {
     using Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub;
-    using Skyline.DataMiner.Utils.SecureCoding.SecureIO;
     using System;
     using System.Collections.Generic;
     using System.Drawing;
@@ -28,7 +27,7 @@
         /// <returns>True if the file exists; otherwise false.</returns>
         public bool FileExists(string directory, string name)
 		{
-			string filePath = SecurePath.ConstructSecurePath(directory, $"{name}");
+			string filePath = Path.Combine(directory, $"{name}");
 			return File.Exists(filePath);
 		}
 
