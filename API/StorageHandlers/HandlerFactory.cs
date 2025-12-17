@@ -41,13 +41,22 @@
 		/// <param name="name">The name to assign to the uploaded file.</param>
 		void UploadFile(string filePath, string directory, string name);
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="category"></param>
-		/// <param name="filter"></param>
-		/// <returns></returns>
-		List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="category"></param>
+        /// <param name="filter"></param>
+        /// <returns></returns>
+        List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="category"></param>
+        /// <param name="filter"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter, PageContext context);
 	}
 
 	#endregion

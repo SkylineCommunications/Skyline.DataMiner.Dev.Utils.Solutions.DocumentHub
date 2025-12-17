@@ -16,8 +16,6 @@
     /// </remarks>
 	internal class LocalHandler : IStorageHandler
 	{
-        private IEnumerator<FileInfo> _fileEnumerator;
-        private string _currentRoot;
 
         /// <summary>
         /// Checks if a file exists at the given directory path.
@@ -80,9 +78,15 @@
 			File.Copy(filePath, targetPath, overwrite: true);
 		}
 
-        public List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter)
+        public List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter, PageContext context)
         {
-            const int pageSize = 200;
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
+
+            if (!(context is LocalPageContext localContext))
+                throw new ArgumentException(
+                    "LocalHandler requires LocalPageContext.",
+                    nameof(context));
 
             // Determine root path
             string root = @"C:\Skyline DataMiner\Webpages\Public\WebFileManager";
@@ -93,9 +97,9 @@
             }
 
             // Initialize enumeration only once or when root changes
-            if (_fileEnumerator == null || !string.Equals(_currentRoot, root, StringComparison.OrdinalIgnoreCase))
+            if (localContext.FileEnumerator == null || !string.Equals(localContext.CurrentRoot, root, StringComparison.OrdinalIgnoreCase))
             {
-                _currentRoot = root;
+                localContext.CurrentRoot = root;
 
                 if (!Directory.Exists(root))
                     return new List<IDocHubFile>();
@@ -110,22 +114,40 @@
                         fi.Name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0);
                 }
 
-                _fileEnumerator = files
+                localContext.FileEnumerator = files
                     .OrderByDescending(fi => fi.CreationTimeUtc)
                     .GetEnumerator();
             }
 
             var result = new List<IDocHubFile>();
 
-            while (result.Count < pageSize && _fileEnumerator.MoveNext())
+            while (result.Count < localContext.PageSize && localContext.FileEnumerator.MoveNext())
             {
                 result.Add(new FileInfoAdapter
                 {
-                    fileInfo = _fileEnumerator.Current
+                    fileInfo = localContext.FileEnumerator.Current,
                 });
             }
 
             return result;
+        }
+
+        public List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter)
+        {
+            List<IDocHubFile> files = new List<IDocHubFile>();
+
+            var context = new LocalPageContext();
+            while (true)
+            {
+                var page = ReadFiles(category, filter, context);
+
+                if (page.Count == 0)
+                    break;
+
+                files.AddRange(page);
+            }
+
+            return files;
         }
     }
 }

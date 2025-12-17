@@ -2,6 +2,7 @@
 {
     using Azure.Identity;
     using Microsoft.Graph;
+    using Microsoft.IdentityModel.Tokens;
     using Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub;
     using System;
     using System.Collections.Generic;
@@ -44,10 +45,6 @@
 		/// Represents the document library (drive) in SharePoint.
 		/// </summary>
 		private readonly Drive _drive;
-
-        private readonly Queue<string> _folderQueue; // Queue to manage folder traversal in breadth-first order.
-        private IDriveItemChildrenCollectionRequest _nextPageRequest; // Tracks the next page of Graph API results.
-
         #endregion
 
         #region Constructor
@@ -73,9 +70,7 @@
 				_sharePoint.ClientSecret);
 
 			_graphClient = new GraphServiceClient(credential);
-            // Start traversal at root folder.
-            _folderQueue = new Queue<string>(new[] { "root" });
-
+            
             // Build site URI
             var uri = new UriBuilder("https://" + _sharePoint.SiteURL).Uri;
 			string hostname = uri.Host;
@@ -100,38 +95,44 @@
 				throw new NullReferenceException($"Library '{_sharePoint.DocumentLibraryName}' not found.");
 		}
 
-        #endregion
+		#endregion
 
-        #region Public
+		#region Public
+		public List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter)
+		{
+			List<IDocHubFile> files = new List<IDocHubFile>();
+			
+			var context = new SharePointPageContext();
+			while (context.FolderQueue.Count > 0 || context.NextPageRequest != null)
+			{
+				files.AddRange(ReadFiles(category, filter, context));
+			}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="category"></param>
-		/// <param name="filter"></param>
-		/// <returns></returns>
-        public List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter)
+			return files;
+		}
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="category"></param>
+        /// <param name="filter"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        public List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter, PageContext context)
         {
-			const int pageSize = 200;
+            if (context == null)
+                throw new ArgumentNullException(nameof(context));
 
-            // Initialize traversal only once per handler instance
-            if (_folderQueue.Count == 0 && _nextPageRequest == null)
-            {
-                string startFolder;
+            if (!(context is SharePointPageContext spContext))
+                throw new ArgumentException(
+                    "SharePointHandler requires SharePointPageContext.",
+                    nameof(context));
 
-                if (category == null || string.IsNullOrWhiteSpace(category.UploadPath))
-                {
-                    startFolder = "root";
-                }
-                else
-                {
-                    startFolder = category.UploadPath;
-                }
+            if (spContext.FolderQueue.IsNullOrEmpty())
+			{
+				throw new Exception();
+			}
 
-                _folderQueue.Enqueue(startFolder);
-            }
-
-            var driveItems = FetchNextPageInternal(pageSize, filter);
+            var driveItems = FetchNextPageInternal(filter, spContext);
 
             var result = new List<IDocHubFile>();
 
@@ -181,21 +182,25 @@
 
         #region Private
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="pageSize"></param>
-		/// <param name="filter"></param>
-		/// <returns></returns>
-        private IList<DriveItem> FetchNextPageInternal(int pageSize, string filter)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        private IList<DriveItem> FetchNextPageInternal(string filter, SharePointPageContext context)
         {
-            while (_folderQueue.Count > 0 || _nextPageRequest != null)
-            {
-                if (_nextPageRequest == null)
-                {
-                    var folderId = _folderQueue.Dequeue();
+			var folderQueue = context.FolderQueue;
+			var nextPageRequest = context.NextPageRequest;
+			var pageSize = context.PageSize;
 
-                    _nextPageRequest = _graphClient
+            while (folderQueue.Count > 0 || nextPageRequest != null)
+            {
+                if (nextPageRequest == null)
+                {
+                    var folderId = folderQueue.Dequeue();
+
+                    nextPageRequest = _graphClient
                         .Drives[_drive.Id]
                         .Items[folderId]
                         .Children
@@ -203,15 +208,15 @@
                         .Top(pageSize);
                 }
 
-                var page = _nextPageRequest
+                var page = nextPageRequest
                     .GetAsync()
                     .GetAwaiter()
                     .GetResult();
 
-                _nextPageRequest = page.NextPageRequest;
+                nextPageRequest = page.NextPageRequest;
 
                 foreach (var folder in page.CurrentPage.Where(i => i.Folder != null))
-                    _folderQueue.Enqueue(folder.Id);
+                    folderQueue.Enqueue(folder.Id);
 
                 var files = page.CurrentPage
                     .Where(i =>
@@ -219,8 +224,12 @@
                         (string.IsNullOrEmpty(filter) ||
                          i.Name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0))
                     .ToList();
+                
+				if (files.Count > 0)
+                    return files;
 
-                return files;
+                if (nextPageRequest == null)
+                    continue;
             }
 
             return new List<DriveItem>();

@@ -1,9 +1,7 @@
 ﻿using Microsoft.Graph;
-using Skyline.DataMiner.Net.Serialization;
 using Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub;
 using System;
 using System.IO;
-using System.Linq;
 using System.Security.AccessControl;
 using System.Security.Principal;
 
