@@ -88,24 +88,20 @@
                     "LocalHandler requires LocalPageContext.",
                     nameof(context));
 
-            // Determine root path
-            string root = @"C:\Skyline DataMiner\Webpages\Public\WebFileManager";
-
-            if (category != null && !string.IsNullOrWhiteSpace(category.UploadPath))
+            if (category != null && localContext.FileEnumerator == null)
             {
-                root = Path.Combine(root, category.UploadPath.TrimStart('\\', '/'));
+                localContext.CurrentRoot = Path.Combine(localContext.CurrentRoot, category.UploadPath.TrimStart('\\', '/'));
             }
 
             // Initialize enumeration only once or when root changes
-            if (localContext.FileEnumerator == null || !string.Equals(localContext.CurrentRoot, root, StringComparison.OrdinalIgnoreCase))
+            if (localContext.FileEnumerator == null)
             {
-                localContext.CurrentRoot = root;
 
-                if (!Directory.Exists(root))
+                if (!Directory.Exists(localContext.CurrentRoot))
                     return new List<IDocHubFile>();
 
                 var files = Directory
-                    .EnumerateFiles(root, "*.*", SearchOption.AllDirectories)
+                    .EnumerateFiles(localContext.CurrentRoot, "*.*", SearchOption.AllDirectories)
                     .Select(f => new FileInfo(f));
 
                 if (!string.IsNullOrEmpty(filter))

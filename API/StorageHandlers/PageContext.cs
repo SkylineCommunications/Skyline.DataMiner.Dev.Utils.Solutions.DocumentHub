@@ -29,7 +29,7 @@ namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
         /// Queue containing the identifiers of folders that still need to be traversed.
         /// This is used internally to recursively enumerate folders across pages.
         /// </summary>
-        public Queue<string> FolderQueue { get; internal set; } = new Queue<string>();
+        public Queue<string> FolderQueue { get; internal set; } = new Queue<string>(new[] { "root" });
 
         /// <summary>
         /// The Graph API request used to retrieve the next page of drive items.
@@ -54,6 +54,6 @@ namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
         /// The root directory currently being enumerated.
         /// Used to detect changes in scope and reinitialize enumeration when needed.
         /// </summary>
-        public string CurrentRoot { get; internal set; }
+        public string CurrentRoot { get; internal set; } = @"C:\Skyline DataMiner\Webpages\Public\WebFileManager";
     }
 }
