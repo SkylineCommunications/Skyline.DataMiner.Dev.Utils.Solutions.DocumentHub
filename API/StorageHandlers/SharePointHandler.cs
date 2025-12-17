@@ -198,33 +198,29 @@
         /// <returns></returns>
         private IList<DriveItem> FetchNextPageInternal(string filter, SharePointPageContext context)
         {
-            var folderQueue = context.FolderQueue;
-            var nextPageRequest = context.NextPageRequest;
-            var pageSize = context.PageSize;
-
-            while (folderQueue.Count > 0 || nextPageRequest != null)
+            while (context.FolderQueue.Count > 0 || context.NextPageRequest != null)
             {
-                if (nextPageRequest == null)
+                if (context.NextPageRequest == null)
                 {
-                    var folderId = folderQueue.Dequeue();
+                    var folderId = context.FolderQueue.Dequeue();
 
-                    nextPageRequest = _graphClient
+                    context.NextPageRequest = _graphClient
                         .Drives[_drive.Id]
                         .Items[folderId]
                         .Children
                         .Request()
-                        .Top(pageSize);
+                        .Top(context.PageSize);
                 }
 
-                var page = nextPageRequest
+                var page = context.NextPageRequest
                     .GetAsync()
                     .GetAwaiter()
                     .GetResult();
 
-                nextPageRequest = page.NextPageRequest;
+                context.NextPageRequest = page.NextPageRequest;
 
                 foreach (var folder in page.CurrentPage.Where(i => i.Folder != null))
-                    folderQueue.Enqueue(folder.Id);
+                    context.FolderQueue.Enqueue(folder.Id);
 
                 var files = page.CurrentPage
                     .Where(i =>
@@ -236,7 +232,7 @@
                 if (files.Count > 0)
                     return files;
 
-                if (nextPageRequest == null)
+                if (context.NextPageRequest == null)
                     continue;
             }
 
