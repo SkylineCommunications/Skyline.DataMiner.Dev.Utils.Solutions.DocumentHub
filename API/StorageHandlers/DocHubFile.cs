@@ -1,6 +1,9 @@
 ﻿using Microsoft.Graph;
+using Skyline.DataMiner.Net.Serialization;
+using Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub;
 using System;
 using System.IO;
+using System.Linq;
 using System.Security.AccessControl;
 using System.Security.Principal;
 
@@ -93,6 +96,12 @@ namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
     internal class DriveItemAdapter : IDocHubFile
     {
         internal DriveItem driveItem;
+        internal Models.SharePointConfiguration sharePoint;
+
+        internal DriveItemAdapter(Models.SharePointConfiguration sharePoint)
+        {
+            this.sharePoint = sharePoint;
+        }
 
         public DateTime GetCreatedAt()
         {
@@ -106,29 +115,35 @@ namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
 
         public string GetDirectory()
         {
-            if (driveItem?.ParentReference?.Path == null)
-                return string.Empty;
-
-            var path = driveItem.ParentReference.Path;
-
-            // Remove Graph prefix
-            const string prefix = "/drive/root:";
-            if (path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            // Ensure the site URL starts with a valid protocol.
+            var siteUrl = sharePoint.SiteURL;
+            if (!siteUrl.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
+                !siteUrl.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
             {
-                path = path.Substring(prefix.Length);
+                siteUrl = "https://" + siteUrl;
             }
 
-            path = path.Trim('/');
-
-            // Split on slash
-            var segments = path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
-
-            // segments[0] is the document library name
-            if (segments.Length <= 1)
+            // Attempt to create valid URI objects.
+            if (!Uri.TryCreate(siteUrl, UriKind.Absolute, out var siteUri) ||
+                !Uri.TryCreate(driveItem.WebUrl, UriKind.Absolute, out var fileUri))
+            {
                 return string.Empty;
+            }
 
-            // Recombine everything after the library
-            return string.Join("/", segments, 1, segments.Length - 1);
+            // Decode and extract path components.
+            var sitePath = Uri.UnescapeDataString(siteUri.AbsolutePath);
+            var filePath = Uri.UnescapeDataString(fileUri.AbsolutePath);
+
+            // Compute relative path of file to site root.
+            var relativePath = filePath.StartsWith(sitePath)
+                ? filePath.Substring(sitePath.Length).TrimStart('/')
+                : filePath.TrimStart('/');
+
+            // Return directory portion (everything before last slash).
+            var lastSlashIndex = relativePath.LastIndexOf('/');
+            return lastSlashIndex >= 0
+                ? relativePath.Substring(0, lastSlashIndex)
+                : string.Empty;
         }
 
         public string GetExtension()

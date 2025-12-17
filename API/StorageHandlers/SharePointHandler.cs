@@ -137,7 +137,7 @@
 
             foreach (var item in driveItems)
             {
-                result.Add(new DriveItemAdapter
+                result.Add(new DriveItemAdapter(_sharePoint)
                 {
                     driveItem = item
                 });
