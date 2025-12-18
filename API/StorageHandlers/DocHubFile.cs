@@ -200,7 +200,7 @@ namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
 
         public string GetFilePath()
         {
-            return "\\" + fileInfo.FullName.Replace(@"c:\Skyline DataMiner\Webpages\", string.Empty);
+            return GetRelativePath(fileInfo.FullName);
         }
 
         public string GetFile()
@@ -265,11 +265,34 @@ namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
 
         public string GetDirectory()
         {
-            // Define root portion to strip from path.
-            string partToRemove = @"c:\Skyline DataMiner\Webpages\Public\WebFileManager";
+            return GetRelativePath(fileInfo.DirectoryName);
+        }
 
-            // Return relative path (removing root and trimming leading backslashes).
-            return fileInfo.DirectoryName.Replace(partToRemove, string.Empty).TrimStart('\\');
+        private string GetRelativePath(string fullPath)
+        {
+            var rootPath = @"C:\Skyline DataMiner\Webpages\Public\WebFileManager";
+            var directoryPath = fullPath;
+
+            if (string.IsNullOrEmpty(directoryPath))
+                return string.Empty;
+
+            var rootFullPath = Path.GetFullPath(rootPath)
+                .TrimEnd(Path.DirectorySeparatorChar);
+
+            var dirFullPath = Path.GetFullPath(directoryPath)
+                .TrimEnd(Path.DirectorySeparatorChar);
+
+            if (!dirFullPath.StartsWith(
+                    rootFullPath,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return string.Empty;
+            }
+
+            var relativePath = dirFullPath.Substring(rootFullPath.Length)
+                .TrimStart(Path.DirectorySeparatorChar);
+
+            return relativePath;
         }
     }
 }
