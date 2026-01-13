@@ -54,7 +54,7 @@
 		/// <param name="filePath">The full path to the source file.</param>
 		/// <param name="directory">The relative path under the WebFileManager folder.</param>
 		/// <param name="name">The target filename including extension.</param>
-		public void UploadFile(string filePath, string directory, string name)
+		public string UploadFile(string filePath, string directory, string name)
 		{
 			// Root path for DataMiner WebFileManager
 			var root = @"C:\Skyline DataMiner\Webpages\Public\WebFileManager";
@@ -76,48 +76,65 @@
 
 			// Copy the file to the target location (overwrite if exists)
 			File.Copy(filePath, targetPath, overwrite: true);
-		}
 
+            // Return the web-resolvable path of the uploaded file.
+            return '/' + FileInfoAdapter.GetRelativePath(targetPath, @"C:\Skyline DataMiner\Webpages");
+        }
+
+        /// <summary>
+        /// Reads files from the local file system using a paged enumerator.
+        /// Supports optional category-based paths and filename filtering.
+        /// </summary>
         public List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter, PageContext context)
         {
+            // Validate context
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
 
+            // Ensure the context is local
             if (!(context is LocalPageContext localContext))
                 throw new ArgumentException(
                     "LocalHandler requires LocalPageContext.",
                     nameof(context));
 
+            // Apply category upload path before enumeration starts
             if (category != null && localContext.FileEnumerator == null)
             {
-                localContext.CurrentRoot = Path.Combine(localContext.CurrentRoot, category.UploadPath.TrimStart('\\', '/'));
+                localContext.CurrentRoot = Path.Combine(
+                    localContext.CurrentRoot,
+                    category.UploadPath.TrimStart('\\', '/'));
             }
 
-            // Initialize enumeration only once or when root changes
+            // Initialize file enumeration if not already created
             if (localContext.FileEnumerator == null)
             {
-
+                // Return empty list if root directory does not exist
                 if (!Directory.Exists(localContext.CurrentRoot))
                     return new List<IDocHubFile>();
 
+                // Enumerate all files recursively
                 var files = Directory
                     .EnumerateFiles(localContext.CurrentRoot, "*.*", SearchOption.AllDirectories)
                     .Select(f => new FileInfo(f));
 
+                // Apply optional filename filter
                 if (!string.IsNullOrEmpty(filter))
                 {
                     files = files.Where(fi =>
                         fi.Name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0);
                 }
 
+                // Sort newest first and store enumerator in context
                 localContext.FileEnumerator = files
                     .OrderByDescending(fi => fi.CreationTimeUtc)
                     .GetEnumerator();
             }
 
+            // Collect the next page of results
             var result = new List<IDocHubFile>();
 
-            while (result.Count < localContext.PageSize && localContext.FileEnumerator.MoveNext())
+            while (result.Count < localContext.PageSize &&
+                   localContext.FileEnumerator.MoveNext())
             {
                 result.Add(new FileInfoAdapter
                 {
@@ -128,15 +145,24 @@
             return result;
         }
 
+        /// <summary>
+        /// Reads all files for the given category and filter by iterating
+        /// through all available pages until no more results are returned.
+        /// </summary>
         public List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter)
         {
+            // Accumulates all files across pages
             List<IDocHubFile> files = new List<IDocHubFile>();
 
+            // Create a new paging context for full enumeration
             var context = new LocalPageContext();
+
+            // Continue reading pages until an empty page is returned
             while (true)
             {
                 var page = ReadFiles(category, filter, context);
 
+                // No more files available
                 if (page.Count == 0)
                     break;
 

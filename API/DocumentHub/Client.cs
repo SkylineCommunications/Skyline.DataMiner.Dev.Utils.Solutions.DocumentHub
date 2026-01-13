@@ -84,7 +84,7 @@ namespace Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub
         /// <exception cref="InvalidOperationException">
         /// Thrown when a file with the same name already exists in the target location.
         /// </exception>
-        public void UploadFile(Models.DocumentCategory category, string filePath, string name = null)
+        public string UploadFile(Models.DocumentCategory category, string filePath, string name = null)
         {
             if (category == null)
                 throw new ArgumentNullException(nameof(category));
@@ -104,7 +104,7 @@ namespace Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub
                 throw new InvalidOperationException($"The file '{name}' already exists.");
             }
 
-            storageHandler.UploadFile(filePath, category.UploadPath, $"{name}{extension}");
+            return storageHandler.UploadFile(filePath, category.UploadPath, $"{name}{extension}");
         }
 
         #endregion

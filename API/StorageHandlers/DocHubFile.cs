@@ -268,7 +268,7 @@ namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
             return GetRelativePath(fileInfo.DirectoryName, @"C:\Skyline DataMiner\Webpages\Public\WebFileManager");
         }
 
-        private string GetRelativePath(string fullPath, string partToRemove)
+        public static string GetRelativePath(string fullPath, string partToRemove)
         {
             var rootPath = partToRemove;
             var directoryPath = fullPath;

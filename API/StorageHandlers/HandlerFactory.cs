@@ -33,13 +33,14 @@
 		/// <param name="name">The name to assign to the uploaded image file.</param>
 		void UploadImage(Bitmap image, string directory, string name);
 
-		/// <summary>
-		/// Uploads a file from a specified local path to the target directory or storage system.
-		/// </summary>
-		/// <param name="filePath">The full local path of the file to upload.</param>
-		/// <param name="directory">The destination directory or storage path.</param>
-		/// <param name="name">The name to assign to the uploaded file.</param>
-		void UploadFile(string filePath, string directory, string name);
+        /// <summary>
+        /// Uploads a file from a specified local path to the target directory or storage system.
+        /// </summary>
+        /// <param name="filePath">The full local path of the file to upload.</param>
+        /// <param name="directory">The destination directory or storage path.</param>
+        /// <param name="name">The name to assign to the uploaded file.</param>
+        /// <returns>The relative path of the uploaded file.</returns>
+        string UploadFile(string filePath, string directory, string name);
 
         /// <summary>
         /// 

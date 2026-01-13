@@ -63,6 +63,10 @@
             // Load SharePoint configuration
             _sharePoint = helpers.SharePointConfigurations.Read().FirstOrDefault();
 
+            // Null check SharePoint Configuration
+            if (_sharePoint == null)
+                helpers.SharePointConfigurations.CreateOrUpdate(new Models.SharePointConfiguration());
+
             // Authenticate to Microsoft Graph using client credentials
             var credential = new ClientSecretCredential(
                 _sharePoint.TenantID,
@@ -169,9 +173,9 @@
         /// <summary>
         /// Uploads a file from local disk to SharePoint.
         /// </summary>
-        public void UploadFile(string filePath, string directory, string name)
+        public string UploadFile(string filePath, string directory, string name)
         {
-            UploadFileAsync(filePath, directory, name)
+            return UploadFileAsync(filePath, directory, name)
                 .GetAwaiter() // TODO: Async uploads to be supported later.
                 .GetResult();
         }
@@ -270,7 +274,7 @@
         /// <summary>
         /// Uploads a local file asynchronously to SharePoint, creating folders if needed.
         /// </summary>
-        private async Task UploadFileAsync(string filepath, string directory, string name)
+        private async Task<string> UploadFileAsync(string filepath, string directory, string name)
         {
             try
             {
@@ -290,6 +294,8 @@
                         .Content
                         .Request()
                         .PutAsync<DriveItem>(stream);
+
+                    return item?.WebUrl;
                 }
             }
             catch (Exception e)
