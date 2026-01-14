@@ -1,18 +1,18 @@
 ﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
 {
-    using Azure.Identity;
-    using Microsoft.Graph;
-    using Microsoft.IdentityModel.Tokens;
-    using Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub;
-    using System;
-    using System.Collections.Generic;
-    using System.Drawing;
-    using System.Drawing.Imaging;
-    using System.IO;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using Drive = Microsoft.Graph.Drive;
-    using File = System.IO.File;
+	using System;
+	using System.Collections.Generic;
+	using System.Drawing;
+	using System.Drawing.Imaging;
+	using System.IO;
+	using System.Linq;
+	using System.Threading.Tasks;
+	using Azure.Identity;
+	using Microsoft.Graph;
+	using Microsoft.IdentityModel.Tokens;
+	using Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub;
+	using Drive = Microsoft.Graph.Drive;
+	using File = System.IO.File;
 
     /// <summary>
     /// Handles uploading files and images to a SharePoint document library.
@@ -63,10 +63,6 @@
             // Load SharePoint configuration
             _sharePoint = helpers.SharePointConfigurations.Read().FirstOrDefault();
 
-            // Null check SharePoint Configuration
-            if (_sharePoint == null)
-                helpers.SharePointConfigurations.CreateOrUpdate(new Models.SharePointConfiguration());
-
             // Authenticate to Microsoft Graph using client credentials
             var credential = new ClientSecretCredential(
                 _sharePoint.TenantID,
@@ -114,22 +110,14 @@
 
             return files;
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="category"></param>
-        /// <param name="filter"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
+
         public List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter, PageContext context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
 
             if (!(context is SharePointPageContext spContext))
-                throw new ArgumentException(
-                    "SharePointHandler requires SharePointPageContext.",
-                    nameof(context));
+                throw new ArgumentException("SharePointHandler requires SharePointPageContext.", nameof(context));
 
             if (category != null)
             {
@@ -170,9 +158,10 @@
                 .GetResult();
         }
 
-        /// <summary>
-        /// Uploads a file from local disk to SharePoint.
-        /// </summary>
+		/// <summary>
+		/// Uploads a file from local disk to SharePoint.
+		/// </summary>
+		/// <returns></returns>
         public string UploadFile(string filePath, string directory, string name)
         {
             return UploadFileAsync(filePath, directory, name)
@@ -194,12 +183,6 @@
 
         #region Private
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="filter"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
         private IList<DriveItem> FetchNextPageInternal(string filter, SharePointPageContext context)
         {
             while (context.FolderQueue.Count > 0 || context.NextPageRequest != null)

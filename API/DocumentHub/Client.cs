@@ -1,29 +1,30 @@
-﻿using Skyline.DataMiner.Net;
-using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-using Skyline.DataMiner.Net.Messages.SLDataGateway;
-using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers;
-using Skyline.DataMiner.Utils.DocumentHub.SDM;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using static DomHelpers.SlcDocumenthub.SlcDocumenthubIds.Enums;
-
-namespace Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub
+﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub
 {
-    /// <summary>
-    /// Entry point for interacting with the DocumentHub API.
-    /// Provides access to document categories and file operations.
-    /// </summary>
-    public class Client
+	using System;
+	using System.Collections.Generic;
+	using System.IO;
+	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers;
+	using Skyline.DataMiner.Utils.DocumentHub.SDM;
+	using static DomHelpers.SlcDocumenthub.SlcDocumenthubIds.Enums;
+
+	/// <summary>
+	/// Entry point for interacting with the DocumentHub API.
+	/// Provides access to document categories and file operations.
+	/// </summary>
+	public class Client
     {
         private readonly IConnection _connection;
 
-        /// <summary>
-        /// Initializes a new DocumentHub client using an active DataMiner connection.
-        /// </summary>
-        /// <param name="connection">
-        /// An active DataMiner connection used to communicate with the system.
-        /// </param>
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Client"/> class.
+		/// Initializes a new DocumentHub client using an active DataMiner connection.
+		/// </summary>
+		/// <param name="connection">
+		/// An active DataMiner connection used to communicate with the system.
+		/// </param>
         public Client(IConnection connection)
         {
             _connection = connection;
@@ -34,18 +35,18 @@ namespace Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub
         }
 
         /// <summary>
-        /// Internal helper layer for DataMiner DOM and storage operations.
+        /// Gets or sets internal helper layer for DataMiner DOM and storage operations.
         /// </summary>
         internal DataHelpersDocumentHub Helpers { get; set; }
 
-        /// <summary>
-        /// Provides access to document category management.
-        /// </summary>
+		/// <summary>
+		/// Gets or sets provides access to document category management.
+		/// </summary>
         public Categories Categories { get; set; }
 
-        /// <summary>
-        /// Provides access to document file operations such as upload and read.
-        /// </summary>
+		/// <summary>
+		/// Gets or sets provides access to document file operations such as upload and read.
+		/// </summary>
         public Files Files { get; set; }
     }
 

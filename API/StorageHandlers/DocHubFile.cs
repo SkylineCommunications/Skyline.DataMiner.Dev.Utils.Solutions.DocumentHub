@@ -1,12 +1,12 @@
-﻿using Microsoft.Graph;
-using Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub;
-using System;
-using System.IO;
-using System.Security.AccessControl;
-using System.Security.Principal;
-
-namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
+﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
 {
+	using System;
+	using System.IO;
+	using System.Security.AccessControl;
+	using System.Security.Principal;
+	using Microsoft.Graph;
+	using Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub;
+
     /// <summary>
 	/// Represents a file returned by the DocumentHub API.
 	/// </summary>

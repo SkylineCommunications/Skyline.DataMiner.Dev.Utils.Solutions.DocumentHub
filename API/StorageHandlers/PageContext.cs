@@ -1,9 +1,9 @@
-﻿using Microsoft.Graph;
-using System.Collections.Generic;
-using System.IO;
-
-namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
+﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
 {
+	using System.Collections.Generic;
+	using System.IO;
+	using Microsoft.Graph;
+
     /// <summary>
     /// Represents the base paging context used when reading files from a storage backend.
     /// The context instance stores paging state and must be reused between calls

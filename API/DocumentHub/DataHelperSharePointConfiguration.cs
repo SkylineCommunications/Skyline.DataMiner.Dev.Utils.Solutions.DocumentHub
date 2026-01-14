@@ -1,13 +1,13 @@
-﻿using DomHelpers.SlcDocumenthub;
-using Skyline.DataMiner.Net;
-using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub
+﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub
 {
-    internal class DataHelperSharePointConfiguration : DataHelper<Models.SharePointConfiguration>
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using DomHelpers.SlcDocumenthub;
+	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+
+	internal class DataHelperSharePointConfiguration : DataHelper<Models.SharePointConfiguration>
     {
         internal DataHelperSharePointConfiguration(IConnection connection) : base(connection, SlcDocumenthubIds.Definitions.Sharepoint)
         {
@@ -40,7 +40,7 @@ namespace Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub
                 TenantID = x.Configuration.TenantID,
                 ClientID = x.Configuration.ClientID,
                 ClientSecret = x.Configuration.ClientSecret,
-                DocumentLibraryName = x.Configuration.DocumentLibraryName
+                DocumentLibraryName = x.Configuration.DocumentLibraryName,
             }).ToList();
         }
 
