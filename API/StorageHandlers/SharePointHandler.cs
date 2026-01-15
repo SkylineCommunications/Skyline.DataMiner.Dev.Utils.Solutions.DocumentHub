@@ -102,7 +102,7 @@
         {
             List<IDocHubFile> files = new List<IDocHubFile>();
 
-            var context = new SharePointPageContext();
+            var context = new SharePointPageData();
             while (context.FolderQueue.Count > 0 || context.NextPageRequest != null)
             {
                 files.AddRange(ReadFiles(category, filter, context));
@@ -111,12 +111,12 @@
             return files;
         }
 
-        public List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter, PageContext context)
+        public List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter, DocHubPageData context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
 
-            if (!(context is SharePointPageContext spContext))
+            if (!(context is SharePointPageData spContext))
                 throw new ArgumentException("SharePointHandler requires SharePointPageContext.", nameof(context));
 
             if (category != null)
@@ -183,7 +183,7 @@
 
         #region Private
 
-        private IList<DriveItem> FetchNextPageInternal(string filter, SharePointPageContext context)
+        private IList<DriveItem> FetchNextPageInternal(string filter, SharePointPageData context)
         {
             while (context.FolderQueue.Count > 0 || context.NextPageRequest != null)
             {

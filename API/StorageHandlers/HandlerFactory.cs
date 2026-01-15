@@ -57,7 +57,7 @@
         /// <param name="filter"></param>
         /// <param name="context"></param>
         /// <returns></returns>
-        List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter, PageContext context);
+        List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter, DocHubPageData context);
 	}
 
 	#endregion

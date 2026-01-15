@@ -194,7 +194,7 @@
 
         /// <summary>
         /// Reads a single page of files from the specified storage type.
-        /// Paging state is maintained inside the provided <see cref="PageContext"/>.
+        /// Paging state is maintained inside the provided <see cref="DocHubPageData"/>.
         /// </summary>
         /// <param name="storagetype">
         /// The storage backend to read from.
@@ -206,7 +206,7 @@
         /// <returns>
         /// A list containing the next page of files.
         /// </returns>
-        public List<IDocHubFile> ReadFiles(Storagetype storagetype, PageContext context)
+        public List<IDocHubFile> ReadFiles(Storagetype storagetype, DocHubPageData context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
@@ -217,7 +217,7 @@
 
         /// <summary>
         /// Reads a single page of files associated with the given document category.
-        /// Paging state is maintained inside the provided <see cref="PageContext"/>.
+        /// Paging state is maintained inside the provided <see cref="DocHubPageData"/>.
         /// </summary>
         /// <param name="category">
         /// The document category defining the storage type and base path.
@@ -229,7 +229,7 @@
         /// <returns>
         /// A list containing the next page of files.
         /// </returns>
-        public List<IDocHubFile> ReadFiles(Models.DocumentCategory category, PageContext context)
+        public List<IDocHubFile> ReadFiles(Models.DocumentCategory category, DocHubPageData context)
         {
             if (category == null)
                 throw new ArgumentNullException(nameof(category));
@@ -242,7 +242,7 @@
 
         /// <summary>
         /// Reads a single page of filtered files from the specified storage type.
-        /// Paging state is maintained inside the provided <see cref="PageContext"/>.
+        /// Paging state is maintained inside the provided <see cref="DocHubPageData"/>.
         /// </summary>
         /// <param name="storagetype">
         /// The storage backend to read from.
@@ -257,7 +257,7 @@
         /// <returns>
         /// A list containing the next page of matching files.
         /// </returns>
-        public List<IDocHubFile> ReadFiles(Storagetype storagetype, string filter, PageContext context)
+        public List<IDocHubFile> ReadFiles(Storagetype storagetype, string filter, DocHubPageData context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
@@ -268,7 +268,7 @@
 
         /// <summary>
         /// Reads a single page of filtered files associated with the given document category.
-        /// Paging state is maintained inside the provided <see cref="PageContext"/>.
+        /// Paging state is maintained inside the provided <see cref="DocHubPageData"/>.
         /// </summary>
         /// <param name="category">
         /// The document category defining the storage type and base path.
@@ -286,7 +286,7 @@
         public List<IDocHubFile> ReadFiles(
             Models.DocumentCategory category,
             string filter,
-            PageContext context)
+            DocHubPageData context)
         {
             if (category == null)
                 throw new ArgumentNullException(nameof(category));

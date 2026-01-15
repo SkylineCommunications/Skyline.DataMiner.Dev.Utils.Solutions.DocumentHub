@@ -85,14 +85,14 @@
         /// Reads files from the local file system using a paged enumerator.
         /// Supports optional category-based paths and filename filtering.
         /// </summary>
-        public List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter, PageContext context)
+        public List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter, DocHubPageData context)
         {
             // Validate context
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
 
             // Ensure the context is local
-            if (!(context is LocalPageContext localContext))
+            if (!(context is LocalPageData localContext))
                 throw new ArgumentException(
                     "LocalHandler requires LocalPageContext.",
                     nameof(context));
@@ -155,7 +155,7 @@
             List<IDocHubFile> files = new List<IDocHubFile>();
 
             // Create a new paging context for full enumeration
-            var context = new LocalPageContext();
+            var context = new LocalPageData();
 
             // Continue reading pages until an empty page is returned
             while (true)
