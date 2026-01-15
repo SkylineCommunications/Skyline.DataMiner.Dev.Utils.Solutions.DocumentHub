@@ -6,7 +6,15 @@
 	using DomHelpers.SlcDocumenthub;
 	using Microsoft.Graph;
 
-	public static class PageDataFactory
+    /// <summary>
+    /// Generic factory class that provides methods to create DocHub related objects.
+    /// </summary>
+    /// <remarks>
+    /// This static factory encapsulates the logic for selecting the appropriate
+    /// <see cref="DocHubPageData"/> implementation (for example, SharePoint or local storage)
+    /// and ensures that instances are initialized with sensible defaults.
+    /// </remarks>
+    public static class DocHubFactory
 	{
 		/// <summary>
 		/// Creates and initializes a <see cref="DocHubPageData"/> instance appropriate for the specified storage type..
