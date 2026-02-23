@@ -9,9 +9,6 @@
 	using System.Threading.Tasks;
 	using Azure.Identity;
 	using Microsoft.Graph;
-	using Microsoft.IdentityModel.Tokens;
-	using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.Net.SLDataGateway.Management.Recommendations;
     using Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.FileAdapters;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Paging;
@@ -63,12 +60,6 @@
 		/// Document library (drive) inside the SharePoint site.
 		/// </summary>
 		private readonly Drive _drive;
-
-		/// <summary>
-		/// DataMiner connection instance.
-		/// </summary>
-		private readonly IConnection _connection;
-
 		#endregion
 
 		#region Constructor
@@ -81,11 +72,8 @@
 		/// <exception cref="NullReferenceException">
 		/// Thrown when the configured SharePoint document library cannot be found.
 		/// </exception>
-		internal SharePointHandler(DataHelpersDocumentHub helpers, IConnection connection)
+		internal SharePointHandler(DataHelpersDocumentHub helpers)
 		{
-			// Store DataMiner connection reference
-			_connection = connection;
-
 			// Defensive check to avoid reinitialization
 			if (_graphClient != null && _drive != null)
 				return;
@@ -281,73 +269,130 @@
 			return result;
 		}
 
-		/// <summary>
-		/// Retrieves the next logical page of DriveItems while recursively traversing folders.
-		/// </summary>
-		/// <remarks>
-		/// ⚠ Paging Pitfall:
-		/// Microsoft Graph returns pages per folder. When combining folders into a global page,
-		/// partially consumed Graph pages MUST be buffered or files will be skipped.
-		/// </remarks>
-		private IList<DriveItem> FetchNextPageInternal(string filter, SharePointPageData context)
-		{
-			var collected = new List<DriveItem>(context.PageSize);
+        /// <summary>
+        /// Retrieves the next logical page of <see cref="DriveItem"/> objects while recursively traversing folders.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Microsoft Graph paginates per folder, not globally. This method merges folder pages into a
+        /// single logical page of size <see cref="SharePointPageData.PageSize"/>.
+        /// </para>
+        /// <para>
+        /// ⚠ Paging Pitfall: Excess items from Graph pages must be buffered in
+        /// <see cref="SharePointPageData.PageRemainderBuffer"/> or files will be skipped.
+        /// </para>
+        /// </remarks>
+        /// <seealso cref="SharePointPageData"/>
+        /// <seealso cref="SharePointPageData.PageRemainderBuffer"/>
+        private IList<DriveItem> FetchNextPageInternal(string filter, SharePointPageData context)
+        {
+            var collected = new List<DriveItem>(context.PageSize);
 
-			// Drain buffered items from previous partial Graph page
-			while (collected.Count < context.PageSize && context.PageRemainderBuffer.Count > 0)
-			{
-				collected.Add(context.PageRemainderBuffer.Dequeue());
-			}
+            // Drain buffered items from previous partial Graph pages
+            DrainRemainderBuffer(context, collected);
 
-			// Continue traversal until page is full or no more data exists
-			while (collected.Count < context.PageSize &&
-				   (context.FolderQueue.Count > 0 || context.NextPageRequest != null))
-			{
-				// Start paging a new folder if required
-				if (context.NextPageRequest == null)
-				{
-					var folderId = context.FolderQueue.Dequeue();
+            // Continue folder traversal until logical page is full or no data remains
+            while (ShouldContinuePaging(context, collected))
+            {
+                EnsureNextPageRequest(context);
 
-					context.NextPageRequest = _graphClient
-						.Drives[_drive.Id]
-						.Items[folderId]
-						.Children
-						.Request()
-						.Top(context.PageSize);
-				}
+                var page = ExecuteGraphPageRequest(context);
 
-				// Execute Graph request
-				var page = context.NextPageRequest.GetAsync().GetAwaiter().GetResult();
-				context.NextPageRequest = page.NextPageRequest;
+                EnqueueSubFolders(context, page);
+                CollectFiles(filter, context, collected, page);
+            }
 
-				// Queue discovered subfolders
-				foreach (var folder in page.CurrentPage.Where(i => i.Folder != null))
-					context.FolderQueue.Enqueue(folder.Id);
+            return collected;
+        }
 
-				// Filter only file items
-				var files = page.CurrentPage
-					.Where(i => i.File != null &&
-								(string.IsNullOrEmpty(filter) ||
-								 i.Name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0))
-					.ToList();
+        /// <summary>
+        /// Drains leftover items from the remainder buffer into the current page.
+        /// </summary>
+        private static void DrainRemainderBuffer(SharePointPageData context, ICollection<DriveItem> collected)
+        {
+            while (collected.Count < context.PageSize && context.PageRemainderBuffer.Count > 0)
+            {
+                collected.Add(context.PageRemainderBuffer.Dequeue());
+            }
+        }
 
-				// Fill logical page and buffer remaining items
-				foreach (var file in files)
-				{
-					if (collected.Count < context.PageSize)
-						collected.Add(file);
-					else
-						context.PageRemainderBuffer.Enqueue(file);
-				}
-			}
+        /// <summary>
+        /// Determines whether paging should continue.
+        /// </summary>
+        private static bool ShouldContinuePaging(SharePointPageData context, ICollection<DriveItem> collected)
+        {
+            return collected.Count < context.PageSize &&
+                   (context.FolderQueue.Count > 0 || context.NextPageRequest != null);
+        }
 
-			return collected;
-		}
+        /// <summary>
+        /// Ensures a Graph paging request exists for the current folder.
+        /// </summary>
+        private void EnsureNextPageRequest(SharePointPageData context)
+        {
+            if (context.NextPageRequest != null)
+                return;
 
-		/// <summary>
-		/// Checks if a file exists asynchronously.
-		/// </summary>
-		private async Task<bool> FileExistsAsync(string directory, string name)
+            var folderId = context.FolderQueue.Dequeue();
+
+            context.NextPageRequest = _graphClient
+                .Drives[_drive.Id]
+                .Items[folderId]
+                .Children
+                .Request()
+                .Top(context.PageSize);
+        }
+
+        /// <summary>
+        /// Executes the current Graph page request and updates the continuation token.
+        /// </summary>
+        private IDriveItemChildrenCollectionPage ExecuteGraphPageRequest(SharePointPageData context)
+        {
+            var page = context.NextPageRequest.GetAsync().GetAwaiter().GetResult();
+            context.NextPageRequest = page.NextPageRequest;
+            return page;
+        }
+
+        /// <summary>
+        /// Enqueues subfolders discovered in the current Graph page.
+        /// </summary>
+        private static void EnqueueSubFolders(SharePointPageData context, IDriveItemChildrenCollectionPage page)
+        {
+            foreach (var folder in page.CurrentPage.Where(i => i.Folder != null))
+            {
+                context.FolderQueue.Enqueue(folder.Id);
+            }
+        }
+
+        /// <summary>
+        /// Collects file items into the logical page and buffers overflow items.
+        /// </summary>
+        private static void CollectFiles(string filter, SharePointPageData context, ICollection<DriveItem> collected, IDriveItemChildrenCollectionPage page)
+        {
+            var files = page.CurrentPage
+                .Where(i => i.File != null &&
+                            (string.IsNullOrEmpty(filter) ||
+                             i.Name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0))
+                .ToList();
+
+            foreach (var file in files)
+            {
+                if (collected.Count < context.PageSize)
+                {
+                    collected.Add(file);
+                }
+                else
+                {
+                    // Buffer overflow files for the next logical page
+                    context.PageRemainderBuffer.Enqueue(file);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Checks if a file exists asynchronously.
+        /// </summary>
+        private async Task<bool> FileExistsAsync(string directory, string name)
 		{
 			try
 			{

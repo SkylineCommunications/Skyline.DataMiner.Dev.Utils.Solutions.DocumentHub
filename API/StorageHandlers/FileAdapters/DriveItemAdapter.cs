@@ -2,9 +2,16 @@
 {
 	using System;
 	using System.IO;
-	using API.DataHelpers;
 	using Microsoft.Graph;
 
+	/// <summary>
+	/// Represents a file that is accessible via web-based operations within DocHub.
+	/// </summary>
+	/// <remarks>
+	/// This interface extends <see cref="IDocHubFile"/> to provide additional capabilities or metadata
+	/// specific to files managed through http. 
+	/// Implementations may support features such as web-based retrieval,
+	/// sharing, or integration with online document workflows.</remarks>
 	public interface IDocHubWebFile : IDocHubFile
 	{
 	}

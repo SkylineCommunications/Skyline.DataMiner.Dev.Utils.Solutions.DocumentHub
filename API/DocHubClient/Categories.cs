@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers;
@@ -13,15 +12,13 @@
 	/// </summary>
 	public class Categories
 	{
-		/// <summary>
-		/// The DataMiner connection used for communication with the system.
-		/// </summary>
-		private readonly IConnection _connection;
-
-		internal Categories(DataHelpersDocumentHub helpers, IConnection connection)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Categories"/> class.
+        /// </summary>
+        /// <param name="helpers"></param>
+        internal Categories(DataHelpersDocumentHub helpers)
 		{
 			Helpers = helpers;
-			_connection = connection;
 		}
 
 		internal DataHelpersDocumentHub Helpers { get; set; }

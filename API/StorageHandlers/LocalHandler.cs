@@ -5,7 +5,6 @@
 	using System.Drawing;
 	using System.IO;
 	using System.Linq;
-	using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.FileAdapters;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Paging;
 
@@ -19,19 +18,10 @@
     internal class LocalHandler : IStorageHandler
 	{
 		/// <summary>
-		/// The DataMiner connection used for communication with the system.
-		/// </summary>
-		private readonly IConnection _connection;
-
-		/// <summary>
 		/// Initializes a new instance of the <see cref="LocalHandler"/> class.
 		/// </summary>
-		/// <param name="connection">
-		/// An active DataMiner connection used to communicate with the system.
-		/// </param>
-		public LocalHandler(IConnection connection)
+		public LocalHandler()
 		{
-			_connection = connection;
 		}
 
 		/// <summary>
@@ -182,7 +172,7 @@
 
 			// Validate context
 			if (context == null)
-				throw new ArgumentNullException(nameof(context));
+				throw new ArgumentNullException(nameof(data));
 
 			// Ensure the context is local
 			if (!(context is LocalPageData localContext))

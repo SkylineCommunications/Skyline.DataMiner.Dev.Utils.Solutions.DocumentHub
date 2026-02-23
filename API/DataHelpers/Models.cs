@@ -63,6 +63,9 @@
 			/// </summary>
 			public class DOMSource : IDocHubSource
 			{
+				/// <summary>
+				/// Gets or sets the unique identifier for the entity.
+				/// </summary>
 				public Guid ID { get; set; }
 
 				/// <summary>

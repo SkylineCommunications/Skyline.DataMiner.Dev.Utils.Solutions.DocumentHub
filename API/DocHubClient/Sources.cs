@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers;
     using Skyline.DataMiner.Utils.DocumentHub.SDM;
@@ -12,30 +11,21 @@
 	/// </summary>
 	public class Sources
 	{
-		/// <summary>
-		/// The DataMiner connection used for communication with the system.
-		/// </summary>
-		private readonly IConnection _connection;
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Sources"/> class.
-		/// </summary>
-		/// <param name="helpers">
-		/// The internal helper layer for DataMiner DOM and storage operations.
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Sources"/> class.
+        /// </summary>
+        /// <param name="helpers">
+        /// The internal helper layer for DataMiner DOM and storage operations.
 		/// </param>
-		/// <param name="connection">
-		/// An active DataMiner connection used to communicate with the system.
-		/// </param>
-		internal Sources(DataHelpersDocumentHub helpers, IConnection connection)
+        internal Sources(DataHelpersDocumentHub helpers)
 		{
 			Helpers = helpers;
-			_connection = connection;
 		}
-
+        
 		/// <summary>
-		/// Gets or sets internal helper layer for DataMiner DOM and storage operations.
-		/// </summary>
-		internal DataHelpersDocumentHub Helpers { get; set; }
+        /// Gets or sets internal helper layer for DataMiner DOM and storage operations.
+        /// </summary>
+        internal DataHelpersDocumentHub Helpers { get; set; }
 
 		/// <summary>
 		/// Retrieves all DOM sources.

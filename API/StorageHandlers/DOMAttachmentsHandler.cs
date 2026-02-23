@@ -17,7 +17,7 @@
     internal class DOMAttachmentsHandler : IStorageHandler
 	{
 		private readonly IConnection _connection;
-		private DataHelperDOMSource _dataHelperDomSource;
+		private readonly DataHelperDOMSource _dataHelperDomSource;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DOMAttachmentsHandler"/> class.
@@ -65,7 +65,7 @@
 
 		/// <summary>
 		/// Reads all files based on the given read data.
-		/// If <see cref="DOMFileReadData.Context"/> is set, reads only a single page.
+		/// If <see cref="ReadData.Context"/> is set, reads only a single page.
 		/// </summary>
 		/// <param name="data">
 		/// The data describing which files to read.
@@ -150,7 +150,7 @@
 				throw new ArgumentException("DOMAttachmentsHandler requires DOMFileReadData.", nameof(data));
 
 			if (!(args.Context is DOMPageData pagingHelper))
-				throw new ArgumentException("DOMAttachmentsHandler requires DOMPageData.", nameof(args.Context));
+				throw new InvalidOperationException($"DOMAttachmentsHandler requires {nameof(DOMPageData)}.");
 
 			int pageSize = args.Context.PageSize;
 			var results = new List<IDocHubFile>();
@@ -176,12 +176,12 @@
 					pagingHelper.PagingHelper = domHelper.DomInstances.PreparePaging(BuildInstanceFilter(args));
 
 				// Read all files from the current module
-				ReadFromModule(domHelper, pagingHelper, results, pageSize);
+				ReadFromModule(domHelper, pagingHelper, args.Filter, results, pageSize);
 
 				// Advance to next module if current module fully consumed
 				if (pagingHelper.PagingHelper != null
 					&& !pagingHelper.PagingHelper.HasNextPage()
-					&& pagingHelper.InstanceIndexInPage >= pagingHelper.PagingHelper.GetCurrentPage().Count())
+					&& pagingHelper.InstanceIndexInPage >= pagingHelper.PagingHelper.GetCurrentPage().Count)
 				{
 					AdvanceToNextModule(pagingHelper);
 				}
@@ -218,7 +218,7 @@
 		/// <summary>
 		/// Reads files from the current module, advancing paging helper and DOM instances.
 		/// </summary>
-		private void ReadFromModule(DomHelper domHelper, DOMPageData page, List<IDocHubFile> results, int pageSize)
+		private void ReadFromModule(DomHelper domHelper, DOMPageData page, string filter, List<IDocHubFile> results, int pageSize)
 		{
 			while (results.Count < pageSize)
 			{
@@ -239,8 +239,16 @@
 				var instance = instances[page.InstanceIndexInPage];
 				var attachments = GetInstanceAttachments(domHelper, page, instance);
 
-				// Add attachments to results until page is full
-				while (page.AttachmentIndex < attachments.Count && results.Count < pageSize)
+                // Apply filename filter (case-insensitive substring match)
+                if (!string.IsNullOrEmpty(filter))
+                {
+                    attachments = attachments
+                        .Where(a => a.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0)
+                        .ToList();
+                }
+
+                // Add attachments to results until page is full
+                while (page.AttachmentIndex < attachments.Count && results.Count < pageSize)
 				{
 					results.Add(new DomFileAdapter
 					{
@@ -307,7 +315,7 @@
 				filter = filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Guid.Parse(definition)));
 			}
 
-			var ids = data.DomInstanceIds;
+			var ids = data?.DomInstanceIds;
 			if (ids != null && ids.Count > 0)
 			{
 				FilterElement<DomInstance> idsFilter = new ORFilterElement<DomInstance>();

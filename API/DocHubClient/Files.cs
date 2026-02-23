@@ -125,7 +125,7 @@
 				throw new ArgumentNullException(nameof(category));
 			if (filePath == null)
 				throw new ArgumentNullException(nameof(filePath));
-			if (domInstanceId == null || domInstanceId == Guid.Empty)
+			if (domInstanceId == Guid.Empty)
 				throw new ArgumentNullException(nameof(domInstanceId));
 
 			// Create appropriate storage handler based on category's storage type.

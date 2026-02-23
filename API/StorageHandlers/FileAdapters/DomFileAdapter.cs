@@ -4,8 +4,16 @@
 	using System.IO;
 	using System.Linq;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.History;
 
+	/// <summary>
+	/// Represents a file that provides access to a DocHub DOM (DataMiner Object Model) structure.
+	/// </summary>
+	/// <remarks>
+	/// This interface extends <see cref="IDocHubFile"/> to indicate that the file supports DOM-based
+	/// operations. 
+	/// Implementations may provide additional methods or properties for interacting with the document
+	/// structure.
+	/// </remarks>
 	public interface IDocHubDomFile : IDocHubFile
 	{
 	}

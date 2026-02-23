@@ -182,6 +182,9 @@
 		}
 	}
 
+	/// <summary>
+	/// Provides paging state and tracking information for reading DOM module data across multiple pages.
+	/// </summary>
 	public class DOMPageData : DocHubPageData
 	{
 		internal DOMPageData()
@@ -228,6 +231,12 @@
 		/// </summary>
 		internal bool Done { get; set; }
 
+		/// <summary>
+		/// Determines whether there is a subsequent page of results available for retrieval.
+		/// </summary>
+		/// <returns>
+		/// True if another page of results can be fetched; otherwise, false.
+		/// </returns>
 		public override bool HasNextPage() => !Done;
 
 		/// <summary>

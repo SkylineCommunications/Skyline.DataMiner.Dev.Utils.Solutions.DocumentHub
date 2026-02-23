@@ -91,11 +91,11 @@
 			{
 				case Storagetype.Sharepoint:
 					// SharePoint-based storage implementation.
-					return new SharePointHandler(helpers, connection);
+					return new SharePointHandler(helpers);
 
 				case Storagetype.Local:
 					// Local file system storage implementation.
-					return new LocalHandler(connection);
+					return new LocalHandler();
 
 				case Storagetype.DOM:
 					// DataMiner Object Model attachments storage implementation.

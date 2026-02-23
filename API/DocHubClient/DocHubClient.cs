@@ -26,9 +26,9 @@
 			_connection = connection;
 			Helpers = new DataHelpersDocumentHub(_connection);
 
-			Categories = new Categories(Helpers, _connection);
+			Categories = new Categories(Helpers);
 			Files = new Files(Helpers, _connection);
-			Sources = new Sources(Helpers, _connection);
+			Sources = new Sources(Helpers);
 		}
 
 		/// <summary>
