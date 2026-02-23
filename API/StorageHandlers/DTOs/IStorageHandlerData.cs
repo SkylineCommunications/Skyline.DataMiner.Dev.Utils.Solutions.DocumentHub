@@ -1,0 +1,73 @@
+﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
+{
+    using Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers;
+    using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Paging;
+    using System;
+	using System.Collections.Generic;
+
+	internal interface IStorageHandlerData
+	{
+	}
+
+	#region Upload
+	internal class UploadData : IStorageHandlerData
+	{
+		public Models.DocumentCategory Category { get; set; }
+
+		public string FilePath { get; set; }
+
+		public string Name { get; set; }
+	}
+
+	internal class WebFileUploadData : UploadData
+	{
+	}
+
+	internal class DOMFileUploadData : UploadData
+	{
+		public Guid DomInstanceId { get; set; }
+	}
+	#endregion
+
+	#region Read
+	internal class ReadData : IStorageHandlerData
+	{
+		public Models.DocumentCategory Category { get; set; }
+
+		public string Filter { get; set; }
+
+		public DocHubPageData Context { get; set; }
+	}
+
+	internal class WebFileReadData : ReadData
+	{
+	}
+
+	internal class DOMFileReadData : ReadData
+	{
+		public string Module { get; set; }
+
+		public List<Guid> DomInstanceIds { get; set; }
+	}
+	#endregion
+
+	#region File Exists
+	internal class FileExistsData : IStorageHandlerData
+	{
+		public string Name { get; set; }
+	}
+
+	internal class WebFileExistsData : FileExistsData
+	{
+		public string Directory { get; set; }
+	}
+
+	internal class DOMFileExistsData : FileExistsData
+	{
+		public Models.DocumentCategory Category { get; set; }
+
+		public Guid DomInstanceId { get; set; }
+	}
+	#endregion
+
+}

@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Utils.DocumentHub.API
+﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers
 {
 	using System;
 	using System.Collections.Generic;
@@ -10,12 +10,12 @@
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Utils.DocumentHub.SDM;
 
-    /// <summary>
-    ///     Provides helper methods for reading, creating, updating, and deleting DOM instances of type
-    ///     <typeparamref name="T" />.
-    /// </summary>
-    /// <typeparam name="T">The type of the DOM instance.</typeparam>
-    internal abstract class DataHelper<T> where T : class
+	/// <summary>
+	///     Provides helper methods for reading, creating, updating, and deleting DOM instances of type
+	///     <typeparamref name="T" />.
+	/// </summary>
+	/// <typeparam name="T">The type of the DOM instance.</typeparam>
+	internal abstract class DataHelper<T> where T : class
 	{
 		protected readonly IConnection _connection;
 		protected readonly DomDefinitionId _defId;

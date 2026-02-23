@@ -107,15 +107,11 @@ namespace DomHelpers
 		/// <summary>
 		/// Gets the datetime when the DOM Instance was created in UTC.
 		/// </summary>
-		public DateTime? CreatedAt
+		public DateTimeOffset CreatedAt
 		{
 			get
 			{
-				var createdAt = ((ITrackCreatedAt)domInstance).CreatedAt;
-				if (createdAt == null)
-					return null;
-				else
-					return createdAt.ToUniversalTime();
+				return ((ITrackCreatedAt)domInstance).CreatedAt;
 			}
 		}
 
@@ -133,15 +129,11 @@ namespace DomHelpers
 		/// <summary>
 		/// Gets the datetime when the DOM Instance was last modified in UTC.
 		/// </summary>
-		public DateTime? LastModified
+		public DateTimeOffset LastModified
 		{
 			get
 			{
-				var lastModified = ((ITrackLastModified)domInstance).LastModified;
-				if (lastModified == null)
-					return null;
-				else
-					return lastModified.ToUniversalTime();
+				return ((ITrackLastModified)domInstance).LastModified;
 			}
 		}
 
@@ -154,6 +146,11 @@ namespace DomHelpers
 			{
 				return ((ITrackLastModifiedBy)domInstance).LastModifiedBy;
 			}
+		}
+
+		public static implicit operator DomInstanceId(DomInstanceBase instance)
+		{
+			return instance.ID;
 		}
 
 		public static implicit operator DomInstance(DomInstanceBase instance)
@@ -468,7 +465,8 @@ namespace DomHelpers.SlcDocumenthub
 			public enum Storagetype
 			{
 				Local = 0,
-				Sharepoint = 1
+				Sharepoint = 1,
+				DOM = 2
 			}
 
 			public enum Status
@@ -480,7 +478,17 @@ namespace DomHelpers.SlcDocumenthub
 
 		public static class Sections
 		{
-			public static class Info
+			public static class DOMSourceInfo
+			{
+				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("a98e6176-ce32-45d1-a8f8-e1baea6d4488"))
+				{ ModuleId = "(slc)documenthub" };
+				public static FieldDescriptorID Name { get; } = new FieldDescriptorID(new Guid("fdf73d52-590c-4b67-8d92-a367651790eb"));
+				public static FieldDescriptorID Module { get; } = new FieldDescriptorID(new Guid("98bdd53d-deda-497a-8394-2f503d294015"));
+				public static FieldDescriptorID NetworkSharePath { get; } = new FieldDescriptorID(new Guid("2ccfdd77-f0a5-4607-8a52-afba8c3bef82"));
+				public static FieldDescriptorID Credential { get; } = new FieldDescriptorID(new Guid("ec214b80-298c-421f-b352-c2a3d5200de9"));
+			}
+
+			public static class CategoryInfo
 			{
 				public static SectionDefinitionID Id { get; } = new SectionDefinitionID(new Guid("9dee7951-0ce8-42d1-8601-f1eb8c28a12c"))
 				{ ModuleId = "(slc)documenthub" };
@@ -490,6 +498,8 @@ namespace DomHelpers.SlcDocumenthub
 				public static FieldDescriptorID Storagetype { get; } = new FieldDescriptorID(new Guid("36c92e1d-0108-4e6d-a411-189ecd9869ea"));
 				public static FieldDescriptorID Extensions { get; } = new FieldDescriptorID(new Guid("9a62750a-de42-4241-b937-54ea4b79ca90"));
 				public static FieldDescriptorID Isdefault { get; } = new FieldDescriptorID(new Guid("f0b2c67c-34f5-4aea-b869-68c134a7bdd8"));
+				public static FieldDescriptorID Definition { get; } = new FieldDescriptorID(new Guid("239b1596-a92c-4552-8086-701270068fbf"));
+				public static FieldDescriptorID Domsource { get; } = new FieldDescriptorID(new Guid("375d860c-9b5d-424b-a1bf-88ceb3a9a280"));
 			}
 
 			public static class Configuration
@@ -507,6 +517,8 @@ namespace DomHelpers.SlcDocumenthub
 
 		public static class Definitions
 		{
+			public static DomDefinitionId Domsource { get; } = new DomDefinitionId(new Guid("5ec0807d-7e0f-4fc2-9e60-53db664614f7"))
+			{ ModuleId = "(slc)documenthub" };
 			public static DomDefinitionId Sharepoint { get; } = new DomDefinitionId(new Guid("f0492169-2e70-4aa3-a06a-28e8091b785a"))
 			{ ModuleId = "(slc)documenthub" };
 			public static DomDefinitionId DocumentCategory { get; } = new DomDefinitionId(new Guid("c5a9829c-5ca1-4a29-87d0-88e4e4d13ace"))
@@ -531,6 +543,115 @@ namespace DomHelpers.SlcDocumenthub
 	using System.Linq;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages;
+
+	/// <summary>
+	/// Represents a wrapper class for accessing a DomsourceInstance DOM instance.
+	/// The <see cref="DomsourceInstance"/> class provides simplified access to the data and functionality of the underlying DOM instance, allowing for easier manipulation and retrieval of data from DOM.
+	/// </summary>
+	public partial class DomsourceInstance : DomInstanceBase
+	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DomsourceInstance"/> class. Creates an empty <see cref="DomsourceInstance"/> instance with default settings.
+		/// </summary>
+		public DomsourceInstance() : base(SlcDocumenthubIds.Definitions.Domsource)
+		{
+			InitializeProperties();
+			AfterLoad();
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DomsourceInstance"/> class. Creates an empty <see cref="DomsourceInstance"/> instance with default settings and a specific ID.
+		/// </summary>
+		public DomsourceInstance(Guid id) : base(SlcDocumenthubIds.Definitions.Domsource, id)
+		{
+			InitializeProperties();
+			AfterLoad();
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DomsourceInstance"/> class using the specified <paramref name="domInstance"/> for initializing the object.
+		/// </summary>
+		/// <param name="domInstance">The <see cref="DomInstance"/> object that provides data for initializing the <see cref="DomsourceInstance"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
+		public DomsourceInstance(DomInstance domInstance) : base(domInstance)
+		{
+			if (!domInstance.DomDefinitionId.Equals(SlcDocumenthubIds.Definitions.Domsource))
+				throw new ArgumentException($"The given domInstance, is not of type '{nameof(SlcDocumenthubIds.Definitions.Domsource)}'", nameof(domInstance));
+			InitializeProperties();
+			AfterLoad();
+		}
+
+		/// <summary>
+		/// Gets or sets the DOMSourceInfo section of the DOM Instance.
+		/// </summary>
+		public DOMSourceInfoSection DOMSourceInfo { get; set; }
+
+		public static explicit operator DomsourceInstance(DomInstance instance)
+		{
+			return new DomsourceInstance(instance);
+		}
+
+		/// <summary>
+		/// Creates a deep copy of the current <see cref="DomsourceInstance"/>.
+		/// </summary>
+		/// <returns>A new <see cref="DomsourceInstance"/> object that is a deep copy of this instance.</returns>
+		public DomsourceInstance Clone()
+		{
+			return new DomsourceInstance((DomInstance)this.ToInstance().Clone());
+		}
+
+		/// <summary>
+		/// Creates a duplicate of the current <see cref="DomsourceInstance"/> with a new id.
+		/// </summary>
+		/// <returns>A new <see cref="DomsourceInstance"/> object that is a copy of this instance but with a different id.</returns>
+		public DomsourceInstance Duplicate()
+		{
+			var instance = (DomInstance)this.ToInstance().Clone();
+			instance.ID = new DomInstanceId(Guid.NewGuid())
+			{ ModuleId = ModuleId };
+			foreach (var section in instance.Sections)
+			{
+				section.ID = new Skyline.DataMiner.Net.Sections.SectionID(Guid.NewGuid());
+			}
+
+			return new DomsourceInstance(instance);
+		}
+
+		/// <inheritdoc />
+		protected sealed override DomInstance InternalToInstance()
+		{
+			domInstance.Sections.Clear();
+			domInstance.Sections.Add(DOMSourceInfo.ToSection());
+			return domInstance;
+		}
+
+		/// <inheritdoc />
+		public sealed override void Save(DomHelper helper)
+		{
+			var exist = helper.DomInstances.Read(DomInstanceExposers.Id.Equal(domInstance.ID)).FirstOrDefault();
+			var instance = ToInstance();
+			if (exist == null)
+			{
+				domInstance = helper.DomInstances.Create(instance);
+			}
+			else
+			{
+				domInstance = helper.DomInstances.Update(instance);
+			}
+		}
+
+		protected sealed override void InitializeProperties()
+		{
+			var _dOMSourceInfo = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcDocumenthubIds.Sections.DOMSourceInfo.Id));
+			if (_dOMSourceInfo is null)
+			{
+				DOMSourceInfo = new DOMSourceInfoSection();
+			}
+			else
+			{
+				DOMSourceInfo = new DOMSourceInfoSection(_dOMSourceInfo);
+			}
+		}
+	}
 
 	/// <summary>
 	/// Represents a wrapper class for accessing a SharepointInstance DOM instance.
@@ -678,9 +799,9 @@ namespace DomHelpers.SlcDocumenthub
 		}
 
 		/// <summary>
-		/// Gets or sets the Info section of the DOM Instance.
+		/// Gets or sets the CategoryInfo section of the DOM Instance.
 		/// </summary>
-		public InfoSection Info { get; set; }
+		public CategoryInfoSection CategoryInfo { get; set; }
 
 		public static explicit operator DocumentCategoryInstance(DomInstance instance)
 		{
@@ -717,7 +838,7 @@ namespace DomHelpers.SlcDocumenthub
 		protected sealed override DomInstance InternalToInstance()
 		{
 			domInstance.Sections.Clear();
-			domInstance.Sections.Add(Info.ToSection());
+			domInstance.Sections.Add(CategoryInfo.ToSection());
 			return domInstance;
 		}
 
@@ -738,14 +859,14 @@ namespace DomHelpers.SlcDocumenthub
 
 		protected sealed override void InitializeProperties()
 		{
-			var _info = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcDocumenthubIds.Sections.Info.Id));
-			if (_info is null)
+			var _categoryInfo = domInstance.Sections.FirstOrDefault(section => section.SectionDefinitionID.Equals(SlcDocumenthubIds.Sections.CategoryInfo.Id));
+			if (_categoryInfo is null)
 			{
-				Info = new InfoSection();
+				CategoryInfo = new CategoryInfoSection();
 			}
 			else
 			{
-				Info = new InfoSection(_info);
+				CategoryInfo = new CategoryInfoSection(_categoryInfo);
 			}
 		}
 	}
@@ -768,23 +889,23 @@ namespace DomHelpers.SlcDocumenthub
 	using Skyline.DataMiner.Net.Sections;
 
 	/// <summary>
-	/// Represents a wrapper class for accessing a InfoSection section.
-	/// The <see cref="InfoSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
+	/// Represents a wrapper class for accessing a DOMSourceInfoSection section.
+	/// The <see cref="DOMSourceInfoSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
 	/// </summary>
-	public partial class InfoSection : DomSectionBase
+	public partial class DOMSourceInfoSection : DomSectionBase
 	{
 		/// <summary>
-		/// Initializes a new instance of the <see cref="InfoSection"/> class. Creates an empty <see cref="InfoSection"/> object with default settings.
+		/// Initializes a new instance of the <see cref="DOMSourceInfoSection"/> class. Creates an empty <see cref="DOMSourceInfoSection"/> object with default settings.
 		/// </summary>
-		public InfoSection() : base(SlcDocumenthubIds.Sections.Info.Id)
+		public DOMSourceInfoSection() : base(SlcDocumenthubIds.Sections.DOMSourceInfo.Id)
 		{
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="InfoSection"/> class using the specified <paramref name="section"/> for initializing the object.
+		/// Initializes a new instance of the <see cref="DOMSourceInfoSection"/> class using the specified <paramref name="section"/> for initializing the object.
 		/// </summary>
-		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="InfoSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
-		public InfoSection(Section section) : base(section, SlcDocumenthubIds.Sections.Info.Id)
+		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="DOMSourceInfoSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
+		public DOMSourceInfoSection(Section section) : base(section, SlcDocumenthubIds.Sections.DOMSourceInfo.Id)
 		{
 		}
 
@@ -807,7 +928,7 @@ namespace DomHelpers.SlcDocumenthub
 		{
 			get
 			{
-				var wrapper = section.GetValue<String>(SlcDocumenthubIds.Sections.Info.Name);
+				var wrapper = section.GetValue<String>(SlcDocumenthubIds.Sections.DOMSourceInfo.Name);
 				if (wrapper != null)
 				{
 					return (String)wrapper.Value;
@@ -822,11 +943,239 @@ namespace DomHelpers.SlcDocumenthub
 			{
 				if (value == null)
 				{
-					section.RemoveFieldValueById(SlcDocumenthubIds.Sections.Info.Name);
+					section.RemoveFieldValueById(SlcDocumenthubIds.Sections.DOMSourceInfo.Name);
 				}
 				else
 				{
-					section.AddOrUpdateValue(SlcDocumenthubIds.Sections.Info.Name, (String)value);
+					section.AddOrUpdateValue(SlcDocumenthubIds.Sections.DOMSourceInfo.Name, (String)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the Module field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public String Module
+		{
+			get
+			{
+				var wrapper = section.GetValue<String>(SlcDocumenthubIds.Sections.DOMSourceInfo.Module);
+				if (wrapper != null)
+				{
+					return (String)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcDocumenthubIds.Sections.DOMSourceInfo.Module);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcDocumenthubIds.Sections.DOMSourceInfo.Module, (String)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the NetworkSharePath field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public String NetworkSharePath
+		{
+			get
+			{
+				var wrapper = section.GetValue<String>(SlcDocumenthubIds.Sections.DOMSourceInfo.NetworkSharePath);
+				if (wrapper != null)
+				{
+					return (String)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcDocumenthubIds.Sections.DOMSourceInfo.NetworkSharePath);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcDocumenthubIds.Sections.DOMSourceInfo.NetworkSharePath, (String)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the Credential field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public String Credential
+		{
+			get
+			{
+				var wrapper = section.GetValue<String>(SlcDocumenthubIds.Sections.DOMSourceInfo.Credential);
+				if (wrapper != null)
+				{
+					return (String)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcDocumenthubIds.Sections.DOMSourceInfo.Credential);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcDocumenthubIds.Sections.DOMSourceInfo.Credential, (String)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Creates a deep copy of the current <see cref="DOMSourceInfoSection"/>.
+		/// </summary>
+		/// <returns>A new <see cref="DOMSourceInfoSection"/> object that is a deep copy of this section.</returns>
+		public DOMSourceInfoSection Clone()
+		{
+			return new DOMSourceInfoSection((Section)this.ToSection().Clone());
+		}
+
+		/// <summary>
+		/// Creates a duplicate of the current <see cref="DOMSourceInfoSection"/> with a new id.
+		/// </summary>
+		/// <returns>A new <see cref="DOMSourceInfoSection"/> object that is a copy of this section but with a different id.</returns>
+		public DOMSourceInfoSection Duplicate()
+		{
+			var section = (Section)this.ToSection().Clone();
+			section.ID = new SectionID(Guid.NewGuid());
+			return new DOMSourceInfoSection(section);
+		}
+
+		/// <inheritdoc />
+		protected override Section InternalToSection()
+		{
+			if (section.GetValue<String>(SlcDocumenthubIds.Sections.DOMSourceInfo.Name) == null)
+				throw new InvalidOperationException("'Name' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
+			if (section.GetValue<String>(SlcDocumenthubIds.Sections.DOMSourceInfo.Module) == null)
+				throw new InvalidOperationException("'Module' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
+			if (section.GetValue<String>(SlcDocumenthubIds.Sections.DOMSourceInfo.NetworkSharePath) == null)
+				throw new InvalidOperationException("'NetworkSharePath' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
+			if (section.GetValue<String>(SlcDocumenthubIds.Sections.DOMSourceInfo.Credential) == null)
+				throw new InvalidOperationException("'Credential' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
+			return section;
+		}
+	}
+
+	/// <summary>
+	/// Represents a wrapper class for accessing a CategoryInfoSection section.
+	/// The <see cref="CategoryInfoSection"/> class provides simplified access to the data and functionality of the underlying DOM section, allowing for easier manipulation and retrieval of data from DOM.
+	/// </summary>
+	public partial class CategoryInfoSection : DomSectionBase
+	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="CategoryInfoSection"/> class. Creates an empty <see cref="CategoryInfoSection"/> object with default settings.
+		/// </summary>
+		public CategoryInfoSection() : base(SlcDocumenthubIds.Sections.CategoryInfo.Id)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="CategoryInfoSection"/> class using the specified <paramref name="section"/> for initializing the object.
+		/// </summary>
+		/// <param name="section">The <see cref="Section"/> object that provides data for initializing the <see cref="CategoryInfoSection"/>. If the section is <c>null</c>, the constructor will not perform any initialization.</param>
+		public CategoryInfoSection(Section section) : base(section, SlcDocumenthubIds.Sections.CategoryInfo.Id)
+		{
+		}
+
+		/// <summary>
+		/// Gets or sets the Name field of the DOM Instance.
+		/// </summary>
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public String Name
+		{
+			get
+			{
+				var wrapper = section.GetValue<String>(SlcDocumenthubIds.Sections.CategoryInfo.Name);
+				if (wrapper != null)
+				{
+					return (String)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcDocumenthubIds.Sections.CategoryInfo.Name);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcDocumenthubIds.Sections.CategoryInfo.Name, (String)value);
 				}
 			}
 		}
@@ -850,7 +1199,7 @@ namespace DomHelpers.SlcDocumenthub
 		{
 			get
 			{
-				var wrapper = section.GetValue<String>(SlcDocumenthubIds.Sections.Info.Uploadpath);
+				var wrapper = section.GetValue<String>(SlcDocumenthubIds.Sections.CategoryInfo.Uploadpath);
 				if (wrapper != null)
 				{
 					return (String)wrapper.Value;
@@ -865,11 +1214,11 @@ namespace DomHelpers.SlcDocumenthub
 			{
 				if (value == null)
 				{
-					section.RemoveFieldValueById(SlcDocumenthubIds.Sections.Info.Uploadpath);
+					section.RemoveFieldValueById(SlcDocumenthubIds.Sections.CategoryInfo.Uploadpath);
 				}
 				else
 				{
-					section.AddOrUpdateValue(SlcDocumenthubIds.Sections.Info.Uploadpath, (String)value);
+					section.AddOrUpdateValue(SlcDocumenthubIds.Sections.CategoryInfo.Uploadpath, (String)value);
 				}
 			}
 		}
@@ -893,7 +1242,7 @@ namespace DomHelpers.SlcDocumenthub
 		{
 			get
 			{
-				var wrapper = section.GetValue<String>(SlcDocumenthubIds.Sections.Info.Description);
+				var wrapper = section.GetValue<String>(SlcDocumenthubIds.Sections.CategoryInfo.Description);
 				if (wrapper != null)
 				{
 					return (String)wrapper.Value;
@@ -908,11 +1257,11 @@ namespace DomHelpers.SlcDocumenthub
 			{
 				if (value == null)
 				{
-					section.RemoveFieldValueById(SlcDocumenthubIds.Sections.Info.Description);
+					section.RemoveFieldValueById(SlcDocumenthubIds.Sections.CategoryInfo.Description);
 				}
 				else
 				{
-					section.AddOrUpdateValue(SlcDocumenthubIds.Sections.Info.Description, (String)value);
+					section.AddOrUpdateValue(SlcDocumenthubIds.Sections.CategoryInfo.Description, (String)value);
 				}
 			}
 		}
@@ -936,7 +1285,7 @@ namespace DomHelpers.SlcDocumenthub
 		{
 			get
 			{
-				var wrapper = section.GetValue<Int32>(SlcDocumenthubIds.Sections.Info.Storagetype);
+				var wrapper = section.GetValue<Int32>(SlcDocumenthubIds.Sections.CategoryInfo.Storagetype);
 				if (wrapper != null)
 				{
 					return (SlcDocumenthubIds.Enums.Storagetype?)wrapper.Value;
@@ -951,11 +1300,11 @@ namespace DomHelpers.SlcDocumenthub
 			{
 				if (value == null)
 				{
-					section.RemoveFieldValueById(SlcDocumenthubIds.Sections.Info.Storagetype);
+					section.RemoveFieldValueById(SlcDocumenthubIds.Sections.CategoryInfo.Storagetype);
 				}
 				else
 				{
-					section.AddOrUpdateValue(SlcDocumenthubIds.Sections.Info.Storagetype, (Int32)value);
+					section.AddOrUpdateValue(SlcDocumenthubIds.Sections.CategoryInfo.Storagetype, (Int32)value);
 				}
 			}
 		}
@@ -979,7 +1328,7 @@ namespace DomHelpers.SlcDocumenthub
 		{
 			get
 			{
-				var wrapper = section.GetValue<String>(SlcDocumenthubIds.Sections.Info.Extensions);
+				var wrapper = section.GetValue<String>(SlcDocumenthubIds.Sections.CategoryInfo.Extensions);
 				if (wrapper != null)
 				{
 					return (String)wrapper.Value;
@@ -994,11 +1343,11 @@ namespace DomHelpers.SlcDocumenthub
 			{
 				if (value == null)
 				{
-					section.RemoveFieldValueById(SlcDocumenthubIds.Sections.Info.Extensions);
+					section.RemoveFieldValueById(SlcDocumenthubIds.Sections.CategoryInfo.Extensions);
 				}
 				else
 				{
-					section.AddOrUpdateValue(SlcDocumenthubIds.Sections.Info.Extensions, (String)value);
+					section.AddOrUpdateValue(SlcDocumenthubIds.Sections.CategoryInfo.Extensions, (String)value);
 				}
 			}
 		}
@@ -1022,7 +1371,7 @@ namespace DomHelpers.SlcDocumenthub
 		{
 			get
 			{
-				var wrapper = section.GetValue<Boolean>(SlcDocumenthubIds.Sections.Info.Isdefault);
+				var wrapper = section.GetValue<Boolean>(SlcDocumenthubIds.Sections.CategoryInfo.Isdefault);
 				if (wrapper != null)
 				{
 					return (Boolean?)wrapper.Value;
@@ -1037,45 +1386,131 @@ namespace DomHelpers.SlcDocumenthub
 			{
 				if (value == null)
 				{
-					section.RemoveFieldValueById(SlcDocumenthubIds.Sections.Info.Isdefault);
+					section.RemoveFieldValueById(SlcDocumenthubIds.Sections.CategoryInfo.Isdefault);
 				}
 				else
 				{
-					section.AddOrUpdateValue(SlcDocumenthubIds.Sections.Info.Isdefault, (Boolean)value);
+					section.AddOrUpdateValue(SlcDocumenthubIds.Sections.CategoryInfo.Isdefault, (Boolean)value);
 				}
 			}
 		}
 
 		/// <summary>
-		/// Creates a deep copy of the current <see cref="InfoSection"/>.
+		/// Gets or sets the Definition field of the DOM Instance.
 		/// </summary>
-		/// <returns>A new <see cref="InfoSection"/> object that is a deep copy of this section.</returns>
-		public InfoSection Clone()
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public String Definition
 		{
-			return new InfoSection((Section)this.ToSection().Clone());
+			get
+			{
+				var wrapper = section.GetValue<String>(SlcDocumenthubIds.Sections.CategoryInfo.Definition);
+				if (wrapper != null)
+				{
+					return (String)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcDocumenthubIds.Sections.CategoryInfo.Definition);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcDocumenthubIds.Sections.CategoryInfo.Definition, (String)value);
+				}
+			}
 		}
 
 		/// <summary>
-		/// Creates a duplicate of the current <see cref="InfoSection"/> with a new id.
+		/// Gets or sets the Domsource field of the DOM Instance.
 		/// </summary>
-		/// <returns>A new <see cref="InfoSection"/> object that is a copy of this section but with a different id.</returns>
-		public InfoSection Duplicate()
+		/// <remarks>
+		/// When retrieving the value:
+		/// <list type="bullet">
+		/// <item>If the field has been set, it will return the value.</item>
+		/// <item>If the field is not set it will return <see langword="null"/>.</item>
+		/// </list>
+		/// When setting the value:
+		/// <list type="bullet">
+		/// <item>- If <see langword="null"/> is assigned, the field will be removed from the section.</item>
+		/// <item>- If a valid value is assigned, the field value will be added or updated in the section.</item>
+		/// </list>
+		/// </remarks>
+		public Guid? Domsource
+		{
+			get
+			{
+				var wrapper = section.GetValue<Guid>(SlcDocumenthubIds.Sections.CategoryInfo.Domsource);
+				if (wrapper != null)
+				{
+					return (Guid?)wrapper.Value;
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			set
+			{
+				if (value == null)
+				{
+					section.RemoveFieldValueById(SlcDocumenthubIds.Sections.CategoryInfo.Domsource);
+				}
+				else
+				{
+					section.AddOrUpdateValue(SlcDocumenthubIds.Sections.CategoryInfo.Domsource, (Guid)value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Creates a deep copy of the current <see cref="CategoryInfoSection"/>.
+		/// </summary>
+		/// <returns>A new <see cref="CategoryInfoSection"/> object that is a deep copy of this section.</returns>
+		public CategoryInfoSection Clone()
+		{
+			return new CategoryInfoSection((Section)this.ToSection().Clone());
+		}
+
+		/// <summary>
+		/// Creates a duplicate of the current <see cref="CategoryInfoSection"/> with a new id.
+		/// </summary>
+		/// <returns>A new <see cref="CategoryInfoSection"/> object that is a copy of this section but with a different id.</returns>
+		public CategoryInfoSection Duplicate()
 		{
 			var section = (Section)this.ToSection().Clone();
 			section.ID = new SectionID(Guid.NewGuid());
-			return new InfoSection(section);
+			return new CategoryInfoSection(section);
 		}
 
 		/// <inheritdoc />
 		protected override Section InternalToSection()
 		{
-			if (section.GetValue<String>(SlcDocumenthubIds.Sections.Info.Name) == null)
+			if (section.GetValue<String>(SlcDocumenthubIds.Sections.CategoryInfo.Name) == null)
 				throw new InvalidOperationException("'Name' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
-			if (section.GetValue<String>(SlcDocumenthubIds.Sections.Info.Uploadpath) == null)
+			if (section.GetValue<String>(SlcDocumenthubIds.Sections.CategoryInfo.Uploadpath) == null)
 				throw new InvalidOperationException("'Uploadpath' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
-			if (section.GetValue<Int32>(SlcDocumenthubIds.Sections.Info.Storagetype) == null)
+			if (section.GetValue<Int32>(SlcDocumenthubIds.Sections.CategoryInfo.Storagetype) == null)
 				throw new InvalidOperationException("'Storagetype' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
-			if (section.GetValue<String>(SlcDocumenthubIds.Sections.Info.Extensions) == null)
+			if (section.GetValue<String>(SlcDocumenthubIds.Sections.CategoryInfo.Extensions) == null)
 				throw new InvalidOperationException("'Extensions' is required. Please fill it in before saving, or mark it as optional with the DOM Editor.");
 			return section;
 		}

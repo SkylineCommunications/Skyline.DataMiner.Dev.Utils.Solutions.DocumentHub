@@ -1,11 +1,13 @@
 ﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
 {
-    using Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub;
-    using System;
-    using System.Collections.Generic;
-    using System.Drawing;
-    using System.IO;
-    using System.Linq;
+	using System;
+	using System.Collections.Generic;
+	using System.Drawing;
+	using System.IO;
+	using System.Linq;
+	using Skyline.DataMiner.Net;
+    using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.FileAdapters;
+    using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Paging;
 
     /// <summary>
     /// Handles file and image storage on the local filesystem.
@@ -14,17 +16,41 @@
     /// Implements <see cref="IStorageHandler"/> to provide local storage operations.
     /// Used for storing files and images under the DataMiner Webpages folder.
     /// </remarks>
-	internal class LocalHandler : IStorageHandler
+    internal class LocalHandler : IStorageHandler
 	{
+		/// <summary>
+		/// The DataMiner connection used for communication with the system.
+		/// </summary>
+		private readonly IConnection _connection;
 
-        /// <summary>
-        /// Checks if a file exists at the given directory path.
-        /// </summary>
-        /// <param name="directory">The directory to search in.</param>
-        /// <param name="name">The filename to check.</param>
-        /// <returns>True if the file exists; otherwise false.</returns>
-        public bool FileExists(string directory, string name)
+		/// <summary>
+		/// Initializes a new instance of the <see cref="LocalHandler"/> class.
+		/// </summary>
+		/// <param name="connection">
+		/// An active DataMiner connection used to communicate with the system.
+		/// </param>
+		public LocalHandler(IConnection connection)
 		{
+			_connection = connection;
+		}
+
+		/// <summary>
+		/// Checks if a file exists at the given directory path.
+		/// </summary>
+		/// <param name="data">
+		/// The storage handler data containing directory and filename.
+		/// </param>
+		/// <returns>
+		/// True if the file exists; otherwise false.
+		/// </returns>
+		public bool FileExists(FileExistsData data)
+		{
+			if (!(data is WebFileExistsData args))
+				throw new ArgumentException("LocalHandler requires WebFileFileExistsData.", nameof(data));
+
+			var directory = args.Directory;
+			var name = args.Name;
+
 			string filePath = Path.Combine(directory, $"{name}");
 			return File.Exists(filePath);
 		}
@@ -51,15 +77,26 @@
 		/// <summary>
 		/// Copies a local file to the DataMiner Webpages folder under the specified relative path.
 		/// </summary>
-		/// <param name="filePath">The full path to the source file.</param>
-		/// <param name="directory">The relative path under the WebFileManager folder.</param>
-		/// <param name="name">The target filename including extension.</param>
-		public string UploadFile(string filePath, string directory, string name)
+		/// <param name="data">
+		/// The storage handler data containing file and target information.
+		/// </param>
+		/// <returns>The web-resolvable path of the uploaded file.</returns>
+		public string UploadFile(UploadData data)
 		{
+			// Validate input data
+			if (!(data is WebFileUploadData args))
+				throw new ArgumentException("LocalHandler requires WebFileUploadData.", nameof(data));
+
+			// Extract parameters from data
+			var category = args.Category;
+			var filePath = args.FilePath;
+			var name = args.Name;
+
 			// Root path for DataMiner WebFileManager
 			var root = @"C:\Skyline DataMiner\Webpages\Public\WebFileManager";
 
 			// Remove leading slashes from relative path
+			var directory = category.UploadPath;
 			directory = directory.TrimStart('/', '\\');
 
 			// Combine root and relative path to get full target directory
@@ -77,99 +114,124 @@
 			// Copy the file to the target location (overwrite if exists)
 			File.Copy(filePath, targetPath, overwrite: true);
 
-            // Return the web-resolvable path of the uploaded file.
-            return '/' + FileInfoAdapter.GetRelativePath(targetPath, @"C:\Skyline DataMiner\Webpages");
-        }
+			// Return the web-resolvable path of the uploaded file.
+			return '/' + FileInfoAdapter.GetRelativePath(targetPath, @"C:\Skyline DataMiner\Webpages");
+		}
 
-        /// <summary>
-        /// Reads files from the local file system using a paged enumerator.
-        /// Supports optional category-based paths and filename filtering.
-        /// </summary>
-        public List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter, DocHubPageData context)
-        {
-            // Validate context
-            if (context == null)
-                throw new ArgumentNullException(nameof(context));
+		/// <summary>
+		/// Reads all files for the given category and filter by iterating
+		/// through all available pages until no more results are returned.
+		/// </summary>
+		/// <param name="data">
+		/// The storage handler data containing category and filter information.
+		/// </param>
+		/// <returns>
+		/// A list of all <see cref="IDocHubFile"/> matching the criteria.
+		/// </returns>
+		public List<IDocHubFile> ReadFiles(ReadData data)
+		{
+			// Validate input data
+			if (!(data is WebFileReadData args))
+				throw new ArgumentException("LocalHandler requires WebFileReadData.", nameof(data));
 
-            // Ensure the context is local
-            if (!(context is LocalPageData localContext))
-                throw new ArgumentException(
-                    "LocalHandler requires LocalPageContext.",
-                    nameof(context));
+			// If a paging context is provided, read a single page
+			if (data.Context != null)
+				return ReadPage(data);
 
-            // Apply category upload path before enumeration starts
-            if (category != null && localContext.FileEnumerator == null)
-            {
-                localContext.CurrentRoot = Path.Combine(
-                    localContext.CurrentRoot,
-                    category.UploadPath.TrimStart('\\', '/'));
-            }
+			// Create a new paging context for full enumeration
+			args.Context = new LocalPageData();
 
-            // Initialize file enumeration if not already created
-            if (localContext.FileEnumerator == null)
-            {
-                // Return empty list if root directory does not exist
-                if (!Directory.Exists(localContext.CurrentRoot))
-                    return new List<IDocHubFile>();
+			// Accumulates all files across pages
+			List<IDocHubFile> files = new List<IDocHubFile>();
 
-                // Enumerate all files recursively
-                var files = Directory
-                    .EnumerateFiles(localContext.CurrentRoot, "*.*", SearchOption.AllDirectories)
-                    .Select(f => new FileInfo(f));
+			// Continue reading pages until an empty page is returned
+			while (true)
+			{
+				var page = ReadPage(args);
 
-                // Apply optional filename filter
-                if (!string.IsNullOrEmpty(filter))
-                {
-                    files = files.Where(fi =>
-                        fi.Name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0);
-                }
+				// No more files available
+				if (page.Count == 0)
+					break;
 
-                // Sort newest first and store enumerator in context
-                localContext.FileEnumerator = files
-                    .OrderByDescending(fi => fi.CreationTimeUtc)
-                    .GetEnumerator();
-            }
+				files.AddRange(page);
+			}
 
-            // Collect the next page of results
-            var result = new List<IDocHubFile>();
+			return files;
+		}
 
-            while (result.Count < localContext.PageSize &&
-                   localContext.FileEnumerator.MoveNext())
-            {
-                result.Add(new FileInfoAdapter
-                {
-                    fileInfo = localContext.FileEnumerator.Current,
-                });
-            }
+		/// <summary>
+		/// Reads files from the local file system using a paged enumerator.
+		/// Supports optional category-based paths and filename filtering.
+		/// </summary>
+		/// <param name="data">"
+		/// The storage handler data containing category, filter, and context.
+		/// </param>
+		/// <returns>
+		/// A list of <see cref="IDocHubFile"/> representing the files in the current page.
+		/// </returns>
+		private List<IDocHubFile> ReadPage(ReadData data)
+		{
+			// Validate input data
+			if (!(data is WebFileReadData args))
+				throw new ArgumentException("LocalHandler requires WebFileReadData.", nameof(data));
 
-            return result;
-        }
+			// Extract parameters from data
+			var category = args.Category;
+			var filter = args.Filter;
+			var context = args.Context;
 
-        /// <summary>
-        /// Reads all files for the given category and filter by iterating
-        /// through all available pages until no more results are returned.
-        /// </summary>
-        public List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter)
-        {
-            // Accumulates all files across pages
-            List<IDocHubFile> files = new List<IDocHubFile>();
+			// Validate context
+			if (context == null)
+				throw new ArgumentNullException(nameof(context));
 
-            // Create a new paging context for full enumeration
-            var context = new LocalPageData();
+			// Ensure the context is local
+			if (!(context is LocalPageData localContext))
+				throw new ArgumentException("LocalHandler requires LocalPageContext.", nameof(context));
 
-            // Continue reading pages until an empty page is returned
-            while (true)
-            {
-                var page = ReadFiles(category, filter, context);
+			// Apply category upload path before enumeration starts
+			if (category != null && localContext.FileEnumerator == null)
+			{
+				localContext.CurrentRoot = Path.Combine(localContext.CurrentRoot, category.UploadPath.TrimStart('\\', '/'));
+			}
 
-                // No more files available
-                if (page.Count == 0)
-                    break;
+			// Initialize file enumeration if not already created
+			if (localContext.FileEnumerator == null)
+			{
+				// Return empty list if root directory does not exist
+				if (!Directory.Exists(localContext.CurrentRoot))
+					return new List<IDocHubFile>();
 
-                files.AddRange(page);
-            }
+				// Enumerate all files recursively
+				var files = Directory
+					.EnumerateFiles(localContext.CurrentRoot, "*.*", SearchOption.AllDirectories)
+					.Select(f => new FileInfo(f));
 
-            return files;
-        }
-    }
+				// Apply optional filename filter
+				if (!string.IsNullOrEmpty(filter))
+				{
+					files = files.Where(fi =>
+						fi.Name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0);
+				}
+
+				// Sort newest first and store enumerator in context
+				localContext.FileEnumerator = files
+					.OrderByDescending(fi => fi.CreationTimeUtc)
+					.GetEnumerator();
+			}
+
+			// Collect the next page of results
+			var result = new List<IDocHubFile>();
+
+			while (result.Count < localContext.PageSize &&
+				   localContext.FileEnumerator.MoveNext())
+			{
+				result.Add(new FileInfoAdapter
+				{
+					fileInfo = localContext.FileEnumerator.Current,
+				});
+			}
+
+			return result;
+		}
+	}
 }

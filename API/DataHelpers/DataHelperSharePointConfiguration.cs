@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub
+﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers
 {
 	using System;
 	using System.Collections.Generic;
@@ -7,13 +7,13 @@
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 
-	internal class DataHelperSharePointConfiguration : DataHelper<Models.SharePointConfiguration>
+	internal class DataHelperSharePointConfiguration : DataHelper<Models.Sources.SharePointConfiguration>
     {
         internal DataHelperSharePointConfiguration(IConnection connection) : base(connection, SlcDocumenthubIds.Definitions.Sharepoint)
         {
         }
 
-        internal override Guid CreateOrUpdate(Models.SharePointConfiguration item)
+        internal override Guid CreateOrUpdate(Models.Sources.SharePointConfiguration item)
         {
             var instance = new SharepointInstance(New(item.ID));
             instance.Configuration.SiteURL = item.SiteURL;
@@ -25,15 +25,15 @@
             return CreateOrUpdateInstance(instance);
         }
 
-        internal override List<Models.SharePointConfiguration> Read(IEnumerable<DomInstance> domInstances)
+        internal override List<Models.Sources.SharePointConfiguration> Read(IEnumerable<DomInstance> domInstances)
         {
             var instances = domInstances.Select(x => new SharepointInstance(x)).ToList();
             if (instances.Count < 1)
             {
-                return new List<Models.SharePointConfiguration>();
+                return new List<Models.Sources.SharePointConfiguration>();
             }
 
-            return instances.Select(x => new Models.SharePointConfiguration
+            return instances.Select(x => new Models.Sources.SharePointConfiguration
             {
                 ID = x.ID.Id,
                 SiteURL = x.Configuration.SiteURL,
@@ -44,7 +44,7 @@
             }).ToList();
         }
 
-        internal override bool TryDelete(IEnumerable<Models.SharePointConfiguration> items)
+        internal override bool TryDelete(IEnumerable<Models.Sources.SharePointConfiguration> items)
         {
             if (items == null)
             {

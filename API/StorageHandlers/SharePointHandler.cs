@@ -10,400 +10,526 @@
 	using Azure.Identity;
 	using Microsoft.Graph;
 	using Microsoft.IdentityModel.Tokens;
-	using Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub;
+	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.SLDataGateway.Management.Recommendations;
+    using Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers;
+    using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.FileAdapters;
+    using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Paging;
+    using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Security;
 	using Drive = Microsoft.Graph.Drive;
 	using File = System.IO.File;
 
-    /// <summary>
-    /// Handles uploading files and images to a SharePoint document library.
-    /// </summary>
-    /// <remarks>
-    /// Implements <see cref="IStorageHandler"/> to provide SharePoint-specific storage operations.
-    /// Responsible for connecting to SharePoint, checking file existence, creating folders,
-    /// and uploading files or images.
-    /// </remarks>
-    internal class SharePointHandler : IStorageHandler
-    {
-        #region Globals
-
-        /// <summary>
-        /// Holds SharePoint instance configuration from the DOM.
-        /// </summary>
-        private readonly Models.SharePointConfiguration _sharePoint;
-
-        /// <summary>
-        /// Client used to access Microsoft Graph API.
-        /// </summary>
-        private readonly GraphServiceClient _graphClient;
-
-        /// <summary>
-        /// Represents the SharePoint site.
-        /// </summary>
-        private readonly Site _site;
-
-        /// <summary>
-        /// Represents the document library (drive) in SharePoint.
-        /// </summary>
-        private readonly Drive _drive;
-        #endregion
-
-        #region Constructor
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SharePointHandler"/> class.
-        /// </summary>
-        /// <param name="helpers">The DOM helper for accessing SharePoint configuration.</param>
-        /// <exception cref="Exception">Thrown if the SharePoint library cannot be found.</exception>
-        internal SharePointHandler(DataHelpersDocumentHub helpers)
-        {
-            // Avoid re-initialization if client and drive are already set
-            if (_graphClient != null && _drive != null)
-                return;
-
-            // Load SharePoint configuration
-            _sharePoint = helpers.SharePointConfigurations.Read().FirstOrDefault();
-
-            // Authenticate to Microsoft Graph using client credentials
-            var credential = new ClientSecretCredential(
-                _sharePoint.TenantID,
-                _sharePoint.ClientID,
-                _sharePoint.ClientSecret);
-
-            _graphClient = new GraphServiceClient(credential);
-
-            // Build site URI
-            var uri = new UriBuilder("https://" + _sharePoint.SiteURL).Uri;
-            string hostname = uri.Host;
-            string path = uri.AbsolutePath;
-
-            // Retrieve the SharePoint site object
-            _site = _graphClient.Sites[$"{hostname}:{path}"]
-                .Request()
-                .GetAsync()
-                .GetAwaiter()
-                .GetResult();
-
-            // Retrieve the document library (drive)
-            var drives = _graphClient.Sites[_site.Id].Drives
-                .Request()
-                .GetAsync()
-                .GetAwaiter()
-                .GetResult();
-
-            _drive = drives.FirstOrDefault(d => d.Name.Equals(_sharePoint.DocumentLibraryName, StringComparison.OrdinalIgnoreCase));
-            if (_drive == null)
-                throw new NullReferenceException($"Library '{_sharePoint.DocumentLibraryName}' not found.");
-        }
-
-        #endregion
-
-        #region Public
-        public List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter)
-        {
-            List<IDocHubFile> files = new List<IDocHubFile>();
-
-            var context = new SharePointPageData();
-            while (context.FolderQueue.Count > 0 || context.NextPageRequest != null)
-            {
-                files.AddRange(ReadFiles(category, filter, context));
-            }
-
-            return files;
-        }
-
-        public List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter, DocHubPageData context)
-        {
-            if (context == null)
-                throw new ArgumentNullException(nameof(context));
-
-            if (!(context is SharePointPageData spContext))
-                throw new ArgumentException("SharePointHandler requires SharePointPageContext.", nameof(context));
-
-            if (category != null)
-            {
-                if (spContext.FolderQueue.Count == 0 && spContext.NextPageRequest == null)
-                {
-                    spContext.FolderQueue = new Queue<string>(new[] { category.UploadPath });
-                }
-            }
-
-            if (spContext.FolderQueue.IsNullOrEmpty())
-            {
-                throw new ArgumentException("FolderQueue cannot be null or empty.", nameof(spContext));
-            }
-
-            var driveItems = FetchNextPageInternal(filter, spContext);
-
-            var result = new List<IDocHubFile>();
-
-            foreach (var item in driveItems)
-            {
-                result.Add(new DriveItemAdapter(_sharePoint)
-                {
-                    driveItem = item
-                });
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Checks synchronously if a file exists in the specified SharePoint directory.
-        /// </summary>
-        /// <returns>Whether the file exists or not.</returns>
-        public bool FileExists(string directory, string name)
-        {
-            return FileExistsAsync(directory, name)
-                .GetAwaiter()
-                .GetResult();
-        }
+	/// <summary>
+	/// SharePoint storage handler implementation using Microsoft Graph.
+	/// </summary>
+	/// <remarks>
+	/// This class provides file enumeration, existence checks, folder creation, and uploads
+	/// to a SharePoint document library.  
+	/// <para>
+	/// ⚠ Paging is implemented manually because Microsoft Graph paginates per-folder, not recursively.
+	/// This means logical paging must aggregate multiple Graph pages and maintain internal buffers.
+	/// </para>
+	/// </remarks>
+	/// <seealso cref="IStorageHandler"/>
+	/// <seealso cref="GraphServiceClient"/>
+	/// <seealso cref="SharePointPageData"/>
+	/// <example>
+	/// Typical usage:
+	/// <code>
+	/// var handler = new SharePointHandler(helpers, connection);
+	/// var files = handler.ReadFiles(new WebFileReadData { Category = category });
+	/// </code>
+	/// </example>
+	internal class SharePointHandler : IStorageHandler
+	{
+		#region Globals
 
 		/// <summary>
-		/// Uploads a file from local disk to SharePoint.
+		/// SharePoint configuration retrieved from the Document Hub configuration model.
 		/// </summary>
-		/// <returns></returns>
-        public string UploadFile(string filePath, string directory, string name)
-        {
-            return UploadFileAsync(filePath, directory, name)
-                .GetAwaiter() // TODO: Async uploads to be supported later.
-                .GetResult();
-        }
+		private readonly Models.Sources.SharePointConfiguration _sharePoint;
 
-        /// <summary>
-        /// Uploads an in-memory image to SharePoint as JPEG.
-        /// </summary>
-        public void UploadImage(Bitmap image, string directory, string name)
-        {
-            UploadImageAsync(image, directory, name)
-                .GetAwaiter() // TODO: Async uploads to be supported later.
-                .GetResult();
-        }
+		/// <summary>
+		/// Microsoft Graph client used for SharePoint API operations.
+		/// </summary>
+		private readonly GraphServiceClient _graphClient;
 
-        #endregion
+		/// <summary>
+		/// SharePoint site resolved from the configured Site URL.
+		/// </summary>
+		private readonly Site _site;
 
-        #region Private
+		/// <summary>
+		/// Document library (drive) inside the SharePoint site.
+		/// </summary>
+		private readonly Drive _drive;
 
-        private IList<DriveItem> FetchNextPageInternal(string filter, SharePointPageData context)
-        {
-            while (context.FolderQueue.Count > 0 || context.NextPageRequest != null)
-            {
-                if (context.NextPageRequest == null)
-                {
-                    var folderId = context.FolderQueue.Dequeue();
+		/// <summary>
+		/// DataMiner connection instance.
+		/// </summary>
+		private readonly IConnection _connection;
 
-                    context.NextPageRequest = _graphClient
-                        .Drives[_drive.Id]
-                        .Items[folderId]
-                        .Children
-                        .Request()
-                        .Top(context.PageSize);
-                }
+		#endregion
 
-                var page = context.NextPageRequest
-                    .GetAsync()
-                    .GetAwaiter()
-                    .GetResult();
+		#region Constructor
 
-                context.NextPageRequest = page.NextPageRequest;
+		/// <summary>
+		/// Initializes a new instance of the <see cref="SharePointHandler"/> class.
+		/// </summary>
+		/// <param name="helpers">Helper object to retrieve configuration from DOM.</param>
+		/// <param name="connection">DataMiner connection instance.</param>
+		/// <exception cref="NullReferenceException">
+		/// Thrown when the configured SharePoint document library cannot be found.
+		/// </exception>
+		internal SharePointHandler(DataHelpersDocumentHub helpers, IConnection connection)
+		{
+			// Store DataMiner connection reference
+			_connection = connection;
 
-                foreach (var folder in page.CurrentPage.Where(i => i.Folder != null))
-                    context.FolderQueue.Enqueue(folder.Id);
+			// Defensive check to avoid reinitialization
+			if (_graphClient != null && _drive != null)
+				return;
 
-                var files = page.CurrentPage
-                    .Where(i =>
-                        i.File != null &&
-                        (string.IsNullOrEmpty(filter) ||
-                         i.Name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0))
-                    .ToList();
+			// Retrieve SharePoint configuration from DOM
+			_sharePoint = helpers.SharePointConfigurations.Read().FirstOrDefault();
 
-                if (files.Count > 0)
-                    return files;
+			// Retrieve client secret
+			var clientSecret = RetrieveClientSecret();
 
-                if (context.NextPageRequest == null)
-                    continue;
-            }
+			// Authenticate using Azure AD client credentials flow
+			var credential = new ClientSecretCredential(
+				_sharePoint.TenantID,
+				_sharePoint.ClientID,
+				clientSecret);
 
-            return new List<DriveItem>();
-        }
+			// Initialize Graph client
+			_graphClient = new GraphServiceClient(credential);
 
-        /// <summary>
-        /// Checks asynchronously if a file exists at the specified SharePoint path.
-        /// </summary>
-        private async Task<bool> FileExistsAsync(string directory, string name)
-        {
-            try
-            {
-                var driveItem = await _graphClient
-                    .Sites[_site.Id]
-                    .Drives[_drive.Id]
-                    .Root
-                    .ItemWithPath($"{directory}/{name}")
-                    .Request()
-                    .GetAsync();
+			// Build site URI components
+			var uri = new UriBuilder("https://" + _sharePoint.SiteURL).Uri;
+			string hostname = uri.Host;
+			string path = uri.AbsolutePath;
 
-                return true;
-            }
-            catch (ServiceException ex)
-            {
-                // File not found
-                if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
-                    return false;
+			// Resolve SharePoint site
+			_site = _graphClient.Sites[$"{hostname}:{path}"]
+				.Request()
+				.GetAsync()
+				.GetAwaiter()
+				.GetResult();
 
-                // Other errors are rethrown
-                throw;
-            }
-        }
+			// Retrieve document libraries (drives)
+			var drives = _graphClient.Sites[_site.Id].Drives
+				.Request()
+				.GetAsync()
+				.GetAwaiter()
+				.GetResult();
 
-        /// <summary>
-        /// Uploads a local file asynchronously to SharePoint, creating folders if needed.
-        /// </summary>
-        private async Task<string> UploadFileAsync(string filepath, string directory, string name)
-        {
-            try
-            {
-                // Ensure target directory exists
-                await EnsureFolderPathExistsAsync(directory);
+			// Select configured document library
+			_drive = drives.FirstOrDefault(d => d.Name.Equals(_sharePoint.DocumentLibraryName, StringComparison.OrdinalIgnoreCase));
+			if (_drive == null)
+				throw new NullReferenceException($"Library '{_sharePoint.DocumentLibraryName}' not found.");
+		}
 
-                using (var stream = File.OpenRead(filepath))
-                {
-                    var path = $"{directory.TrimEnd('/')}/{name}";
+		#endregion
 
-                    // Upload file to SharePoint
-                    var item = await _graphClient
-                        .Sites[_site.Id]
-                        .Drives[_drive.Id]
-                        .Root
-                        .ItemWithPath(path)
-                        .Content
-                        .Request()
-                        .PutAsync<DriveItem>(stream);
+		#region Public
 
-                    return item?.WebUrl;
-                }
-            }
-            catch (Exception e)
-            {
-                throw new IOException(ExtractMessage(e));
-            }
-        }
+		/// <summary>
+		/// Reads all files using recursive traversal with manual paging.
+		/// </summary>
+		/// <remarks>
+		/// ⚠ Microsoft Graph paginates per folder, so this method aggregates multiple folder pages
+		/// into a single logical page using <see cref="SharePointPageData"/>.
+		/// </remarks>
+		public List<IDocHubFile> ReadFiles(ReadData data)
+		{
+			if (!(data is WebFileReadData args))
+				throw new ArgumentException("SharePointHandler requires WebFileReadData.", nameof(data));
 
-        /// <summary>
-        /// Uploads a <see cref="Bitmap"/> image asynchronously to SharePoint as JPEG.
-        /// </summary>
-        private async Task UploadImageAsync(Bitmap image, string directory, string name)
-        {
-            try
-            {
-                MemoryStream jpegStream = new MemoryStream();
+			// If paging context exists, return next page only
+			if (args.Context != null)
+				return ReadPage(args);
 
-                // Save image to memory stream
-                image.Save(jpegStream, ImageFormat.Jpeg);
-                jpegStream.Position = 0; // Reset stream for reading
+			// Initialize paging context
+			var context = new SharePointPageData();
+			args.Context = context;
 
-                // Upload the image
-                var item = await _graphClient
-                    .Sites[_site.Id]
-                    .Drives[_drive.Id]
-                    .Root
-                    .ItemWithPath($"{name}.jpeg")
-                    .Content
-                    .Request()
-                    .PutAsync<DriveItem>(jpegStream);
-            }
-            catch (Exception e)
-            {
-                throw new IOException(ExtractMessage(e));
-            }
-        }
+			var files = new List<IDocHubFile>();
 
-        /// <summary>
-        /// Ensures that a folder path exists in SharePoint; creates missing folders recursively.
-        /// </summary>
-        private async Task EnsureFolderPathExistsAsync(string directory)
-        {
-            var segments = directory.Trim('/').Split('/');
+			// Iterate until no more data is available
+			while (context.HasNextPage())
+			{
+				var page = ReadPage(args);
 
-            string currentPath = string.Empty;
-            foreach (var segment in segments)
-            {
-                currentPath = string.IsNullOrEmpty(currentPath) ? segment : $"{currentPath}/{segment}";
+				// Safety break if no results and no further pages
+				if (page.Count == 0 && !context.HasNextPage())
+					break;
+			}
 
-                try
-                {
-                    // Attempt to get the folder
-                    await _graphClient
-                        .Sites[_site.Id]
-                        .Drives[_drive.Id]
-                        .Root
-                        .ItemWithPath(currentPath)
-                        .Request()
-                        .GetAsync();
-                }
-                catch (ServiceException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
-                {
-                    var parentPath = Path.GetDirectoryName(currentPath).Replace("\\", "/");
-                    var folderName = Path.GetFileName(currentPath);
+			return files;
+		}
 
-                    var folder = new DriveItem
-                    {
-                        Name = folderName,
-                        Folder = new Folder(),
-                    };
+		/// <summary>
+		/// Checks whether a file exists in SharePoint.
+		/// </summary>
+		public bool FileExists(FileExistsData data)
+		{
+			if (!(data is WebFileExistsData args))
+				throw new ArgumentException("SharePointHandler requires WebFileExistsData.", nameof(data));
 
-                    if (string.IsNullOrEmpty(parentPath) || parentPath == ".")
-                    {
-                        // Create at root
-                        await _graphClient
-                            .Sites[_site.Id]
-                            .Drives[_drive.Id]
-                            .Root
-                            .Children
-                            .Request()
-                            .AddAsync(folder);
-                    }
-                    else
-                    {
-                        // Create under parent folder
-                        await _graphClient
-                            .Sites[_site.Id]
-                            .Drives[_drive.Id]
-                            .Root
-                            .ItemWithPath(parentPath)
-                            .Children
-                            .Request()
-                            .AddAsync(folder);
-                    }
-                }
-                catch (Exception e)
-                {
-                    throw new IOException(e.ToString());
-                }
-            }
-        }
+			var directory = args.Directory;
+			var name = args.Name;
 
-        /// <summary>
-        /// Extracts the innermost meaningful message from an exception.
-        /// </summary>
-        private string ExtractMessage(Exception ex)
-        {
-            Exception current = ex;
-            string lastMessage = ex.Message;
+			return FileExistsAsync(directory, name)
+				.GetAwaiter()
+				.GetResult();
+		}
 
-            while (current != null)
-            {
-                lastMessage = current.Message;
+		/// <summary>
+		/// Uploads a file from disk to SharePoint.
+		/// </summary>
+		public string UploadFile(UploadData data)
+		{
+			if (!(data is WebFileUploadData args))
+				throw new ArgumentException("SharePointHandler requires WebFileUploadData.", nameof(data));
 
-                if (current is Microsoft.Identity.Client.MsalServiceException)
-                {
-                    return current.Message;
-                }
+			var category = args.Category;
+			var filePath = args.FilePath;
+			var name = args.Name;
 
-                current = current.InnerException;
-            }
+			return UploadFileAsync(category.UploadPath, filePath, name)
+				.GetAwaiter()
+				.GetResult();
+		}
 
-            return lastMessage;
-        }
+		/// <summary>
+		/// Uploads an image to SharePoint as a JPEG file.
+		/// </summary>
+		public void UploadImage(Bitmap image, string directory, string name)
+		{
+			UploadImageAsync(image, directory, name)
+				.GetAwaiter()
+				.GetResult();
+		}
 
-        #endregion
-    }
+		#endregion
+
+		#region Private
+
+		/// <summary>
+		/// Reads a single logical page of SharePoint files.
+		/// </summary>
+		private List<IDocHubFile> ReadPage(ReadData data)
+		{
+			// Validate and cast input
+			var args = data as WebFileReadData;
+			if (args == null)
+				throw new ArgumentException("SharePointHandler requires WebFileReadData.", nameof(data));
+
+			var spContext = args.Context as SharePointPageData;
+			if (spContext == null)
+				throw new ArgumentException("SharePointHandler requires SharePointPageContext.", nameof(args.Context));
+
+			var category = args.Category;
+			var filter = args.Filter;
+
+			// Initialize category root exactly once (replace initial "root" sentinel)
+			if (category != null
+				&& spContext.FolderQueue.Count == 1
+				&& spContext.FolderQueue.Peek() == "root"
+				&& spContext.NextPageRequest == null)
+			{
+				var folder = _graphClient
+					.Sites[_site.Id]
+					.Drives[_drive.Id]
+					.Root
+					.ItemWithPath(category.UploadPath)
+					.Request()
+					.GetAsync()
+					.GetAwaiter()
+					.GetResult();
+
+				if (folder == null || folder.Folder == null)
+					throw new InvalidOperationException("Could not find folder with path /" + category.UploadPath);
+
+				// Do NOT replace the queue instance (other code may hold references)
+				spContext.FolderQueue.Clear();
+				spContext.FolderQueue.Enqueue(folder.Id);
+			}
+
+			// End-of-traversal: no folders, no Graph pages, no buffered items
+			if (spContext.FolderQueue.Count == 0
+				&& spContext.NextPageRequest == null
+				&& spContext.PageRemainderBuffer.Count == 0)
+			{
+				return new List<IDocHubFile>();
+			}
+
+			// Fetch next logical page (Graph paging + remainder buffer)
+			var driveItems = FetchNextPageInternal(filter, spContext);
+
+			// Wrap DriveItems in adapter objects
+			var result = new List<IDocHubFile>(driveItems.Count);
+			foreach (var item in driveItems)
+			{
+				result.Add(new DriveItemAdapter
+				{
+					DriveItem = item,
+				});
+			}
+
+			return result;
+		}
+
+		/// <summary>
+		/// Retrieves the next logical page of DriveItems while recursively traversing folders.
+		/// </summary>
+		/// <remarks>
+		/// ⚠ Paging Pitfall:
+		/// Microsoft Graph returns pages per folder. When combining folders into a global page,
+		/// partially consumed Graph pages MUST be buffered or files will be skipped.
+		/// </remarks>
+		private IList<DriveItem> FetchNextPageInternal(string filter, SharePointPageData context)
+		{
+			var collected = new List<DriveItem>(context.PageSize);
+
+			// Drain buffered items from previous partial Graph page
+			while (collected.Count < context.PageSize && context.PageRemainderBuffer.Count > 0)
+			{
+				collected.Add(context.PageRemainderBuffer.Dequeue());
+			}
+
+			// Continue traversal until page is full or no more data exists
+			while (collected.Count < context.PageSize &&
+				   (context.FolderQueue.Count > 0 || context.NextPageRequest != null))
+			{
+				// Start paging a new folder if required
+				if (context.NextPageRequest == null)
+				{
+					var folderId = context.FolderQueue.Dequeue();
+
+					context.NextPageRequest = _graphClient
+						.Drives[_drive.Id]
+						.Items[folderId]
+						.Children
+						.Request()
+						.Top(context.PageSize);
+				}
+
+				// Execute Graph request
+				var page = context.NextPageRequest.GetAsync().GetAwaiter().GetResult();
+				context.NextPageRequest = page.NextPageRequest;
+
+				// Queue discovered subfolders
+				foreach (var folder in page.CurrentPage.Where(i => i.Folder != null))
+					context.FolderQueue.Enqueue(folder.Id);
+
+				// Filter only file items
+				var files = page.CurrentPage
+					.Where(i => i.File != null &&
+								(string.IsNullOrEmpty(filter) ||
+								 i.Name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0))
+					.ToList();
+
+				// Fill logical page and buffer remaining items
+				foreach (var file in files)
+				{
+					if (collected.Count < context.PageSize)
+						collected.Add(file);
+					else
+						context.PageRemainderBuffer.Enqueue(file);
+				}
+			}
+
+			return collected;
+		}
+
+		/// <summary>
+		/// Checks if a file exists asynchronously.
+		/// </summary>
+		private async Task<bool> FileExistsAsync(string directory, string name)
+		{
+			try
+			{
+				var driveItem = await _graphClient
+					.Sites[_site.Id]
+					.Drives[_drive.Id]
+					.Root
+					.ItemWithPath($"{directory}/{name}")
+					.Request()
+					.GetAsync();
+
+				return true;
+			}
+			catch (ServiceException ex)
+			{
+				if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+					return false;
+
+				throw;
+			}
+		}
+
+		/// <summary>
+		/// Uploads a file to SharePoint and returns the resulting Web URL.
+		/// </summary>
+		private async Task<string> UploadFileAsync(string directory, string filepath, string name)
+		{
+			try
+			{
+				// Ensure folder structure exists
+				await EnsureFolderPathExistsAsync(directory);
+
+				using (var stream = File.OpenRead(filepath))
+				{
+					var path = $"{directory.TrimEnd('/')}/{name}";
+
+					var item = await _graphClient
+						.Sites[_site.Id]
+						.Drives[_drive.Id]
+						.Root
+						.ItemWithPath(path)
+						.Content
+						.Request()
+						.PutAsync<DriveItem>(stream);
+
+					return item?.WebUrl;
+				}
+			}
+			catch (Exception e)
+			{
+				throw new IOException(ExtractMessage(e));
+			}
+		}
+
+		/// <summary>
+		/// Uploads a bitmap image as JPEG to SharePoint.
+		/// </summary>
+		private async Task UploadImageAsync(Bitmap image, string directory, string name)
+		{
+			try
+			{
+				MemoryStream jpegStream = new MemoryStream();
+
+				// Serialize image to memory
+				image.Save(jpegStream, ImageFormat.Jpeg);
+				jpegStream.Position = 0;
+
+				var item = await _graphClient
+					.Sites[_site.Id]
+					.Drives[_drive.Id]
+					.Root
+					.ItemWithPath($"{name}.jpeg")
+					.Content
+					.Request()
+					.PutAsync<DriveItem>(jpegStream);
+			}
+			catch (Exception e)
+			{
+				throw new IOException(ExtractMessage(e));
+			}
+		}
+
+		/// <summary>
+		/// Ensures that a folder hierarchy exists in SharePoint, creating missing folders as needed.
+		/// </summary>
+		private async Task EnsureFolderPathExistsAsync(string directory)
+		{
+			var segments = directory.Trim('/').Split('/');
+
+			string currentPath = string.Empty;
+			foreach (var segment in segments)
+			{
+				currentPath = string.IsNullOrEmpty(currentPath) ? segment : $"{currentPath}/{segment}";
+
+				try
+				{
+					// Check if folder exists
+					await _graphClient
+						.Sites[_site.Id]
+						.Drives[_drive.Id]
+						.Root
+						.ItemWithPath(currentPath)
+						.Request()
+						.GetAsync();
+				}
+				catch (ServiceException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+				{
+					// Folder missing -> create it
+					var parentPath = Path.GetDirectoryName(currentPath).Replace("\\", "/");
+					var folderName = Path.GetFileName(currentPath);
+
+					var folder = new DriveItem
+					{
+						Name = folderName,
+						Folder = new Folder(),
+					};
+
+					if (string.IsNullOrEmpty(parentPath) || parentPath == ".")
+					{
+						await _graphClient
+							.Sites[_site.Id]
+							.Drives[_drive.Id]
+							.Root
+							.Children
+							.Request()
+							.AddAsync(folder);
+					}
+					else
+					{
+						await _graphClient
+							.Sites[_site.Id]
+							.Drives[_drive.Id]
+							.Root
+							.ItemWithPath(parentPath)
+							.Children
+							.Request()
+							.AddAsync(folder);
+					}
+				}
+				catch (Exception e)
+				{
+					throw new IOException(e.ToString());
+				}
+			}
+		}
+
+		private string RetrieveClientSecret()
+		{
+			string path = @"C:\Skyline DataMiner\Security\DocumentHub\graphsecret.dat";
+
+			if (!File.Exists(path))
+				throw new FileNotFoundException("Secret file not found", path);
+
+			string encrypted = File.ReadAllText(path);
+			string clientSecret = DPAPIHelper.Decrypt(encrypted);
+
+			return clientSecret;
+		}
+
+		/// <summary>
+		/// Extracts the most meaningful message from nested exceptions.
+		/// </summary>
+		private string ExtractMessage(Exception ex)
+		{
+			Exception current = ex;
+			string lastMessage = ex.Message;
+
+			while (current != null)
+			{
+				lastMessage = current.Message;
+
+				if (current is Microsoft.Identity.Client.MsalServiceException)
+				{
+					return current.Message;
+				}
+
+				current = current.InnerException;
+			}
+
+			return lastMessage;
+		}
+
+		#endregion
+	}
 }

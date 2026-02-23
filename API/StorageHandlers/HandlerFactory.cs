@@ -1,9 +1,10 @@
 ﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
 {
 	using System;
-    using System.Collections.Generic;
-    using System.Drawing;
-    using Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub;
+	using System.Collections.Generic;
+	using Skyline.DataMiner.Net;
+    using Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers;
+    using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.FileAdapters;
     using static DomHelpers.SlcDocumenthub.SlcDocumenthubIds.Enums;
 
 	#region Interface
@@ -20,46 +21,36 @@
 		/// <summary>
 		/// Checks whether a file with the specified name already exists in the given directory.
 		/// </summary>
-		/// <param name="directory">The target directory or storage path.</param>
-		/// <param name="name">The name of the file to check.</param>
-		/// <returns><c>true</c> if the file exists; otherwise, <c>false</c>.</returns>
-		bool FileExists(string directory, string name);
+		/// <param name="data">
+		/// The storage handler data containing directory and file name information.
+		/// </param>
+		/// <returns>
+		/// <c>true</c> if the file exists; otherwise, <c>false</c>.
+		/// </returns>
+		bool FileExists(FileExistsData data);
 
 		/// <summary>
-		/// Uploads an image to the target directory or storage system.
+		/// Uploads a file from a specified local path to the target directory or storage system.
 		/// </summary>
-		/// <param name="image">The <see cref="Bitmap"/> image to upload.</param>
-		/// <param name="directory">The destination directory or storage path.</param>
-		/// <param name="name">The name to assign to the uploaded image file.</param>
-		void UploadImage(Bitmap image, string directory, string name);
+		/// <param name="data">
+		/// The storage handler data containing file and target information.
+		/// </param>
+		/// <returns>
+		/// The relative path of the uploaded file.
+		/// </returns>
+		string UploadFile(UploadData data);
 
-        /// <summary>
-        /// Uploads a file from a specified local path to the target directory or storage system.
-        /// </summary>
-        /// <param name="filePath">The full local path of the file to upload.</param>
-        /// <param name="directory">The destination directory or storage path.</param>
-        /// <param name="name">The name to assign to the uploaded file.</param>
-        /// <returns>The relative path of the uploaded file.</returns>
-        string UploadFile(string filePath, string directory, string name);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="category"></param>
-        /// <param name="filter"></param>
-        /// <returns></returns>
-        List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="category"></param>
-        /// <param name="filter"></param>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        List<IDocHubFile> ReadFiles(Models.DocumentCategory category, string filter, DocHubPageData context);
+		/// <summary>
+		/// Reads files from the storage based on the specified category and filter.
+		/// </summary>
+		/// <param name="data">
+		/// The storage handler data containing category and filter information.
+		/// </param>
+		/// <returns>
+		/// A list of <see cref="IDocHubFile"/> objects representing the files read from storage.
+		/// </returns>
+		List<IDocHubFile> ReadFiles(ReadData data);
 	}
-
 	#endregion
 
 	#region Factory
@@ -75,25 +66,40 @@
 	/// </remarks>
 	internal static class StorageHandlerFactory
 	{
-        /// <summary>
-        /// Creates a new instance of a storage handler that matches the specified <see cref="Storage"/> type.
-        /// </summary>
-        /// <param name="storage"></param>
-        /// <param name="helpers"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentException"></exception>
-        internal static IStorageHandler Create(Storagetype storage, DataHelpersDocumentHub helpers)
+		/// <summary>
+		/// Creates a new instance of a storage handler that matches the specified <see cref="Storage"/> type.
+		/// </summary>
+		/// <param name="storage">
+		/// The type of storage for which to create a handler.
+		/// </param>
+		/// <param name="helpers">
+		/// The document hub helpers instance to be used by the storage handler.
+		/// </param>
+		/// <param name="connection">
+		/// An active DataMiner connection used to communicate with the system.
+		/// </param>
+		/// <returns>
+		/// An instance of <see cref="IStorageHandler"/> corresponding to the specified storage type.
+		/// </returns>
+		/// <exception cref="ArgumentException">
+		/// Thrown if no handler is registered for the specified storage type.
+		/// </exception>
+		internal static IStorageHandler Create(Storagetype storage, DataHelpersDocumentHub helpers, IConnection connection)
 		{
 			// Select the appropriate storage handler based on the given storage type.
 			switch (storage)
 			{
 				case Storagetype.Sharepoint:
 					// SharePoint-based storage implementation.
-					return new SharePointHandler(helpers);
+					return new SharePointHandler(helpers, connection);
 
 				case Storagetype.Local:
 					// Local file system storage implementation.
-					return new LocalHandler();
+					return new LocalHandler(connection);
+
+				case Storagetype.DOM:
+					// DataMiner Object Model attachments storage implementation.
+					return new DOMAttachmentsHandler(connection);
 
 				default:
 					// Throw an exception if no matching handler exists.
@@ -101,6 +107,5 @@
 			}
 		}
 	}
-
 	#endregion
 }
