@@ -139,7 +139,7 @@
 
 			// Check for existing file to prevent overwriting.
 			string extension = Path.GetExtension(filePath);
-			if (storageHandler.FileExists(new DOMFileExistsData
+			if (storageHandler.FileExists(new DomFileExistsData
 			{
 				Category = category,
 				DomInstanceId = domInstanceId,
@@ -150,7 +150,7 @@
 			}
 
 			// Upload the file using the storage handler.
-			return storageHandler.UploadFile(new DOMFileUploadData
+			return storageHandler.UploadFile(new DomFileUploadData
 			{
 				Category = category,
 				DomInstanceId = domInstanceId,
@@ -190,7 +190,7 @@
 		public List<IDocHubFile> ReadFiles(Storagetype storageType, DocHubPageData context = null, string filter = null)
 		{
 			ReadData data = storageType == Storagetype.DOM
-				? (ReadData)new DOMFileReadData()
+				? (ReadData)new DomFileReadData()
 				: new WebFileReadData();
 
 			data.Filter = filter;
@@ -233,7 +233,7 @@
 				throw new ArgumentNullException(nameof(category));
 
 			ReadData data = category.StorageType == Storagetype.DOM
-				? (ReadData)new DOMFileReadData()
+				? (ReadData)new DomFileReadData()
 				: new WebFileReadData();
 
 			data.Category = category;
@@ -279,7 +279,7 @@
 		/// ReadFiles(source, ids, context: pageData);
 		/// </code>
 		/// </remarks>
-		public List<IDocHubFile> ReadFiles(Models.Sources.DOMSource source, IEnumerable<Guid> domInstanceIds, DocHubPageData context = null, string filter = null)
+		public List<IDocHubFile> ReadFiles(Models.Sources.DomSource source, IEnumerable<Guid> domInstanceIds, DocHubPageData context = null, string filter = null)
 		{
 			if (source == null)
 				throw new ArgumentNullException(nameof(source));
@@ -288,7 +288,7 @@
 			if (domInstanceIds == null)
 				throw new ArgumentNullException(nameof(domInstanceIds));
 
-			ReadData data = new DOMFileReadData
+			ReadData data = new DomFileReadData
 			{
 				Module = source.Module,
 				DomInstanceIds = domInstanceIds.ToList(),

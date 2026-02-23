@@ -23,7 +23,7 @@
 	{
 	}
 
-	internal class DOMFileUploadData : UploadData
+	internal class DomFileUploadData : UploadData
 	{
 		public Guid DomInstanceId { get; set; }
 	}
@@ -43,7 +43,7 @@
 	{
 	}
 
-	internal class DOMFileReadData : ReadData
+	internal class DomFileReadData : ReadData
 	{
 		public string Module { get; set; }
 
@@ -62,7 +62,7 @@
 		public string Directory { get; set; }
 	}
 
-	internal class DOMFileExistsData : FileExistsData
+	internal class DomFileExistsData : FileExistsData
 	{
 		public Models.DocumentCategory Category { get; set; }
 

@@ -33,7 +33,7 @@
 		/// <returns>
 		/// A list of DOM sources.
 		/// </returns>
-		public List<Models.Sources.DOMSource> GetDomSources()
+		public List<Models.Sources.DomSource> GetDomSources()
 		{
 			return Helpers.DOMSources.Read();
 		}
@@ -45,21 +45,21 @@
 		/// A collection of <see cref="Guid"/> values representing the IDs of the DOM sources to retrieve.
 		/// </param>
 		/// <returns>
-		/// An <see cref="IEnumerable{T}"/> of <see cref="Models.Sources.DOMSource"/> containing
+		/// An <see cref="IEnumerable{T}"/> of <see cref="Models.Sources.DomSource"/> containing
 		/// all DOM sources that match the provided IDs. The returned collection may be empty if no matches are found.
 		/// </returns>
 		/// <exception cref="ArgumentNullException">
 		/// Thrown if <paramref name="ids"/> is null.
 		/// </exception>
-		public IEnumerable<Models.Sources.DOMSource> GetDomSources(IEnumerable<Guid> ids)
+		public IEnumerable<Models.Sources.DomSource> GetDomSources(IEnumerable<Guid> ids)
 		{
 			if (ids == null)
 				throw new ArgumentNullException(nameof(ids));
 
-			FilterElement<Models.Sources.DOMSource> filter = new ORFilterElement<Models.Sources.DOMSource>();
+			FilterElement<Models.Sources.DomSource> filter = new ORFilterElement<Models.Sources.DomSource>();
 			foreach (var id in ids)
 			{
-				filter = filter.OR(DOMSourceExposers.Id.Equal(id));
+				filter = filter.OR(DomSourceExposers.Id.Equal(id));
 			}
 
 			return Helpers.DOMSources.Read(filter);
@@ -70,17 +70,17 @@
 		/// </summary>
 		/// <param name="filter">
 		/// A <see cref="FilterElement{T}"/> used to specify the criteria for retrieving DOM sources.
-		/// The filter can be composed using the <see cref="DOMSourceExposers"/> class to create conditions
+		/// The filter can be composed using the <see cref="DomSourceExposers"/> class to create conditions
 		/// on DOM source properties, such as ID and Name.
 		/// </param>
 		/// <returns>
-		/// A <see cref="List{T}"/> of <see cref="Models.Sources.DOMSource"/> containing all DOM sources
+		/// A <see cref="List{T}"/> of <see cref="Models.Sources.DomSource"/> containing all DOM sources
 		/// that match the provided filter criteria. The list may be empty if no matches are found.
 		/// </returns>
 		/// <exception cref="ArgumentNullException">
 		/// Thrown if <paramref name="filter"/> is null.
 		/// </exception>
-		public List<Models.Sources.DOMSource> GetDomSources(FilterElement<Models.Sources.DOMSource> filter)
+		public List<Models.Sources.DomSource> GetDomSources(FilterElement<Models.Sources.DomSource> filter)
 		{
 			if (filter == null)
 				throw new ArgumentNullException(nameof(filter));

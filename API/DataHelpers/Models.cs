@@ -61,7 +61,7 @@
 			/// <summary>
 			/// Configuration required to connect to a DOM Attachment file storage.
 			/// </summary>
-			public class DOMSource : IDocHubSource
+			public class DomSource : IDocHubSource
 			{
 				/// <summary>
 				/// Gets or sets the unique identifier for the entity.
@@ -136,7 +136,7 @@
 			/// <summary>
 			/// Gets or sets a reference to the associated DOM Source with this category.
 			/// </summary>
-			public Models.Sources.DOMSource DOMSource { get; set; }
+			public Models.Sources.DomSource DOMSource { get; set; }
 
 			/// <summary>
 			/// Gets or sets a string value indicating the definition associated with this category.

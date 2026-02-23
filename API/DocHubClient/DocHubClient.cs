@@ -10,11 +10,6 @@
     public class DocHubClient
 	{
 		/// <summary>
-		/// The DataMiner connection used for communication with the system.
-		/// </summary>
-		private readonly IConnection _connection;
-
-		/// <summary>
 		/// Initializes a new instance of the <see cref="DocHubClient"/> class.
 		/// Initializes a new DocumentHub client using an active DataMiner connection.
 		/// </summary>
@@ -23,11 +18,10 @@
 		/// </param>
 		public DocHubClient(IConnection connection)
 		{
-			_connection = connection;
-			Helpers = new DataHelpersDocumentHub(_connection);
+			Helpers = new DataHelpersDocumentHub(connection);
 
 			Categories = new Categories(Helpers);
-			Files = new Files(Helpers, _connection);
+			Files = new Files(Helpers, connection);
 			Sources = new Sources(Helpers);
 		}
 

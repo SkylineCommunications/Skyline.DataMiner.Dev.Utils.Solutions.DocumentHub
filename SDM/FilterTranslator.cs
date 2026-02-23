@@ -15,8 +15,8 @@
 			[CategoryExposers.Name.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcDocumenthubIds.Sections.CategoryInfo.Name), comparer, (string)value),
 			[CategoryExposers.StorageType.fieldName] = (comparer, value) => HandleEnum<SlcDocumenthubIds.Enums.Storagetype>(comparer, value),
 			[SharePointExposers.Id.fieldName] = HandleGuid,
-			[DOMSourceExposers.Id.fieldName] = HandleGuid,
-			[DOMSourceExposers.Name.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcDocumenthubIds.Sections.DOMSourceInfo.Name), comparer, (string)value),
+			[DomSourceExposers.Id.fieldName] = HandleGuid,
+			[DomSourceExposers.Name.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcDocumenthubIds.Sections.DOMSourceInfo.Name), comparer, (string)value),
 		};
 
 		/// <summary>

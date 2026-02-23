@@ -28,7 +28,7 @@
 
 			if (item.DOMSource != null)
 			{
-				var domSourceHelper = new DataHelperDOMSource(_connection);
+				var domSourceHelper = new DataHelperDomSource(_connection);
 				instance.CategoryInfo.Domsource = domSourceHelper.CreateOrUpdate(item.DOMSource);
 			}
 
@@ -61,12 +61,12 @@
 				return new List<Models.DocumentCategory>();
 			}
 
-			List<Models.Sources.DOMSource> domSources = GetRequiredDomSources(instances);
+			List<Models.Sources.DomSource> domSources = GetRequiredDomSources(instances);
 
 			return instances.Select(
 				x =>
 				{
-					Models.Sources.DOMSource domSource = null;
+					Models.Sources.DomSource domSource = null;
 					if (x.CategoryInfo.Domsource != null && x.CategoryInfo.Domsource != Guid.Empty)
 					{
 						domSource = domSources.Find(o => o.ID == x.CategoryInfo.Domsource);
@@ -88,7 +88,7 @@
 				.ToList();
 		}
 
-		private List<Models.Sources.DOMSource> GetRequiredDomSources(IEnumerable<DocumentCategoryInstance> instances)
+		private List<Models.Sources.DomSource> GetRequiredDomSources(IEnumerable<DocumentCategoryInstance> instances)
 		{
 			var guids = instances
 				.Select(i => i.CategoryInfo.Domsource)
@@ -96,15 +96,15 @@
 				.Select(g => g.Value);
 
 			if (!guids.Any())
-				return new List<Models.Sources.DOMSource>();
+				return new List<Models.Sources.DomSource>();
 
 			var filter = guids
-				.Select(g => DOMSourceExposers.Id.Equal(g))
+				.Select(g => DomSourceExposers.Id.Equal(g))
 				.Aggregate(
-					(FilterElement<Models.Sources.DOMSource>)null,
+					(FilterElement<Models.Sources.DomSource>)null,
 					(f, e) => f == null ? e : f.OR(e));
 
-			return new DataHelperDOMSource(_connection).Read(filter);
+			return new DataHelperDomSource(_connection).Read(filter);
 		}
 
 	}

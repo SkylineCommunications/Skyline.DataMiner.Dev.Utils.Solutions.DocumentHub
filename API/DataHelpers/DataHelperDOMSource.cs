@@ -7,13 +7,13 @@
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 
-	internal class DataHelperDOMSource : DataHelper<Models.Sources.DOMSource>
+	internal class DataHelperDomSource : DataHelper<Models.Sources.DomSource>
 	{
-		internal DataHelperDOMSource(IConnection connection) : base(connection, SlcDocumenthubIds.Definitions.Domsource)
+		internal DataHelperDomSource(IConnection connection) : base(connection, SlcDocumenthubIds.Definitions.Domsource)
 		{
 		}
 
-		internal override Guid CreateOrUpdate(Models.Sources.DOMSource item)
+		internal override Guid CreateOrUpdate(Models.Sources.DomSource item)
 		{
 			var instance = new DomsourceInstance(New(item.ID));
 			instance.DOMSourceInfo.Name = item.Name;
@@ -24,7 +24,7 @@
 			return CreateOrUpdateInstance(instance);
 		}
 
-		internal override bool TryDelete(IEnumerable<Models.Sources.DOMSource> items)
+		internal override bool TryDelete(IEnumerable<Models.Sources.DomSource> items)
 		{
 			if (items == null)
 			{
@@ -42,18 +42,18 @@
 			return b;
 		}
 
-		internal override List<Models.Sources.DOMSource> Read(IEnumerable<DomInstance> domInstances)
+		internal override List<Models.Sources.DomSource> Read(IEnumerable<DomInstance> domInstances)
 		{
 			var instances = domInstances.Select(x => new DomsourceInstance(x)).ToList();
 			if (instances.Count < 1)
 			{
-				return new List<Models.Sources.DOMSource>();
+				return new List<Models.Sources.DomSource>();
 			}
 
 			return instances
 				.Select(x =>
 				{
-					return new Models.Sources.DOMSource
+					return new Models.Sources.DomSource
 					{
 						ID = x.ID.Id,
 						Name = x.DOMSourceInfo.Name,

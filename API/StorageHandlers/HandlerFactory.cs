@@ -99,7 +99,7 @@
 
 				case Storagetype.DOM:
 					// DataMiner Object Model attachments storage implementation.
-					return new DOMAttachmentsHandler(connection);
+					return new DomAttachmentsHandler(connection);
 
 				default:
 					// Throw an exception if no matching handler exists.

@@ -8,13 +8,13 @@
 		{
 			DocumentCategories = new DataHelperCategory(connection);
 			SharePointConfigurations = new DataHelperSharePointConfiguration(connection);
-			DOMSources = new DataHelperDOMSource(connection);
+			DOMSources = new DataHelperDomSource(connection);
 		}
 
 		internal DataHelperCategory DocumentCategories { get; }
 
 		internal DataHelperSharePointConfiguration SharePointConfigurations { get; }
 
-		internal DataHelperDOMSource DOMSources { get; set; }
+		internal DataHelperDomSource DOMSources { get; set; }
 	}
 }

@@ -14,21 +14,21 @@
     /// <summary>
     /// Storage handler for reading, paging, and uploading files from DOM instances.
     /// </summary>
-    internal class DOMAttachmentsHandler : IStorageHandler
+    internal class DomAttachmentsHandler : IStorageHandler
 	{
 		private readonly IConnection _connection;
-		private readonly DataHelperDOMSource _dataHelperDomSource;
+		private readonly DataHelperDomSource _dataHelperDomSource;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="DOMAttachmentsHandler"/> class.
+		/// Initializes a new instance of the <see cref="DomAttachmentsHandler"/> class.
 		/// </summary>
 		/// <param name="connection">
 		/// The active DataMiner connection to use for DOM operations.
 		/// </param>
-		public DOMAttachmentsHandler(IConnection connection)
+		public DomAttachmentsHandler(IConnection connection)
 		{
 			_connection = connection;
-			_dataHelperDomSource = new DataHelperDOMSource(connection);
+			_dataHelperDomSource = new DataHelperDomSource(connection);
 		}
 
 		#region Public Methods
@@ -43,11 +43,11 @@
 		/// <c>true</c> if the file exists; otherwise <c>false</c>.
 		/// </returns>
 		/// <exception cref="ArgumentException">
-		/// Thrown if the <paramref name="data"/> is not of type <see cref="DOMFileExistsData"/>.
+		/// Thrown if the <paramref name="data"/> is not of type <see cref="DomFileExistsData"/>.
 		/// </exception>
 		public bool FileExists(FileExistsData data)
 		{
-			if (!(data is DOMFileExistsData args))
+			if (!(data is DomFileExistsData args))
 				throw new ArgumentException("DOMAttachmentsHandler requires DOMFileExistsData.", nameof(data));
 
 			var category = args.Category;
@@ -74,11 +74,11 @@
 		/// List of <see cref="IDocHubFile"/> representing the files found.
 		/// </returns>
 		/// <exception cref="ArgumentException">
-		/// Thrown if the <paramref name="data"/> is not of type <see cref="DOMFileReadData"/>.
+		/// Thrown if the <paramref name="data"/> is not of type <see cref="DomFileReadData"/>.
 		/// </exception>
 		public List<IDocHubFile> ReadFiles(ReadData data)
 		{
-			if (!(data is DOMFileReadData args))
+			if (!(data is DomFileReadData args))
 				throw new ArgumentException("DOMAttachmentsHandler requires DOMFileReadData.", nameof(data));
 
 			// If a paging context is already provided, read a single page
@@ -110,11 +110,11 @@
 		/// The ID of the DOM instance as a string.
 		/// </returns>
 		/// <exception cref="ArgumentException">
-		/// Thrown if <paramref name="data"/> is not of type <see cref="DOMFileUploadData"/>.
+		/// Thrown if <paramref name="data"/> is not of type <see cref="DomFileUploadData"/>.
 		/// </exception>
 		public string UploadFile(UploadData data)
 		{
-			if (!(data is DOMFileUploadData args))
+			if (!(data is DomFileUploadData args))
 				throw new ArgumentException("DOMAttachmentsHandler requires DOMFileUploadData.", nameof(data));
 
 			var filePath = args.FilePath;
@@ -142,11 +142,11 @@
 		/// List of <see cref="IDocHubFile"/> representing a single page of files.
 		/// </returns>
 		/// <exception cref="ArgumentException">
-		/// Thrown if <paramref name="data"/> is not <see cref="DOMFileReadData"/> or if <paramref name="data.Context"/> is not <see cref="DOMPageData"/>.
+		/// Thrown if <paramref name="data"/> is not <see cref="DomFileReadData"/> or if <paramref name="data.Context"/> is not <see cref="DOMPageData"/>.
 		/// </exception>
 		public List<IDocHubFile> ReadPage(ReadData data)
 		{
-			if (!(data is DOMFileReadData args))
+			if (!(data is DomFileReadData args))
 				throw new ArgumentException("DOMAttachmentsHandler requires DOMFileReadData.", nameof(data));
 
 			if (!(args.Context is DOMPageData pagingHelper))
@@ -191,7 +191,7 @@
 			if (pagingHelper.ModuleIndex >= pagingHelper.Modules.Count)
 				pagingHelper.Done = true;
 
-			return results.Cast<IDocHubFile>().ToList();
+			return results.ToList();
 		}
 		#endregion
 
@@ -200,7 +200,7 @@
 		/// <summary>
 		/// Initializes the module list in the page context.
 		/// </summary>
-		private void InitializeModules(DOMFileReadData args, DOMPageData page)
+		private void InitializeModules(DomFileReadData args, DOMPageData page)
 		{
 			if (page.Modules != null)
 				return;
@@ -305,7 +305,7 @@
 		/// Builds a DOM instance filter from category definition and/or instance IDs.
 		/// Returns a TRUE filter when no filtering criteria are provided.
 		/// </summary>
-		private FilterElement<DomInstance> BuildInstanceFilter(DOMFileReadData data)
+		private FilterElement<DomInstance> BuildInstanceFilter(DomFileReadData data)
 		{
 			FilterElement<DomInstance> filter = new TRUEFilterElement<DomInstance>();
 
@@ -334,7 +334,7 @@
 		/// <summary>
 		/// Retrieves all available DOM module names from the data helper.
 		/// </summary>
-		private IEnumerable<string> GetAllSources(DataHelperDOMSource helper)
+		private IEnumerable<string> GetAllSources(DataHelperDomSource helper)
 		{
 			return helper.Read().Select(s => s.Module);
 		}
