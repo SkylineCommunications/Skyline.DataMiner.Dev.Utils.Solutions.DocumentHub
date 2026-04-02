@@ -158,6 +158,103 @@
 				Name = $"{name}{extension}",
 			});
 		}
+
+		/// <summary>
+		/// Uploads a file to the storage location configured in the given document category,
+		/// allowing the caller to further qualify the category's UploadPath with an additional relative segment.
+		/// Useful for adding a subfolder or logical qualifier without mutating the original category.
+		/// </summary>
+		/// <param name="category">
+		/// The document category defining the storage type and base upload path.
+		/// </param>
+		/// <param name="filePath">
+		/// The full local path of the file to upload.
+		/// </param>
+		/// <param name="uploadPathQualifier">
+		/// Additional relative path segment to append to the category's UploadPath.
+		/// May be null or empty to behave the same as <see cref="UploadFile(Models.DocumentCategory,string,string)"/>.
+		/// </param>
+		/// <param name="name">
+		/// Optional custom file name without extension.
+		/// If null, the original file name is used.
+		/// </param>
+		/// <returns>
+		/// The path or identifier of the uploaded file.
+		/// </returns>
+		/// <exception cref="ArgumentNullException">
+		/// Thrown when <paramref name="category"/> or <paramref name="filePath"/> is null.
+		/// </exception>
+		/// <exception cref="InvalidOperationException">
+		/// Thrown when called for DOM storage (use the DOM overload) or when a file with the same name already exists.
+		/// </exception>
+		public string UploadFile(Models.DocumentCategory category, string filePath, string uploadPathQualifier, string name = null)
+		{
+			if (category == null)
+				throw new ArgumentNullException(nameof(category));
+			if (filePath == null)
+				throw new ArgumentNullException(nameof(filePath));
+
+			// This overload is intended for web-like storage backends that use UploadPath.
+			// DOM storage uses DOM instances instead; instruct caller to use the DOM overload.
+			if (category.StorageType == Storagetype.DOM)
+				throw new InvalidOperationException("This overload is not supported for DOM storage. Use UploadFile(category, filePath, domInstanceId, name) instead.");
+
+			var storageHandler = StorageHandlerFactory.Create(category.StorageType, Helpers, _connection);
+
+			if (string.IsNullOrEmpty(name))
+			{
+				name = Path.GetFileNameWithoutExtension(filePath);
+			}
+
+			string extension = Path.GetExtension(filePath);
+
+			// Build effective upload path (do not mutate original category).
+			string basePath = category.UploadPath ?? string.Empty;
+			basePath = basePath.TrimEnd('\\', '/');
+
+			string qualifier = uploadPathQualifier ?? string.Empty;
+			qualifier = qualifier.TrimStart('\\', '/');
+
+			string effectiveUploadPath;
+			if (string.IsNullOrEmpty(basePath))
+				effectiveUploadPath = qualifier;
+			else if (string.IsNullOrEmpty(qualifier))
+				effectiveUploadPath = basePath;
+			else
+				effectiveUploadPath = basePath + "/" + qualifier; // use forward slash as logical separator for remote stores
+
+			// Prevent overwriting existing file in the qualified path
+			if (storageHandler.FileExists(new WebFileExistsData
+			{
+				Directory = effectiveUploadPath,
+				Name = $"{name}{extension}",
+			}))
+			{
+				throw new InvalidOperationException($"The file '{name}' already exists.");
+			}
+
+			// Create a shallow copy of the category with the adjusted UploadPath so storage handlers see the qualified path.
+			var effectiveCategory = new Models.DocumentCategory
+			{
+				ID = category.ID,
+				Name = category.Name,
+				Description = category.Description,
+				UploadPath = effectiveUploadPath,
+				StorageType = category.StorageType,
+				Extensions = category.Extensions,
+				IsDefault = category.IsDefault,
+				DOMSource = category.DOMSource,
+				Definition = category.Definition,
+			};
+
+			// Upload using the adjusted category
+			return storageHandler.UploadFile(new WebFileUploadData
+			{
+				Category = effectiveCategory,
+				FilePath = filePath,
+				Name = $"{name}{extension}",
+			});
+		}
 		#endregion
 
 		#region Read
