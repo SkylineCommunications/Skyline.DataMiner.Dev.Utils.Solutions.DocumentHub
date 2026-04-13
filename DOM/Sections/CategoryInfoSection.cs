@@ -47,7 +47,7 @@
                 var wrapper = section.GetValue<String>(SlcDocumenthubIds.Sections.CategoryInfo.Name);
                 if (wrapper != null)
                 {
-                    return (String)wrapper.Value;
+                    return wrapper.Value;
                 }
                 else
                 {
@@ -63,7 +63,7 @@
                 }
                 else
                 {
-                    section.AddOrUpdateValue(SlcDocumenthubIds.Sections.CategoryInfo.Name, (String)value);
+                    section.AddOrUpdateValue(SlcDocumenthubIds.Sections.CategoryInfo.Name, value);
                 }
             }
         }
@@ -90,7 +90,7 @@
                 var wrapper = section.GetValue<String>(SlcDocumenthubIds.Sections.CategoryInfo.Uploadpath);
                 if (wrapper != null)
                 {
-                    return (String)wrapper.Value;
+                    return wrapper.Value;
                 }
                 else
                 {
@@ -106,7 +106,7 @@
                 }
                 else
                 {
-                    section.AddOrUpdateValue(SlcDocumenthubIds.Sections.CategoryInfo.Uploadpath, (String)value);
+                    section.AddOrUpdateValue(SlcDocumenthubIds.Sections.CategoryInfo.Uploadpath, value);
                 }
             }
         }
@@ -133,7 +133,7 @@
                 var wrapper = section.GetValue<String>(SlcDocumenthubIds.Sections.CategoryInfo.Description);
                 if (wrapper != null)
                 {
-                    return (String)wrapper.Value;
+                    return wrapper.Value;
                 }
                 else
                 {
@@ -149,7 +149,7 @@
                 }
                 else
                 {
-                    section.AddOrUpdateValue(SlcDocumenthubIds.Sections.CategoryInfo.Description, (String)value);
+                    section.AddOrUpdateValue(SlcDocumenthubIds.Sections.CategoryInfo.Description, value);
                 }
             }
         }
@@ -219,7 +219,7 @@
                 var wrapper = section.GetValue<String>(SlcDocumenthubIds.Sections.CategoryInfo.Extensions);
                 if (wrapper != null)
                 {
-                    return (String)wrapper.Value;
+                    return wrapper.Value;
                 }
                 else
                 {
@@ -235,7 +235,7 @@
                 }
                 else
                 {
-                    section.AddOrUpdateValue(SlcDocumenthubIds.Sections.CategoryInfo.Extensions, (String)value);
+                    section.AddOrUpdateValue(SlcDocumenthubIds.Sections.CategoryInfo.Extensions, value);
                 }
             }
         }
@@ -305,7 +305,7 @@
                 var wrapper = section.GetValue<String>(SlcDocumenthubIds.Sections.CategoryInfo.Definition);
                 if (wrapper != null)
                 {
-                    return (String)wrapper.Value;
+                    return wrapper.Value;
                 }
                 else
                 {
@@ -321,7 +321,7 @@
                 }
                 else
                 {
-                    section.AddOrUpdateValue(SlcDocumenthubIds.Sections.CategoryInfo.Definition, (String)value);
+                    section.AddOrUpdateValue(SlcDocumenthubIds.Sections.CategoryInfo.Definition, value);
                 }
             }
         }
