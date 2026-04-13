@@ -142,6 +142,6 @@
 			/// Gets or sets a string value indicating the definition associated with this category.
 			/// </summary>
 			public string Definition { get; set; }
-		}
+        }
 	}
 }

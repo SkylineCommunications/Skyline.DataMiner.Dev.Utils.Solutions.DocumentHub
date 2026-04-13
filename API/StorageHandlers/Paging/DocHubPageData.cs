@@ -1,22 +1,17 @@
 ﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Paging
 {
-	using System;
-	using System.Collections.Generic;
-	using System.IO;
-	using DomHelpers.SlcDocumenthub;
-	using Microsoft.Graph;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.ManagerStore;
+    using System;
+    using DomHelpers.SlcDocumenthub;
 
-	/// <summary>
-	/// Generic factory class that provides methods to create DocHub related objects.
-	/// </summary>
-	/// <remarks>
-	/// This static factory encapsulates the logic for selecting the appropriate
-	/// <see cref="DocHubPageData"/> implementation (for example, SharePoint or local storage)
-	/// and ensures that instances are initialized with sensible defaults.
-	/// </remarks>
-	public static class DocHubPageFactory
+    /// <summary>
+    /// Generic factory class that provides methods to create DocHub related objects.
+    /// </summary>
+    /// <remarks>
+    /// This static factory encapsulates the logic for selecting the appropriate
+    /// <see cref="DocHubPageData"/> implementation (for example, SharePoint or local storage)
+    /// and ensures that instances are initialized with sensible defaults.
+    /// </remarks>
+    public static class DocHubPageFactory
 	{
 		/// <summary>
 		/// Creates and initializes a <see cref="DocHubPageData"/> instance appropriate for the specified storage type..
@@ -93,165 +88,5 @@
 		///   <c>true</c> if there are more pages; otherwise, <c>false</c>.
 		/// </returns>
 		public abstract bool HasNextPage();
-	}
-
-	/// <summary>
-	/// Paging context used when reading files from SharePoint storage.
-	/// This context keeps track of the folder traversal state
-	/// and the SharePoint Graph paging request.
-	/// </summary>
-	public class SharePointPageData : DocHubPageData
-	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="SharePointPageData"/> class.
-		/// SharePointPageData constructor is internal.
-		/// SharePointPageData is created by factory.
-		/// </summary>
-		public SharePointPageData()
-		{
-		}
-
-		/// <summary>
-		/// Buffer for DriveItems that were retrieved from Microsoft Graph but could not fit into the
-		/// current logical page.
-		/// </summary>
-		public Queue<DriveItem> PageRemainderBuffer { get; } = new Queue<DriveItem>();
-
-		/// <summary>
-		/// Gets queue containing the identifiers of folders that still need to be traversed.
-		/// This is used internally to recursively enumerate folders across pages.
-		/// </summary>
-		public Queue<string> FolderQueue { get; internal set; } = new Queue<string>(new[] { "root" });
-
-		/// <summary>
-		/// Gets the Graph API request used to retrieve the next page of drive items.
-		/// When null, a new folder traversal request will be started.
-		/// </summary>
-		public IDriveItemChildrenCollectionRequest NextPageRequest { get; internal set; }
-
-		/// <summary>
-		/// Checks if there are more pages left.
-		/// </summary>
-		/// <returns>
-		///   <c>true</c> if there are more pages; otherwise, <c>false</c>.
-		/// </returns>
-		public override bool HasNextPage()
-		{
-			return FolderQueue.Count > 0
-				|| NextPageRequest != null
-				|| PageRemainderBuffer.Count > 0;
-		}
-	}
-
-	/// <summary>
-	/// Paging context used when reading files from local file system storage.
-	/// This context maintains the file enumeration state across paging calls.
-	/// </summary>
-	public class LocalPageData : DocHubPageData
-	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="LocalPageData"/> class.
-		/// LocalPageData constructor is internal.
-		/// LocalPageData is created by factory.
-		/// </summary>
-		internal LocalPageData()
-		{
-		}
-
-		/// <summary>
-		/// Gets enumerator used to iterate through files in the current directory tree.
-		/// The enumerator position is preserved between paging calls.
-		/// </summary>
-		public IEnumerator<FileInfo> FileEnumerator { get; internal set; }
-
-		/// <summary>
-		/// Gets the root directory currently being enumerated.
-		/// Used to detect changes in scope and reinitialize enumeration when needed.
-		/// </summary>
-		public string CurrentRoot { get; internal set; } = @"C:\Skyline DataMiner\Webpages\Public\WebFileManager";
-
-		/// <summary>
-		/// Checks if theres more pages left.
-		/// </summary>
-		/// <returns>
-		///   <c>true</c> if there are more pages; otherwise, <c>false</c>.
-		/// </returns>
-		public override bool HasNextPage()
-		{
-			return FileEnumerator != null && FileEnumerator.MoveNext();
-		}
-	}
-
-	/// <summary>
-	/// Provides paging state and tracking information for reading DOM module data across multiple pages.
-	/// </summary>
-	public class DOMPageData : DocHubPageData
-	{
-		internal DOMPageData()
-		{
-		}
-
-		/// <summary>
-		/// Persistent paging helper for the current module
-		/// </summary>
-		internal PagingHelper<DomInstance> PagingHelper { get; set; }
-
-		/// <summary>
-		/// List of modules to read.
-		/// </summary>
-		internal List<string> Modules { get; set; }
-
-		/// <summary>
-		/// Current module index in the Modules list.
-		/// </summary>
-		internal int ModuleIndex { get; set; }
-
-		/// <summary>
-		/// Index of the current instance within the current DOM page.
-		/// </summary>
-		internal int InstanceIndexInPage { get; set; }
-
-		/// <summary>
-		/// Index of the next attachment to return in the current instance.
-		/// </summary>
-		internal int AttachmentIndex { get; set; }
-
-		/// <summary>
-		/// Current instance ID whose attachments are cached.
-		/// </summary>
-		internal Guid CurrentInstanceId { get; set; }
-
-		/// <summary>
-		/// Cached attachments for the current instance.
-		/// </summary>
-		internal List<string> CurrentAttachments { get; set; }
-
-		/// <summary>
-		/// True if all modules have been fully read.
-		/// </summary>
-		internal bool Done { get; set; }
-
-		/// <summary>
-		/// Determines whether there is a subsequent page of results available for retrieval.
-		/// </summary>
-		/// <returns>
-		/// True if another page of results can be fetched; otherwise, false.
-		/// </returns>
-		public override bool HasNextPage() => !Done;
-
-		/// <summary>
-		/// Resets the page data for a fresh read.
-		/// </summary>
-		internal void Reset()
-		{
-			PagingHelper = null;
-			Modules = null;
-			ModuleIndex = 0;
-			InstanceIndexInPage = 0;
-			AttachmentIndex = 0;
-			CurrentInstanceId = Guid.Empty;
-			CurrentAttachments = null;
-			Done = false;
-		}
 	}
 }

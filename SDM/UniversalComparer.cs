@@ -3,6 +3,7 @@
 	using System;
 	internal static class UniversalComparer
 	{
+		// test candidate
 		internal static int Compare<T>(T x, T y)
 		{
 			if (Object.Equals(x, y))
