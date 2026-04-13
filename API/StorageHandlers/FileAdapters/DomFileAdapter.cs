@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.IO;
-	using System.Linq;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 
 	/// <summary>
