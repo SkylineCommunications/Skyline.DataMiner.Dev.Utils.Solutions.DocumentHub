@@ -79,6 +79,7 @@
 			return GetRelativePath(fileInfo.DirectoryName, @"C:\Skyline DataMiner\Webpages\Public\WebFileManager");
 		}
 
+		// test candidate
 		public static string GetRelativePath(string fullPath, string partToRemove)
 		{
 			var rootPath = partToRemove;
