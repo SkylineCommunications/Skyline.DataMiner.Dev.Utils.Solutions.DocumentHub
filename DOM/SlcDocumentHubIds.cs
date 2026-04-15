@@ -5,12 +5,13 @@
 //     Changes to this file will be lost if the code is regenerated.
 // </auto-generated>
 //------------------------------------------------------------------------------
-namespace DomHelpers.SlcDocumenthub
+namespace Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers
 {
     using System;
     using System.ComponentModel;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Sections;
+    using Skyline.DataMiner.SDM;
 
     public static class SlcDocumenthubIds
     {

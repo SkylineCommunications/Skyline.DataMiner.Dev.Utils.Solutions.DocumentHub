@@ -5,18 +5,18 @@
 	using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.FileAdapters;
-    using static DomHelpers.SlcDocumenthub.SlcDocumenthubIds.Enums;
+    using static Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers.SlcDocumenthubIds.Enums;
 
-	#region Interface
+    #region Interface
 
-	/// <summary>
-	/// Defines the contract for different file storage implementations.
-	/// </summary>
-	/// <remarks>
-	/// Implementations of this interface (e.g., <see cref="LocalHandler"/> and <see cref="SharePointHandler"/>)
-	/// handle how files or images are uploaded and verified in their respective storage environments.
-	/// </remarks>
-	internal interface IStorageHandler
+    /// <summary>
+    /// Defines the contract for different file storage implementations.
+    /// </summary>
+    /// <remarks>
+    /// Implementations of this interface (e.g., <see cref="LocalHandler"/> and <see cref="SharePointHandler"/>)
+    /// handle how files or images are uploaded and verified in their respective storage environments.
+    /// </remarks>
+    internal interface IStorageHandler
 	{
 		/// <summary>
 		/// Checks whether a file with the specified name already exists in the given directory.

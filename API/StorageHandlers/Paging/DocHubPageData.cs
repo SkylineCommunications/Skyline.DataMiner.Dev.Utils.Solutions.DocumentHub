@@ -2,6 +2,7 @@
 {
     using System;
     using DomHelpers.SlcDocumenthub;
+    using Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers;
 
     /// <summary>
     /// Generic factory class that provides methods to create DocHub related objects.

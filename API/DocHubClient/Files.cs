@@ -4,21 +4,22 @@
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
-	using Skyline.DataMiner.Net;
+    using Skyline.DataMiner.DocumentHub.SDM.Models;
+    using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.FileAdapters;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Paging;
-    using static DomHelpers.SlcDocumenthub.SlcDocumenthubIds.Enums;
+    using static Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers.SlcDocumenthubIds.Enums;
 
-	/// <summary>
-	/// Provides file related operations within DocumentHub.
-	/// This class is the main entry point for uploading and reading files
-	/// across different storage backends such as local storage and SharePoint.
-	/// </summary>
-	public class Files
+    /// <summary>
+    /// Provides file related operations within DocumentHub.
+    /// This class is the main entry point for uploading and reading files
+    /// across different storage backends such as local storage and SharePoint.
+    /// </summary>
+    public class Files
 	{
 		/// <summary>
 		/// The DataMiner connection used for communication with the system.
@@ -57,7 +58,7 @@
 		/// <returns>
 		/// The path or identifier of the uploaded file.
 		/// </returns>
-		public string UploadFile(Models.DocumentCategory category, string filePath, string name = null)
+		public string UploadFile(DocumentCategory category, string filePath, string name = null)
 		{
 			// Validate parameters
 			if (category == null)
@@ -118,7 +119,7 @@
 		/// <exception cref="InvalidOperationException">
 		/// Thrown when a file with the same name already exists in the target location.
 		/// </exception>
-		public string UploadFile(Models.DocumentCategory category, string filePath, Guid domInstanceId, string name = null)
+		public string UploadFile(DocumentCategory category, string filePath, Guid domInstanceId, string name = null)
 		{
 			// Validate parameters
 			if (category == null)
@@ -187,7 +188,7 @@
 		/// <exception cref="InvalidOperationException">
 		/// Thrown when called for DOM storage (use the DOM overload) or when a file with the same name already exists.
 		/// </exception>
-		public string UploadFile(Models.DocumentCategory category, string filePath, string uploadPathQualifier, string name = null)
+		public string UploadFile(DocumentCategory category, string filePath, string uploadPathQualifier, string name = null)
 		{
 			if (category == null)
 				throw new ArgumentNullException(nameof(category));
@@ -234,7 +235,7 @@
 			}
 
 			// Create a shallow copy of the category with the adjusted UploadPath so storage handlers see the qualified path.
-			var effectiveCategory = new Models.DocumentCategory
+			var effectiveCategory = new DocumentCategory
 			{
 				ID = category.ID,
 				Name = category.Name,
@@ -324,7 +325,7 @@
 		/// ReadFiles(category, context: pageData);
 		/// </code>
 		/// </remarks>
-		public List<IDocHubFile> ReadFiles(Models.DocumentCategory category, DocHubPageData context = null, string filter = null)
+		public List<IDocHubFile> ReadFiles(DocumentCategory category, DocHubPageData context = null, string filter = null)
 		{
 			if (category == null)
 				throw new ArgumentNullException(nameof(category));
@@ -376,7 +377,7 @@
 		/// ReadFiles(source, ids, context: pageData);
 		/// </code>
 		/// </remarks>
-		public List<IDocHubFile> ReadFiles(Models.Sources.DomSource source, IEnumerable<Guid> domInstanceIds, DocHubPageData context = null, string filter = null)
+		public List<IDocHubFile> ReadFiles(DomSource source, IEnumerable<Guid> domInstanceIds, DocHubPageData context = null, string filter = null)
 		{
 			if (source == null)
 				throw new ArgumentNullException(nameof(source));

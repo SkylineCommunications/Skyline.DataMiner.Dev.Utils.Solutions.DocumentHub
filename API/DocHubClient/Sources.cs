@@ -2,14 +2,14 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.DocumentHub.SDM.Models;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers;
-    using Skyline.DataMiner.Utils.DocumentHub.SDM;
 
-	/// <summary>
-	/// Provides operations for managing document sources.
-	/// </summary>
-	public class Sources
+    /// <summary>
+    /// Provides operations for managing document sources.
+    /// </summary>
+    public class Sources
 	{
         /// <summary>
         /// Initializes a new instance of the <see cref="Sources"/> class.
@@ -33,7 +33,7 @@
 		/// <returns>
 		/// A list of DOM sources.
 		/// </returns>
-		public List<Models.Sources.DomSource> GetDomSources()
+		public List<DomSource> GetDomSources()
 		{
 			return Helpers.DOMSources.Read();
 		}
@@ -45,21 +45,21 @@
 		/// A collection of <see cref="Guid"/> values representing the IDs of the DOM sources to retrieve.
 		/// </param>
 		/// <returns>
-		/// An <see cref="IEnumerable{T}"/> of <see cref="Models.Sources.DomSource"/> containing
+		/// An <see cref="IEnumerable{T}"/> of <see cref="DomSource"/> containing
 		/// all DOM sources that match the provided IDs. The returned collection may be empty if no matches are found.
 		/// </returns>
 		/// <exception cref="ArgumentNullException">
 		/// Thrown if <paramref name="ids"/> is null.
 		/// </exception>
-		public IEnumerable<Models.Sources.DomSource> GetDomSources(IEnumerable<Guid> ids)
+		public IEnumerable<DomSource> GetDomSources(IEnumerable<Guid> ids)
 		{
 			if (ids == null)
 				throw new ArgumentNullException(nameof(ids));
 
-			FilterElement<Models.Sources.DomSource> filter = new ORFilterElement<Models.Sources.DomSource>();
+			FilterElement<DomSource> filter = new ORFilterElement<DomSource>();
 			foreach (var id in ids)
 			{
-				filter = filter.OR(DomSourceExposers.Id.Equal(id));
+				filter = filter.OR(DomSourceExposers.Identifier.Equal(id.ToString()));
 			}
 
 			return Helpers.DOMSources.Read(filter);
@@ -74,13 +74,13 @@
 		/// on DOM source properties, such as ID and Name.
 		/// </param>
 		/// <returns>
-		/// A <see cref="List{T}"/> of <see cref="Models.Sources.DomSource"/> containing all DOM sources
+		/// A <see cref="List{T}"/> of <see cref="DomSource"/> containing all DOM sources
 		/// that match the provided filter criteria. The list may be empty if no matches are found.
 		/// </returns>
 		/// <exception cref="ArgumentNullException">
 		/// Thrown if <paramref name="filter"/> is null.
 		/// </exception>
-		public List<Models.Sources.DomSource> GetDomSources(FilterElement<Models.Sources.DomSource> filter)
+		public List<DomSource> GetDomSources(FilterElement<DomSource> filter)
 		{
 			if (filter == null)
 				throw new ArgumentNullException(nameof(filter));

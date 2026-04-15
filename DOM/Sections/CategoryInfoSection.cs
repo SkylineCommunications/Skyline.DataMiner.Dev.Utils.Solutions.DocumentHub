@@ -2,6 +2,7 @@
 {
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Sections;
+    using Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers;
     using System;
 
     /// <summary>

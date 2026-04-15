@@ -1,18 +1,18 @@
 ﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
 {
-    using Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers;
+    using Skyline.DataMiner.DocumentHub.SDM.Models;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Paging;
     using System;
-	using System.Collections.Generic;
+    using System.Collections.Generic;
 
-	internal interface IStorageHandlerData
+    internal interface IStorageHandlerData
 	{
 	}
 
 	#region Upload
 	internal class UploadData : IStorageHandlerData
 	{
-		public Models.DocumentCategory Category { get; set; }
+		public DocumentCategory Category { get; set; }
 
 		public string FilePath { get; set; }
 
@@ -32,7 +32,7 @@
 	#region Read
 	internal class ReadData : IStorageHandlerData
 	{
-		public Models.DocumentCategory Category { get; set; }
+		public DocumentCategory Category { get; set; }
 
 		public string Filter { get; set; }
 
@@ -64,7 +64,7 @@
 
 	internal class DomFileExistsData : FileExistsData
 	{
-		public Models.DocumentCategory Category { get; set; }
+		public DocumentCategory Category { get; set; }
 
 		public Guid DomInstanceId { get; set; }
 	}

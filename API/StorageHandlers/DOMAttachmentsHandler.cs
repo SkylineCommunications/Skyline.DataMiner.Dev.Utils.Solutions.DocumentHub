@@ -51,11 +51,11 @@
 				throw new ArgumentException("DOMAttachmentsHandler requires DOMFileExistsData.", nameof(data));
 
 			var category = args.Category;
-			if (category == null || string.IsNullOrEmpty(category.DOMSource.Module))
+			if (category == null || string.IsNullOrEmpty(category.DOMSource/*.Module*/ ))
 				throw new ArgumentException("Category and its module must be specified.", nameof(data));
 
 			// Create DOM helper for the module
-			var domHelper = new DomHelper(_connection.HandleMessages, category.DOMSource.Module);
+			var domHelper = new DomHelper(_connection.HandleMessages, category.DOMSource/*.Module*/);
 
 			// Retrieve the file names for the given instance and check for match
 			return domHelper.DomInstances.Attachments
@@ -125,7 +125,7 @@
 			var fileBytes = File.ReadAllBytes(filePath);
 
 			// Add file as attachment to the DOM instance
-			var domHelper = new DomHelper(_connection.HandleMessages, args.Category.DOMSource.Module);
+			var domHelper = new DomHelper(_connection.HandleMessages, args.Category.DOMSource/*.Module*/);
 			domHelper.DomInstances.Attachments.Add(new DomInstanceId(instanceId), newName, fileBytes);
 
 			return instanceId.ToString();

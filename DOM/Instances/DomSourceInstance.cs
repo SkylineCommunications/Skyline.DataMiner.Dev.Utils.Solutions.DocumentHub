@@ -11,6 +11,7 @@ namespace DomHelpers.SlcDocumenthub
     using System.Linq;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Messages;
+    using Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers;
 
     /// <summary>
     /// Represents a wrapper class for accessing a DomsourceInstance DOM instance.

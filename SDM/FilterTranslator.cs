@@ -1,21 +1,19 @@
 ﻿namespace Skyline.DataMiner.Utils.DocumentHub.SDM
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using DomHelpers.SlcDocumenthub;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.DocumentHub.SDM.Models;
+    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
-	internal static class FilterTranslator
+    internal static class FilterTranslator
 	{
 		private static readonly Dictionary<string, Func<Comparer, object, FilterElement<DomInstance>>> Handlers = new Dictionary<string, Func<Comparer, object, FilterElement<DomInstance>>>
 		{
-			[CategoryExposers.Id.fieldName] = HandleGuid,
-			[CategoryExposers.Name.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcDocumenthubIds.Sections.CategoryInfo.Name), comparer, (string)value),
-			[CategoryExposers.StorageType.fieldName] = (comparer, value) => HandleEnum<SlcDocumenthubIds.Enums.Storagetype>(comparer, value),
 			[SharePointExposers.Id.fieldName] = HandleGuid,
-			[DomSourceExposers.Id.fieldName] = HandleGuid,
+			[DomSourceExposers.Identifier.fieldName] = HandleGuid,
 			[DomSourceExposers.Name.fieldName] = (comparer, value) => FilterElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(SlcDocumenthubIds.Sections.DOMSourceInfo.Name), comparer, (string)value),
 		};
 

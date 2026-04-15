@@ -14,6 +14,7 @@ namespace DomHelpers.SlcDocumenthub
     using Skyline.DataMiner.Net.Apps.Sections.Sections;
     using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Net.Sections;
+    using Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers;
 
     /// <summary>
     /// Represents a wrapper class for accessing a ConfigurationSection section.

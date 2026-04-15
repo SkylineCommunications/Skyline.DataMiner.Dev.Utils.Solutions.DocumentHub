@@ -1,21 +1,21 @@
 ﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using DomHelpers.SlcDocumenthub;
-	using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.Utils.DocumentHub.SDM;
+    using DomHelpers.SlcDocumenthub;
+    using Skyline.DataMiner.DocumentHub.SDM.Models;
+    using Skyline.DataMiner.Net;
+    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
-	internal class DataHelperCategory : DataHelper<Models.DocumentCategory>
+    internal class DataHelperCategory : DataHelper<DocumentCategory>
 	{
 		internal DataHelperCategory(IConnection connection) : base(connection, SlcDocumenthubIds.Definitions.DocumentCategory)
 		{
 		}
 
-		internal override Guid CreateOrUpdate(Models.DocumentCategory item)
+		internal override Guid CreateOrUpdate(DocumentCategory item)
 		{
 			var instance = new DocumentCategoryInstance(New(item.ID));
 			instance.CategoryInfo.Name = item.Name;
@@ -29,13 +29,13 @@
 			if (item.DOMSource != null)
 			{
 				var domSourceHelper = new DataHelperDomSource(_connection);
-				instance.CategoryInfo.Domsource = domSourceHelper.CreateOrUpdate(item.DOMSource);
+				//instance.CategoryInfo.Domsource = domSourceHelper.CreateOrUpdate(item.DOMSource);
 			}
 
 			return CreateOrUpdateInstance(instance);
 		}
 
-		internal override bool TryDelete(IEnumerable<Models.DocumentCategory> items)
+		internal override bool TryDelete(IEnumerable<DocumentCategory> items)
 		{
 			if (items == null)
 			{
@@ -53,26 +53,26 @@
 			return b;
 		}
 
-		internal override List<Models.DocumentCategory> Read(IEnumerable<DomInstance> domInstances)
+		internal override List<DocumentCategory> Read(IEnumerable<DomInstance> domInstances)
 		{
 			var instances = domInstances.Select(x => new DocumentCategoryInstance(x)).ToList();
 			if (instances.Count < 1)
 			{
-				return new List<Models.DocumentCategory>();
+				return new List<DocumentCategory>();
 			}
 
-			List<Models.Sources.DomSource> domSources = GetRequiredDomSources(instances);
+			List<DomSource> domSources = GetRequiredDomSources(instances);
 
 			return instances.Select(
 				x =>
 				{
-					Models.Sources.DomSource domSource = null;
+					DomSource domSource = null;
 					if (x.CategoryInfo.Domsource != null && x.CategoryInfo.Domsource != Guid.Empty)
 					{
-						domSource = domSources.Find(o => o.ID == x.CategoryInfo.Domsource);
+						domSource = domSources.Find(o => o.Identifier == x.CategoryInfo.Domsource.ToString());
 					}
 
-					return new Models.DocumentCategory
+					return new DocumentCategory
 					{
 						ID = x.ID.Id,
 						Name = x.CategoryInfo.Name,
@@ -88,7 +88,7 @@
 				.ToList();
 		}
 
-		private List<Models.Sources.DomSource> GetRequiredDomSources(IEnumerable<DocumentCategoryInstance> instances)
+		private List<DomSource> GetRequiredDomSources(IEnumerable<DocumentCategoryInstance> instances)
 		{
 			var guids = instances
 				.Select(i => i.CategoryInfo.Domsource)
@@ -96,12 +96,12 @@
 				.Select(g => g.Value);
 
 			if (!guids.Any())
-				return new List<Models.Sources.DomSource>();
+				return new List<DomSource>();
 
 			var filter = guids
-				.Select(g => DomSourceExposers.Id.Equal(g))
+				.Select(g => DomSourceExposers.Identifier.Equal(g.ToString()))
 				.Aggregate(
-					(FilterElement<Models.Sources.DomSource>)null,
+					(FilterElement<DomSource>)null,
 					(f, e) => f == null ? e : f.OR(e));
 
 			return new DataHelperDomSource(_connection).Read(filter);

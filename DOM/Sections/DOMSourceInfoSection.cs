@@ -9,6 +9,7 @@ namespace DomHelpers.SlcDocumenthub
     using System;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Sections;
+    using Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers;
 
     /// <summary>
     /// Represents a wrapper class for accessing a DOMSourceInfoSection section.

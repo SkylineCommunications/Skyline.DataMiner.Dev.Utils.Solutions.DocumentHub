@@ -2,15 +2,15 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+    using Skyline.DataMiner.DocumentHub.SDM.Models;
+    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers;
-    using Skyline.DataMiner.Utils.DocumentHub.SDM;
 
-	/// <summary>
-	/// Provides document category management operations.
-	/// </summary>
-	public class Categories
+    /// <summary>
+    /// Provides document category management operations.
+    /// </summary>
+    public class Categories
 	{
         /// <summary>
         /// Initializes a new instance of the <see cref="Categories"/> class.
@@ -32,7 +32,7 @@
 		/// <returns>
 		/// The GUID ID of the created or updated category.
 		/// </returns>
-		public Guid CreateOrUpdateCategory(Models.DocumentCategory category)
+		public Guid CreateOrUpdateCategory(DocumentCategory category)
 		{
 			return Helpers.DocumentCategories.CreateOrUpdate(category);
 		}
@@ -43,7 +43,7 @@
 		/// <returns>
 		/// A list of document categories.
 		/// </returns>
-		public List<Models.DocumentCategory> GetCategories()
+		public List<DocumentCategory> GetCategories()
 		{
 			return Helpers.DocumentCategories.Read();
 		}
@@ -65,15 +65,15 @@
 		/// <exception cref="ArgumentNullException">
 		/// Thrown if <paramref name="ids"/> is null.
 		/// </exception>
-		public IEnumerable<Models.DocumentCategory> GetCategories(IEnumerable<Guid> ids)
+		public IEnumerable<DocumentCategory> GetCategories(IEnumerable<Guid> ids)
 		{
 			if (ids == null)
 				throw new ArgumentNullException(nameof(ids));
 
-			FilterElement<Models.DocumentCategory> filter = new ORFilterElement<Models.DocumentCategory>();
+			FilterElement<DocumentCategory> filter = new ORFilterElement<DocumentCategory>();
 			foreach (var id in ids)
 			{
-				filter = filter.OR(CategoryExposers.Id.Equal(id));
+				filter = filter.OR(DocumentCategoryExposers.Identifier.Equal(id.ToString()));
 			}
 
 			return Helpers.DocumentCategories.Read(filter);
@@ -88,7 +88,7 @@
 		/// which exposes properties such as <c>Id</c> and <c>Name</c>.
 		/// </param>
 		/// <returns>
-		/// A <see cref="List{T}"/> of <see cref="Models.DocumentCategory"/> containing all categories
+		/// A <see cref="List{T}"/> of <see cref="DocumentCategory"/> containing all categories
 		/// that match the provided filter criteria. The list may be empty if no matches are found.
 		/// </returns>
 		/// <remarks>
@@ -98,7 +98,7 @@
 		/// <exception cref="ArgumentNullException">
 		/// Thrown if <paramref name="filter"/> is null.
 		/// </exception>
-		public List<Models.DocumentCategory> GetCategories(FilterElement<Models.DocumentCategory> filter)
+		public List<DocumentCategory> GetCategories(FilterElement<DocumentCategory> filter)
 		{
 			if (filter == null)
 				throw new ArgumentNullException(nameof(filter));
@@ -115,7 +115,7 @@
 		/// <returns>
 		/// True if all categories were deleted successfully, otherwise false.
 		/// </returns>
-		public bool TryDeleteCategory(IEnumerable<Models.DocumentCategory> items)
+		public bool TryDeleteCategory(IEnumerable<DocumentCategory> items)
 		{
 			return Helpers.DocumentCategories.TryDelete(items);
 		}

@@ -1,6 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <AssemblyName>Skyline.DataMiner.Utils.DocumentHub</AssemblyName>
@@ -29,12 +29,15 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Azure.Identity" Version="1.16.0" />
+    <PackageReference Include="Azure.Identity" Version="1.21.0" />
     <PackageReference Include="Microsoft.Graph" Version="4.36.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="Skyline.DataMiner.Dev.Common" Version="10.6.3.1" />
-    <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding" Version="2.2.1" />
-    <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="2.2.1">
+    <PackageReference Include="Skyline.DataMiner.SDM" Version="1.0.1" />
+    <PackageReference Include="Skyline.DataMiner.SDM.Registration.Common" Version="2.0.5" />
+    <PackageReference Include="Skyline.DataMiner.SDM.SourceGenerator.Runtime" Version="1.0.1" OutputItemType="Analyzer" ReferenceoutputAssembly="false" />
+    <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding" Version="2.2.3" />
+    <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="2.2.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

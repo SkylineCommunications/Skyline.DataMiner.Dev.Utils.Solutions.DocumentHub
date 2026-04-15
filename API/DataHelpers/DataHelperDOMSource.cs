@@ -4,18 +4,19 @@
 	using System.Collections.Generic;
 	using System.Linq;
 	using DomHelpers.SlcDocumenthub;
-	using Skyline.DataMiner.Net;
+    using Skyline.DataMiner.DocumentHub.SDM.Models;
+    using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 
-	internal class DataHelperDomSource : DataHelper<Models.Sources.DomSource>
+    internal class DataHelperDomSource : DataHelper<DomSource>
 	{
 		internal DataHelperDomSource(IConnection connection) : base(connection, SlcDocumenthubIds.Definitions.Domsource)
 		{
 		}
 
-		internal override Guid CreateOrUpdate(Models.Sources.DomSource item)
+		internal override Guid CreateOrUpdate(DomSource item)
 		{
-			var instance = new DomsourceInstance(New(item.ID));
+			var instance = new DomsourceInstance(New(Guid.Parse(item.Identifier)));
 			instance.DOMSourceInfo.Name = item.Name;
 			instance.DOMSourceInfo.Module = item.Module;
 			instance.DOMSourceInfo.NetworkSharePath = item.NetworkSharePath;
@@ -24,7 +25,7 @@
 			return CreateOrUpdateInstance(instance);
 		}
 
-		internal override bool TryDelete(IEnumerable<Models.Sources.DomSource> items)
+		internal override bool TryDelete(IEnumerable<DomSource> items)
 		{
 			if (items == null)
 			{
@@ -37,25 +38,25 @@
 				return true;
 			}
 
-			bool b = TryDelete(lst.Where(i => i != null).Select(i => i.ID));
+			bool b = TryDelete(lst.Where(i => i != null));
 
 			return b;
 		}
 
-		internal override List<Models.Sources.DomSource> Read(IEnumerable<DomInstance> domInstances)
+		internal override List<DomSource> Read(IEnumerable<DomInstance> domInstances)
 		{
 			var instances = domInstances.Select(x => new DomsourceInstance(x)).ToList();
 			if (instances.Count < 1)
 			{
-				return new List<Models.Sources.DomSource>();
+				return new List<DomSource>();
 			}
 
 			return instances
 				.Select(x =>
 				{
-					return new Models.Sources.DomSource
+					return new DomSource
 					{
-						ID = x.ID.Id,
+						Identifier = x.ID.Id.ToString(),
 						Name = x.DOMSourceInfo.Name,
 						Module = x.DOMSourceInfo.Module,
 						NetworkSharePath = x.DOMSourceInfo.NetworkSharePath,
