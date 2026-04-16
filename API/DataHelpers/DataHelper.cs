@@ -4,7 +4,7 @@
 	using System.Collections.Generic;
 	using System.Linq;
 	using Newtonsoft.Json;
-	using Skyline.DataMiner.Net;
+    using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
@@ -31,7 +31,7 @@
 			_connection = connection;
 			_defId = defId;
 			_domHelper = new DomHelper(connection.HandleMessages, defId.ModuleId);
-		}
+        }
 
 		/// <summary>
 		///     Creates a new DOM instance or updates an existing one based on the provided item.

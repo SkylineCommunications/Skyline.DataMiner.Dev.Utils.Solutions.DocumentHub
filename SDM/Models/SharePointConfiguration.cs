@@ -8,7 +8,7 @@
     /// </summary>
     [GenerateExposers]
     [SdmDomStorage("(slc)documenthub")]
-    public class SharePointConfiguration
+    public class SharePointConfiguration : SdmObject<SharePointConfiguration>
     {
         /// <summary>
         /// Gets or sets azure Active Directory tenant identifier.

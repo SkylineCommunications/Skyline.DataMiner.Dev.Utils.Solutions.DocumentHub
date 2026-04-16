@@ -1,7 +1,6 @@
 ﻿namespace Skyline.DataMiner.DocumentHub.SDM.Models
 {
     using Skyline.DataMiner.SDM;
-    using static Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers.Models.Sources;
 
 
 	/// <summary>

@@ -6,16 +6,17 @@
 	using DomHelpers.SlcDocumenthub;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+    using Skyline.DataMiner.Utils.DocumentHub.SDM.Models;
 
-	internal class DataHelperSharePointConfiguration : DataHelper<Models.Sources.SharePointConfiguration>
+    internal class DataHelperSharePointConfiguration : DataHelper<SharePointConfiguration>
     {
         internal DataHelperSharePointConfiguration(IConnection connection) : base(connection, SlcDocumenthubIds.Definitions.Sharepoint)
         {
         }
 
-        internal override Guid CreateOrUpdate(Models.Sources.SharePointConfiguration item)
+        internal override Guid CreateOrUpdate(SharePointConfiguration item)
         {
-            var instance = new SharepointInstance(New(item.ID));
+            var instance = new SharepointInstance(New(Guid.Parse(item.Identifier)));
             instance.Configuration.SiteURL = item.SiteURL;
             instance.Configuration.TenantID = item.TenantID;
             instance.Configuration.ClientID = item.ClientID;
@@ -25,17 +26,17 @@
             return CreateOrUpdateInstance(instance);
         }
 
-        internal override List<Models.Sources.SharePointConfiguration> Read(IEnumerable<DomInstance> domInstances)
+        internal override List<SharePointConfiguration> Read(IEnumerable<DomInstance> domInstances)
         {
             var instances = domInstances.Select(x => new SharepointInstance(x)).ToList();
             if (instances.Count < 1)
             {
-                return new List<Models.Sources.SharePointConfiguration>();
+                return new List<SharePointConfiguration>();
             }
 
-            return instances.Select(x => new Models.Sources.SharePointConfiguration
+            return instances.Select(x => new SharePointConfiguration
             {
-                ID = x.ID.Id,
+                Identifier = x.ID.Id.ToString(),
                 SiteURL = x.Configuration.SiteURL,
                 TenantID = x.Configuration.TenantID,
                 ClientID = x.Configuration.ClientID,
@@ -44,7 +45,7 @@
             }).ToList();
         }
 
-        internal override bool TryDelete(IEnumerable<Models.Sources.SharePointConfiguration> items)
+        internal override bool TryDelete(IEnumerable<SharePointConfiguration> items)
         {
             if (items == null)
             {
@@ -57,7 +58,7 @@
                 return true;
             }
 
-            bool b = TryDelete(lst.Where(i => i != null).Select(i => i.ID));
+            bool b = TryDelete(lst.Where(i => i != null));
 
             return b;
         }

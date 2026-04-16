@@ -13,7 +13,8 @@
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.FileAdapters;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Paging;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Security;
-	using Drive = Microsoft.Graph.Drive;
+    using Skyline.DataMiner.Utils.DocumentHub.SDM.Models;
+    using Drive = Microsoft.Graph.Drive;
 	using File = System.IO.File;
 
 	/// <summary>
@@ -44,7 +45,7 @@
 		/// <summary>
 		/// SharePoint configuration retrieved from the Document Hub configuration model.
 		/// </summary>
-		private readonly Models.Sources.SharePointConfiguration _sharePoint;
+		private readonly SharePointConfiguration _sharePoint;
 
 		/// <summary>
 		/// Microsoft Graph client used for SharePoint API operations.
@@ -68,7 +69,6 @@
 		/// Initializes a new instance of the <see cref="SharePointHandler"/> class.
 		/// </summary>
 		/// <param name="helpers">Helper object to retrieve configuration from DOM.</param>
-		/// <param name="connection">DataMiner connection instance.</param>
 		/// <exception cref="NullReferenceException">
 		/// Thrown when the configured SharePoint document library cannot be found.
 		/// </exception>
