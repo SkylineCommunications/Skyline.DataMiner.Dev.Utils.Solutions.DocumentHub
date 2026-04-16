@@ -7,15 +7,10 @@
     /// <summary>
     /// Represents a document category that defines how and where files are stored.
     /// </summary>
-    [GenerateExposers]
-    [SdmDomStorage("(slc)documenthub")]
+    //[GenerateExposers]
+    //[SdmDomStorage("(slc)documenthub")]
     public class DocumentCategory : SdmObject<DocumentCategory>
     {
-        /// <summary>
-        /// Gets or sets unique identifier of the document category.
-        /// </summary>
-        public Guid ID { get; set; }
-
         /// <summary>
         /// Gets or sets human readable name of the category.
         /// </summary>

@@ -11,6 +11,6 @@ namespace Skyline.DataMiner.DocumentHub.SDM
 
         IBulkRepository<DocumentCategory> DocumentCategories { get; }
 
-        IBulkRepository<DomSource> DomSources { get; }
+        IRepository<DomSource> DomSources { get; }
     }
 }

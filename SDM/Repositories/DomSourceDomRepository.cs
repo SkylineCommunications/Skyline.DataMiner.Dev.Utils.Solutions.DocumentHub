@@ -22,7 +22,7 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
-    internal partial class DomSourceDomRepository : IBulkRepository<DomSource>
+    internal partial class DomSourceDomRepository : IRepository<DomSource>
     {
         private readonly IConnection connection;
         private readonly DomHelper helper;
@@ -42,66 +42,6 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             var instance = ToInstance(createObject);
             instance = helper.DomInstances.Create(instance);
             return FromInstance(instance);
-        }
-
-        public IReadOnlyCollection<DomSource> Create(IEnumerable<DomSource> createObjects)
-        {
-            if (createObjects is null || !createObjects.Any())
-            {
-                return Array.Empty<DomSource>();
-            }
-
-            // Check if some of the objects already exist
-            var existing = new HashSet<string>();
-            foreach (var batch in createObjects.Batch(500))
-            {
-                existing.UnionWith(Read(new ORFilterElement<DomSource>(batch.Select(obj => DomSourceExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
-            }
-
-            // Create the remainder
-            var SuccessfulItems = new List<DomSource>();
-            var failures = new Dictionary<string, Exception>();
-            var objects = createObjects.Where(obj => !existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
-            foreach (var batch in createObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
-            {
-                helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
-                foreach (var failure in result.UnsuccessfulIds)
-                {
-                    failures.Add(failure.Id.ToString(), new CrudFailedException(result.TraceDataPerItem[failure]));
-                }
-
-                foreach (var success in result.SuccessfulItems)
-                {
-                    SuccessfulItems.Add(FromInstance(success));
-                }
-            }
-
-            // If everything went fine, return the successful creations
-            if (!existing.Any() && !failures.Any())
-            {
-                return SuccessfulItems;
-            }
-
-            // Otherwise, build and throw an exception
-            var exceptionBuilder = new SdmBulkCrudException<DomSource>.Builder();
-            foreach (var obj in createObjects)
-            {
-                if (existing.Contains(obj.Identifier))
-                {
-                    exceptionBuilder.AddFailed(obj, new SdmCrudException<DomSource>(obj, $"Could not create DomSource with guid: '{obj.Identifier}', it already exists."));
-                    continue;
-                }
-
-                if (failures.ContainsKey(obj.Identifier))
-                {
-                    exceptionBuilder.AddFailed(obj, failures[obj.Identifier]);
-                    continue;
-                }
-
-                exceptionBuilder.AddSuccessful(obj);
-            }
-
-            throw exceptionBuilder.Build();
         }
 
         public IReadOnlyCollection<DomSource> CreateOrUpdate(IEnumerable<DomSource> items)
@@ -262,65 +202,6 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             var instance = ToInstance(updateObject);
             instance = helper.DomInstances.Update(instance);
             return FromInstance(instance);
-        }
-
-        public IReadOnlyCollection<DomSource> Update(IEnumerable<DomSource> updateObjects)
-        {
-            if (updateObjects is null || !updateObjects.Any())
-            {
-                return Array.Empty<DomSource>();
-            }
-
-            // Check if which objects already exist
-            var existing = new HashSet<string>();
-            foreach (var batch in updateObjects.Batch(500))
-            {
-                existing.UnionWith(Read(new ORFilterElement<DomSource>(batch.Select(obj => DomSourceExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
-            }
-
-            // Update the existing objects
-            var successfulItems = new List<DomSource>();
-            var failures = new Dictionary<string, Exception>();
-            var objects = updateObjects.Where(obj => existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
-            foreach (var batch in updateObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
-            {
-                helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
-                foreach (var failure in result.UnsuccessfulIds)
-                {
-                    failures.Add(failure.Id.ToString(), new CrudFailedException(result.TraceDataPerItem[failure]));
-                }
-
-                foreach (var success in result.SuccessfulItems)
-                {
-                    successfulItems.Add(FromInstance(success));
-                }
-            }
-
-            // Check for failures and build exception if needed
-            var exceptionBuilder = new SdmBulkCrudException<DomSource>.Builder();
-            foreach (var obj in updateObjects)
-            {
-                if (!existing.Contains(obj.Identifier))
-                {
-                    exceptionBuilder.AddFailed(obj, new SdmCrudException<DomSource>(obj, "Could not update a non existing DomSource"));
-                    continue;
-                }
-
-                if (failures.ContainsKey(obj.Identifier))
-                {
-                    exceptionBuilder.AddFailed(obj, failures[obj.Identifier]);
-                    continue;
-                }
-
-                exceptionBuilder.AddSuccessful(obj);
-            }
-
-            if (exceptionBuilder.HasFailure)
-            {
-                throw exceptionBuilder.Build();
-            }
-
-            return successfulItems;
         }
 
         public void Delete(DomSource deleteObject)

@@ -20,7 +20,6 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
     public static partial class DocumentCategoryExposers
     {
         public static readonly Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, string> Identifier = new Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, string>((obj) => obj.Identifier, "Identifier");
-        public static readonly Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, System.Guid> ID = new Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, System.Guid>((obj) => obj.ID, "ID");
         public static readonly Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, string> Name = new Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, string>((obj) => obj.Name, "Name");
         public static readonly Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, string> Description = new Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, string>((obj) => obj.Description, "Description");
         public static readonly Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, string> UploadPath = new Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, string>((obj) => obj.UploadPath, "UploadPath");

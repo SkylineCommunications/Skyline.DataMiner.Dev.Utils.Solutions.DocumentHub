@@ -237,7 +237,7 @@
 			// Create a shallow copy of the category with the adjusted UploadPath so storage handlers see the qualified path.
 			var effectiveCategory = new DocumentCategory
 			{
-				ID = category.ID,
+				Identifier = category.Identifier,
 				Name = category.Name,
 				Description = category.Description,
 				UploadPath = effectiveUploadPath,

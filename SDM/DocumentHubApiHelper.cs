@@ -8,13 +8,14 @@
     internal class DocumentHubApiHelper : IDocumentHubApiHelper
     {
         private readonly IBulkRepository<DocumentCategory> _documentCategories;
-        private readonly IBulkRepository<DomSource> _domSources;
+        private readonly IRepository<DomSource> _domSources;
         private bool _disposed;
 
         public DocumentHubApiHelper(IConnection connection)
         {
             Connection = connection;
             _documentCategories = new DocumentCategoryDomRepository(connection);
+            _domSources = new DomSourceDomRepository(connection);
         }
 
         public IConnection Connection { get; }
@@ -32,7 +33,7 @@
             }
         }
 
-        public IBulkRepository<DomSource> DomSources 
+        public IRepository<DomSource> DomSources 
         {
             get
             {

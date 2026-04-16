@@ -4,10 +4,11 @@
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
-	using Skyline.DataMiner.Net;
+    using Skyline.DataMiner.DocumentHub.SDM.Models;
+    using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-    using Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers;
+    using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.FileAdapters;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Paging;
 
@@ -17,7 +18,7 @@
     internal class DomAttachmentsHandler : IStorageHandler
 	{
 		private readonly IConnection _connection;
-		private readonly DataHelperDomSource _dataHelperDomSource;
+		private readonly IRepository<DomSource> _domSourceRepository;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DomAttachmentsHandler"/> class.
@@ -28,7 +29,7 @@
 		public DomAttachmentsHandler(IConnection connection)
 		{
 			_connection = connection;
-			_dataHelperDomSource = new DataHelperDomSource(connection);
+			_domSourceRepository = new DomSourceDomRepository(connection);
 		}
 
 		#region Public Methods
@@ -208,7 +209,7 @@
 			// Use specific module or fetch all available modules
 			page.Modules = !string.IsNullOrEmpty(args.Module)
 				? new List<string> { args.Module }
-				: GetAllSources(_dataHelperDomSource).ToList();
+				: GetAllSources(_domSourceRepository).ToList();
 
 			// Mark done if no modules available
 			if (page.Modules.Count == 0)
@@ -331,9 +332,9 @@
 		/// <summary>
 		/// Retrieves all available DOM module names from the data helper.
 		/// </summary>
-		private IEnumerable<string> GetAllSources(DataHelperDomSource helper)
+		private IEnumerable<string> GetAllSources(IRepository<DomSource> helper)
 		{
-			return helper.Read().Select(s => s.Module);
+			return helper.Read(new TRUEFilterElement<DomSource>()).Select(s => s.Module);
 		}
 		#endregion
 	}

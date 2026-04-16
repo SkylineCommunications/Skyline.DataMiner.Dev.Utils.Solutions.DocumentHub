@@ -20,25 +20,16 @@
 		{
 			Helpers = new DataHelpersDocumentHub(connection);
 
-			Categories = new Categories(Helpers);
+			//Categories = new Categories(Helpers);
 			Files = new Files(Helpers, connection);
-			Sources = new Sources(Helpers);
+			//Sources = new Sources(Helpers);
 		}
-
-		/// <summary>
-		/// Gets or sets provides access to document category management.
-		/// </summary>
-		public Categories Categories { get; set; }
 
 		/// <summary>
 		/// Gets or sets provides access to document file operations such as upload and read.
 		/// </summary>
 		public Files Files { get; set; }
 
-		/// <summary>
-		/// Gets or sets provides access to source management operations.
-		/// </summary>
-		public Sources Sources { get; set; }
 
 		/// <summary>
 		/// Gets or sets internal helper layer for DataMiner DOM and storage operations.
