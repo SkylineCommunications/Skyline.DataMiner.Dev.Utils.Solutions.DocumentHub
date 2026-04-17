@@ -11,6 +11,7 @@ namespace Skyline.DataMiner.Utils.DocumentHub.SDM.Models
     using System.Collections.Generic;
     using System.Linq;
     using System.Runtime.CompilerServices;
+    using Skyline.DataMiner.DocumentHub.SDM.Models;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.SDM.Exposers;
@@ -19,11 +20,11 @@ namespace Skyline.DataMiner.Utils.DocumentHub.SDM.Models
 
     public static partial class SharePointConfigurationExposers
     {
-        public static readonly Exposer<Skyline.DataMiner.Utils.DocumentHub.SDM.Models.SharePointConfiguration, string> Identifier = new Exposer<Skyline.DataMiner.Utils.DocumentHub.SDM.Models.SharePointConfiguration, string>((obj) => obj.Identifier, "Identifier");
-        public static readonly Exposer<Skyline.DataMiner.Utils.DocumentHub.SDM.Models.SharePointConfiguration, string> TenantID = new Exposer<Skyline.DataMiner.Utils.DocumentHub.SDM.Models.SharePointConfiguration, string>((obj) => obj.TenantID, "TenantID");
-        public static readonly Exposer<Skyline.DataMiner.Utils.DocumentHub.SDM.Models.SharePointConfiguration, string> ClientID = new Exposer<Skyline.DataMiner.Utils.DocumentHub.SDM.Models.SharePointConfiguration, string>((obj) => obj.ClientID, "ClientID");
-        public static readonly Exposer<Skyline.DataMiner.Utils.DocumentHub.SDM.Models.SharePointConfiguration, string> ClientSecret = new Exposer<Skyline.DataMiner.Utils.DocumentHub.SDM.Models.SharePointConfiguration, string>((obj) => obj.ClientSecret, "ClientSecret");
-        public static readonly Exposer<Skyline.DataMiner.Utils.DocumentHub.SDM.Models.SharePointConfiguration, string> SiteURL = new Exposer<Skyline.DataMiner.Utils.DocumentHub.SDM.Models.SharePointConfiguration, string>((obj) => obj.SiteURL, "SiteURL");
-        public static readonly Exposer<Skyline.DataMiner.Utils.DocumentHub.SDM.Models.SharePointConfiguration, string> DocumentLibraryName = new Exposer<Skyline.DataMiner.Utils.DocumentHub.SDM.Models.SharePointConfiguration, string>((obj) => obj.DocumentLibraryName, "DocumentLibraryName");
+        public static readonly Exposer<SharePointConfiguration, string> Identifier = new Exposer<SharePointConfiguration, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<SharePointConfiguration, string> TenantID = new Exposer<SharePointConfiguration, string>((obj) => obj.TenantID, "TenantID");
+        public static readonly Exposer<SharePointConfiguration, string> ClientID = new Exposer<SharePointConfiguration, string>((obj) => obj.ClientID, "ClientID");
+        public static readonly Exposer<SharePointConfiguration, string> ClientSecret = new Exposer<SharePointConfiguration, string>((obj) => obj.ClientSecret, "ClientSecret");
+        public static readonly Exposer<SharePointConfiguration, string> SiteURL = new Exposer<SharePointConfiguration, string>((obj) => obj.SiteURL, "SiteURL");
+        public static readonly Exposer<SharePointConfiguration, string> DocumentLibraryName = new Exposer<SharePointConfiguration, string>((obj) => obj.DocumentLibraryName, "DocumentLibraryName");
     }
 }

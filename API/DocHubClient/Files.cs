@@ -26,13 +26,10 @@
 		/// </summary>
 		private readonly IConnection _connection;
 
-		internal Files(DataHelpersDocumentHub helpers, IConnection connection)
+		internal Files(IConnection connection)
 		{
-			Helpers = helpers;
 			_connection = connection;
 		}
-
-		internal DataHelpersDocumentHub Helpers { get; }
 
 		#region Upload
 

@@ -71,10 +71,6 @@
 		/// </summary>
 		/// <param name="storage">
 		/// The type of storage for which to create a handler.
-		/// </param>
-		/// <param name="helpers">
-		/// The document hub helpers instance to be used by the storage handler.
-		/// </param>
 		/// <param name="connection">
 		/// An active DataMiner connection used to communicate with the system.
 		/// </param>
@@ -84,14 +80,14 @@
 		/// <exception cref="ArgumentException">
 		/// Thrown if no handler is registered for the specified storage type.
 		/// </exception>
-		internal static IStorageHandler Create(Storagetype storage, DataHelpersDocumentHub helpers, IConnection connection)
+		internal static IStorageHandler Create(Storagetype storage, IConnection connection)
 		{
 			// Select the appropriate storage handler based on the given storage type.
 			switch (storage)
 			{
 				case Storagetype.Sharepoint:
 					// SharePoint-based storage implementation.
-					return new SharePointHandler(helpers);
+					return new SharePointHandler(connection);
 
 				case Storagetype.Local:
 					// Local file system storage implementation.

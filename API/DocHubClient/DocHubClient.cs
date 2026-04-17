@@ -18,10 +18,8 @@
 		/// </param>
 		public DocHubClient(IConnection connection)
 		{
-			Helpers = new DataHelpersDocumentHub(connection);
-
 			//Categories = new Categories(Helpers);
-			Files = new Files(Helpers, connection);
+			Files = new Files(connection);
 			//Sources = new Sources(Helpers);
 		}
 
@@ -34,6 +32,5 @@
 		/// <summary>
 		/// Gets or sets internal helper layer for DataMiner DOM and storage operations.
 		/// </summary>
-		internal DataHelpersDocumentHub Helpers { get; set; }
 	}
 }

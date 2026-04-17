@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Utils.DocumentHub.SDM.Models
+﻿namespace Skyline.DataMiner.DocumentHub.SDM.Models
 {
     using Skyline.DataMiner.SDM;
     using System;
@@ -6,8 +6,8 @@
     /// <summary>
     /// Configuration required to connect to a SharePoint document library.
     /// </summary>
-    [GenerateExposers]
-    [SdmDomStorage("(slc)documenthub")]
+    //[GenerateExposers]
+    //[SdmDomStorage("(slc)documenthub")]
     public class SharePointConfiguration : SdmObject<SharePointConfiguration>
     {
         /// <summary>

@@ -8,7 +8,7 @@
 	/// </summary>
 	//[GenerateExposers]
 	//[SdmDomStorage("(slc)documenthub")]
-    public class DomSource : SdmObject<DomSource>
+	public class DomSource : SdmObject<DomSource>
 	{
 		/// <summary>
 		/// Gets or sets unique identifier of the DOM Attachment source configuration.

@@ -9,6 +9,8 @@
 	using System.Threading.Tasks;
 	using Azure.Identity;
 	using Microsoft.Graph;
+    using Skyline.DataMiner.DocumentHub.SDM.Models;
+    using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.FileAdapters;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Paging;
@@ -72,8 +74,10 @@
 		/// <exception cref="NullReferenceException">
 		/// Thrown when the configured SharePoint document library cannot be found.
 		/// </exception>
-		internal SharePointHandler(DataHelpersDocumentHub helpers)
+		internal SharePointHandler(IConnection connection)
 		{
+			sharepointRepository = new SharePointConfigurationDomRepository(connection);
+
 			// Defensive check to avoid reinitialization
 			if (_graphClient != null && _drive != null)
 				return;
