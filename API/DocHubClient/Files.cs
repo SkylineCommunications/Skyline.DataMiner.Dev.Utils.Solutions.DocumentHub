@@ -12,6 +12,7 @@
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.FileAdapters;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Paging;
+    using Skyline.DataMiner.Utils.DocumentHub.SDM.Models;
     using static Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers.SlcDocumenthubIds.Enums;
 
     /// <summary>
@@ -64,7 +65,7 @@
 				throw new ArgumentNullException(nameof(filePath));
 
 			// Create appropriate storage handler based on category's storage type.
-			var storageHandler = StorageHandlerFactory.Create(category.StorageType, Helpers, _connection);
+			var storageHandler = StorageHandlerFactory.Create(category.StorageType, _connection);
 
 			// Rename file if necessary.
 			if (string.IsNullOrEmpty(name))
@@ -127,7 +128,7 @@
 				throw new ArgumentNullException(nameof(domInstanceId));
 
 			// Create appropriate storage handler based on category's storage type.
-			var storageHandler = StorageHandlerFactory.Create(category.StorageType, Helpers, _connection);
+			var storageHandler = StorageHandlerFactory.Create(category.StorageType, _connection);
 
 			// Rename file if necessary.
 			if (string.IsNullOrEmpty(name))
@@ -194,10 +195,10 @@
 
 			// This overload is intended for web-like storage backends that use UploadPath.
 			// DOM storage uses DOM instances instead; instruct caller to use the DOM overload.
-			if (category.StorageType == Storagetype.DOM)
+			if (category.StorageType == StorageType.DOM)
 				throw new InvalidOperationException("This overload is not supported for DOM storage. Use UploadFile(category, filePath, domInstanceId, name) instead.");
 
-			var storageHandler = StorageHandlerFactory.Create(category.StorageType, Helpers, _connection);
+			var storageHandler = StorageHandlerFactory.Create(category.StorageType, _connection);
 
 			if (string.IsNullOrEmpty(name))
 			{
@@ -282,9 +283,9 @@
 		/// ReadFiles(Storagetype.DOM, context: pageData);
 		/// </code>
 		/// </remarks>
-		public List<IDocHubFile> ReadFiles(Storagetype storageType, DocHubPageData context = null, string filter = null)
+		public List<IDocHubFile> ReadFiles(StorageType storageType, DocHubPageData context = null, string filter = null)
 		{
-			ReadData data = storageType == Storagetype.DOM
+			ReadData data = storageType == StorageType.DOM
 				? (ReadData)new DomFileReadData()
 				: new WebFileReadData();
 
@@ -327,7 +328,7 @@
 			if (category == null)
 				throw new ArgumentNullException(nameof(category));
 
-			ReadData data = category.StorageType == Storagetype.DOM
+			ReadData data = category.StorageType == StorageType.DOM
 				? (ReadData)new DomFileReadData()
 				: new WebFileReadData();
 
@@ -391,7 +392,7 @@
 				Context = context,
 			};
 
-			return ReadFiles(Storagetype.DOM, data);
+			return ReadFiles(StorageType.DOM, data);
 		}
 
 		/// <summary>
@@ -456,9 +457,9 @@
 		#endregion
 
 		#region Internal Methods
-		internal List<IDocHubFile> ReadFiles(Storagetype storagetype, ReadData data)
+		internal List<IDocHubFile> ReadFiles(StorageType storagetype, ReadData data)
 		{
-			var storageHandler = StorageHandlerFactory.Create(storagetype, Helpers, _connection);
+			var storageHandler = StorageHandlerFactory.Create(storagetype, _connection);
 			return storageHandler.ReadFiles(data);
 		}
 		#endregion

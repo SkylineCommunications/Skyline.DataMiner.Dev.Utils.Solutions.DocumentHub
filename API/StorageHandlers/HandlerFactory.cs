@@ -3,9 +3,8 @@
 	using System;
 	using System.Collections.Generic;
 	using Skyline.DataMiner.Net;
-    using Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.FileAdapters;
-    using static Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers.SlcDocumenthubIds.Enums;
+    using Skyline.DataMiner.Utils.DocumentHub.SDM.Models;
 
     #region Interface
 
@@ -71,6 +70,7 @@
 		/// </summary>
 		/// <param name="storage">
 		/// The type of storage for which to create a handler.
+		/// </param>
 		/// <param name="connection">
 		/// An active DataMiner connection used to communicate with the system.
 		/// </param>
@@ -80,20 +80,21 @@
 		/// <exception cref="ArgumentException">
 		/// Thrown if no handler is registered for the specified storage type.
 		/// </exception>
-		internal static IStorageHandler Create(Storagetype storage, IConnection connection)
+		internal static IStorageHandler Create(StorageType storage, IConnection connection)
 		{
 			// Select the appropriate storage handler based on the given storage type.
 			switch (storage)
 			{
-				case Storagetype.Sharepoint:
+                // TODO: if it's sharepoint, don't initialize each time. Instead, consider caching the handler instance or implementing a singleton pattern if appropriate.
+                case StorageType.SharePoint:
 					// SharePoint-based storage implementation.
 					return new SharePointHandler(connection);
 
-				case Storagetype.Local:
+				case StorageType.Local:
 					// Local file system storage implementation.
 					return new LocalHandler();
 
-				case Storagetype.DOM:
+				case StorageType.DOM:
 					// DataMiner Object Model attachments storage implementation.
 					return new DomAttachmentsHandler(connection);
 

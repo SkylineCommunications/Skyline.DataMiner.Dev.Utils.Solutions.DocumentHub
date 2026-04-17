@@ -11,11 +11,11 @@
 	using Microsoft.Graph;
     using Skyline.DataMiner.DocumentHub.SDM.Models;
     using Skyline.DataMiner.Net;
-    using Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.FileAdapters;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Paging;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Security;
-    using Skyline.DataMiner.Utils.DocumentHub.SDM.Models;
     using Drive = Microsoft.Graph.Drive;
 	using File = System.IO.File;
 
@@ -45,6 +45,11 @@
 		#region Globals
 
 		/// <summary>
+		/// SharePoint DOM repository used to retrieve configurations from DataMiner Object Model.
+		/// </summary>
+		private readonly IRepository<SharePointConfiguration> _sharePointRepository;
+
+		/// <summary>
 		/// SharePoint configuration retrieved from the Document Hub configuration model.
 		/// </summary>
 		private readonly SharePointConfiguration _sharePoint;
@@ -70,20 +75,19 @@
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SharePointHandler"/> class.
 		/// </summary>
-		/// <param name="helpers">Helper object to retrieve configuration from DOM.</param>
 		/// <exception cref="NullReferenceException">
 		/// Thrown when the configured SharePoint document library cannot be found.
 		/// </exception>
 		internal SharePointHandler(IConnection connection)
 		{
-			sharepointRepository = new SharePointConfigurationDomRepository(connection);
+			_sharePointRepository = new SharePointConfigurationDomRepository(connection);
 
 			// Defensive check to avoid reinitialization
 			if (_graphClient != null && _drive != null)
 				return;
 
 			// Retrieve SharePoint configuration from DOM
-			_sharePoint = helpers.SharePointConfigurations.Read().FirstOrDefault();
+			_sharePoint = _sharePointRepository.Read(new TRUEFilterElement<SharePointConfiguration>()).FirstOrDefault();
 
 			// Retrieve client secret
 			var clientSecret = RetrieveClientSecret();
