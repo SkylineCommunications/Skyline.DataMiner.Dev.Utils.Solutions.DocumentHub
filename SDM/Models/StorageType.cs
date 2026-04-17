@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Utils.DocumentHub.SDM.Models
+﻿namespace Skyline.DataMiner.DocumentHub.SDM.Models
 {
     /// <summary>
     /// Enumeration representing the different types of storage backends supported by the Document Hub.

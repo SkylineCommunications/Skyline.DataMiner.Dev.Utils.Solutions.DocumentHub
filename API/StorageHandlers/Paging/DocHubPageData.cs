@@ -1,8 +1,7 @@
 ﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Paging
 {
     using System;
-    using DomHelpers.SlcDocumenthub;
-    using Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers;
+    using Skyline.DataMiner.DocumentHub.SDM.Models;
 
     /// <summary>
     /// Generic factory class that provides methods to create DocHub related objects.
@@ -27,7 +26,7 @@
 		/// <exception cref="NotSupportedException">
 		/// Thrown when the specified <paramref name="storageType"/> is not supported.
 		/// </exception>
-		public static DocHubPageData CreatePageData(SlcDocumenthubIds.Enums.Storagetype storageType)
+		public static DocHubPageData CreatePageData(StorageType storageType)
 		{
 			return CreatePageData(storageType, 200);
 		}
@@ -50,17 +49,17 @@
 		/// <exception cref="NotSupportedException">
 		/// Thrown when the specified <paramref name="storageType"/> is not supported.
 		/// </exception>
-		public static DocHubPageData CreatePageData(SlcDocumenthubIds.Enums.Storagetype storageType, int pageSize)
+		public static DocHubPageData CreatePageData(StorageType storageType, int pageSize)
 		{
 			switch (storageType)
 			{
-				case SlcDocumenthubIds.Enums.Storagetype.Sharepoint:
+				case StorageType.SharePoint:
 					return new SharePointPageData() { PageSize = pageSize };
 
-				case SlcDocumenthubIds.Enums.Storagetype.Local:
+				case StorageType.Local:
 					return new LocalPageData() { PageSize = pageSize };
 
-				case SlcDocumenthubIds.Enums.Storagetype.DOM:
+				case StorageType.DOM:
 					return new DOMPageData() { PageSize = pageSize };
 
 				default:

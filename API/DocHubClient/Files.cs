@@ -8,12 +8,10 @@
     using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-    using Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.FileAdapters;
     using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Paging;
     using Skyline.DataMiner.Utils.DocumentHub.SDM.Models;
-    using static Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers.SlcDocumenthubIds.Enums;
 
     /// <summary>
     /// Provides file related operations within DocumentHub.

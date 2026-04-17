@@ -2,7 +2,7 @@
 {
     using System;
     using Skyline.DataMiner.SDM;
-    using static Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers.SlcDocumenthubIds.Enums;
+    using Skyline.DataMiner.Utils.DocumentHub.SDM.Models;
 
     /// <summary>
     /// Represents a document category that defines how and where files are stored.
@@ -30,7 +30,7 @@
         /// <summary>
         /// Gets or sets storage backend used by this category.
         /// </summary>
-        public Storagetype StorageType { get; set; }
+        public StorageType StorageType { get; set; }
 
         /// <summary>
         /// Gets or sets allowed file extensions for this category.
