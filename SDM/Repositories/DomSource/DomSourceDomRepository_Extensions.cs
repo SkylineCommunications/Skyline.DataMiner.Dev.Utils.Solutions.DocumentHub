@@ -1,13 +1,26 @@
-﻿namespace Skyline.DataMiner.SDM
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
 {
-    using Skyline.DataMiner.Solutions.DocumentHub.SDM;
+    using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 
+    /// <summary>
+    /// Provides extension methods for adding middleware to an <see cref="IBulkRepository{T}"/> instance.
+    /// </summary>
     public static class DomSourceDomRepository_Extensions
     {
-
-        public static IBulkRepository<Solutions.DocumentHub.SDM.Models.DomSource> WithMiddleware(
-            this IBulkRepository<Solutions.DocumentHub.SDM.Models.DomSource> repository,
-            IMiddlewareMarker<Solutions.DocumentHub.SDM.Models.DomSource> middleware)
+        /// <summary>
+        /// Wraps the specified repository with the provided middleware, enabling interception or augmentation of
+        /// repository operations.
+        /// </summary>
+        /// <remarks>Use this method to add cross-cutting concerns such as logging, validation, or
+        /// authorization to repository operations without modifying the repository implementation.</remarks>
+        /// <param name="repository">The <see cref="IBulkRepository{T}"/> to be wrapped with middleware.</param>
+        /// <param name="middleware">The middleware to apply to the repository.</param>
+        /// <returns>An <see cref="IBulkRepository{DomSource}"/> instance that applies the specified middleware to all
+        /// operations.</returns>
+        public static IBulkRepository<DomSource> WithMiddleware(
+            this IBulkRepository<DomSource> repository,
+            IMiddlewareMarker<DomSource> middleware)
         {
             return new DomSourceDomRepository_Middleware(repository, middleware);
         }

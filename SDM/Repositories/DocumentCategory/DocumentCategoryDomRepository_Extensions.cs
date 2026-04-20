@@ -3,9 +3,21 @@
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 
+    /// <summary>
+    /// Provides extension methods for adding middleware to an <see cref="IBulkRepository{T}"/> instance.
+    /// </summary>
     public static class DocumentCategoryDomRepository_Extensions
     {
-
+        /// <summary>
+        /// Wraps the specified repository with the provided middleware, enabling interception or augmentation of
+        /// repository operations.
+        /// </summary>
+        /// <remarks>Use this method to add cross-cutting concerns such as logging, validation, or
+        /// authorization to repository operations without modifying the repository implementation.</remarks>
+        /// <param name="repository">The <see cref="IBulkRepository{T}"/> to be wrapped with middleware.</param>
+        /// <param name="middleware">The middleware to apply to the repository.</param>
+        /// <returns>An <see cref="IBulkRepository{DocumentCategory}"/> instance that applies the specified middleware to all
+        /// operations.</returns>
         public static IBulkRepository<DocumentCategory> WithMiddleware(
             this IBulkRepository<DocumentCategory> repository,
             IMiddlewareMarker<DocumentCategory> middleware)
