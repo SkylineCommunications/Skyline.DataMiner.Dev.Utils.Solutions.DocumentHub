@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.FileAdapters
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API
 {
 	using System;
 	using System.IO;

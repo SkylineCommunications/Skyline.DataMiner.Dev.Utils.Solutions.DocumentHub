@@ -4,7 +4,7 @@
 //     Changes to this file will be lost if the code is regenerated.
 // </auto-generated>
 //------------------------------------------------------------------------------
-namespace Skyline.DataMiner.DocumentHub.SDM.Models
+namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
 {
     using System;
     using System.Collections.Generic;
@@ -19,6 +19,7 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
     using Skyline.DataMiner.Net.Sections;
     using Skyline.DataMiner.Net.SubscriptionFilters;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
@@ -29,7 +30,7 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
         public DomSourceDomRepository(IConnection connection)
         {
             this.connection = connection;
-            this.helper = new DomHelper(connection.HandleMessages, Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.ModuleId);
+            this.helper = new DomHelper(connection.HandleMessages, Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.ModuleId);
         }
 
         public DomSource Create(DomSource createObject)
@@ -86,7 +87,7 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
 
             var domFilter = TranslateFullFilter(filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomDefinitionId.Id));
             return helper.DomInstances.Count(domFilter);
         }
 
@@ -98,7 +99,7 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
 
             var domFilter = TranslateFullFilter(query.Filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomDefinitionId.Id));
             var domOrder = TranslateFullOrderBy(query.Order);
             var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
             return helper.DomInstances.Count(domQuery);
@@ -251,7 +252,7 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomDefinitionId.Id));
             var domInstances = helper.DomInstances.Read(domFilter);
             return domInstances.Select(FromInstance);
         }
@@ -263,7 +264,7 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var domInstances = helper.DomInstances.Read(domQuery);
             return domInstances.Select(FromInstance);
@@ -276,7 +277,7 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomDefinitionId.Id));
             var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
             while (pagingHelper.MoveToNextPage())
             {
@@ -291,7 +292,7 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
             while (pagingHelper.MoveToNextPage())
@@ -391,28 +392,28 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             {
                 Identifier = instance.ID.Id.ToString()
             };
-            var _domsourcepropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomSourceProperties.SectionDefinitionId));
+            var _domsourcepropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomSourceProperties.SectionDefinitionId));
             if (_domsourcepropertiesSection != default)
             {
-                var _name = _domsourcepropertiesSection.GetValue<string>(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomSourceProperties.Name);
+                var _name = _domsourcepropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomSourceProperties.Name);
                 if (_name != null)
                 {
                     obj.Name = _name.Value;
                 }
 
-                var _module = _domsourcepropertiesSection.GetValue<string>(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomSourceProperties.Module);
+                var _module = _domsourcepropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomSourceProperties.Module);
                 if (_module != null)
                 {
                     obj.Module = _module.Value;
                 }
 
-                var _networksharepath = _domsourcepropertiesSection.GetValue<string>(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomSourceProperties.NetworkSharePath);
+                var _networksharepath = _domsourcepropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomSourceProperties.NetworkSharePath);
                 if (_networksharepath != null)
                 {
                     obj.NetworkSharePath = _networksharepath.Value;
                 }
 
-                var _credential = _domsourcepropertiesSection.GetValue<string>(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomSourceProperties.Credential);
+                var _credential = _domsourcepropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomSourceProperties.Credential);
                 if (_credential != null)
                 {
                     obj.Credential = _credential.Value;
@@ -436,31 +437,31 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
 
             var instance = new DomInstance
             {
-                DomDefinitionId = Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomDefinitionId,
+                DomDefinitionId = Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomDefinitionId,
                 ID = new DomInstanceId(id)
                 {
-                    ModuleId = Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.ModuleId
+                    ModuleId = Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.ModuleId
                 }
             };
-            var _domsourceproperties = new Section(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomSourceProperties.SectionDefinitionId);
+            var _domsourceproperties = new Section(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomSourceProperties.SectionDefinitionId);
             if (obj.Name != default)
             {
-                _domsourceproperties.AddOrUpdateValue<string>(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomSourceProperties.Name, Convert.ToString(obj.Name));
+                _domsourceproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomSourceProperties.Name, Convert.ToString(obj.Name));
             }
 
             if (obj.Module != default)
             {
-                _domsourceproperties.AddOrUpdateValue<string>(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomSourceProperties.Module, Convert.ToString(obj.Module));
+                _domsourceproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomSourceProperties.Module, Convert.ToString(obj.Module));
             }
 
             if (obj.NetworkSharePath != default)
             {
-                _domsourceproperties.AddOrUpdateValue<string>(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomSourceProperties.NetworkSharePath, Convert.ToString(obj.NetworkSharePath));
+                _domsourceproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomSourceProperties.NetworkSharePath, Convert.ToString(obj.NetworkSharePath));
             }
 
             if (obj.Credential != default)
             {
-                _domsourceproperties.AddOrUpdateValue<string>(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomSourceProperties.Credential, Convert.ToString(obj.Credential));
+                _domsourceproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomSourceProperties.Credential, Convert.ToString(obj.Credential));
             }
 
             instance.Sections.Add(_domsourceproperties);
@@ -474,13 +475,13 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
                 case "Identifier":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
                 case "Name":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomSourceProperties.Name), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomSourceProperties.Name), comparer, (string)value);
                 case "Module":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomSourceProperties.Module), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomSourceProperties.Module), comparer, (string)value);
                 case "NetworkSharePath":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomSourceProperties.NetworkSharePath), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomSourceProperties.NetworkSharePath), comparer, (string)value);
                 case "Credential":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomSourceProperties.Credential), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomSourceProperties.Credential), comparer, (string)value);
                 default:
                     throw new NotImplementedException();
             }
@@ -493,13 +494,13 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
                 case "Identifier":
                     return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
                 case "Name":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomSourceProperties.Name), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomSourceProperties.Name), sortOrder, naturalSort);
                 case "Module":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomSourceProperties.Module), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomSourceProperties.Module), sortOrder, naturalSort);
                 case "NetworkSharePath":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomSourceProperties.NetworkSharePath), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomSourceProperties.NetworkSharePath), sortOrder, naturalSort);
                 case "Credential":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DomSourceDomMapper.DomSourceProperties.Credential), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomSourceProperties.Credential), sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }

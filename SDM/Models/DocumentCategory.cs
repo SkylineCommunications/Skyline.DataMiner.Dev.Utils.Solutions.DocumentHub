@@ -1,8 +1,6 @@
-﻿namespace Skyline.DataMiner.DocumentHub.SDM.Models
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Models
 {
-    using System;
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.Utils.DocumentHub.SDM.Models;
 
     /// <summary>
     /// Represents a document category that defines how and where files are stored.

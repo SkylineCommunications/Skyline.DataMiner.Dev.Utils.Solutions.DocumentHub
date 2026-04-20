@@ -1,7 +1,6 @@
-﻿namespace Skyline.DataMiner.DocumentHub.SDM.Models
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Models
 {
     using Skyline.DataMiner.SDM;
-    using System;
 
     /// <summary>
     /// Configuration required to connect to a SharePoint document library.

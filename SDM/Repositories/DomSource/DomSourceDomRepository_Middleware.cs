@@ -5,7 +5,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Skyline.DataMiner.DocumentHub.SDM.Models
+namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
 {
     using System;
     using System.Collections.Generic;
@@ -23,20 +23,20 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
-    internal sealed partial class DomSourceDomRepository_Middleware : Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource>
+    internal sealed partial class DomSourceDomRepository_Middleware : Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>
     {
-        private readonly Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> _inner;
-        private readonly IMiddlewareMarker<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> _middleware;
+        private readonly Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> _inner;
+        private readonly IMiddlewareMarker<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> _middleware;
 
-        public DomSourceDomRepository_Middleware(Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> inner, IMiddlewareMarker<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> middleware)
+        public DomSourceDomRepository_Middleware(Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> inner, IMiddlewareMarker<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> middleware)
         {
             _inner = inner ?? throw new ArgumentNullException(nameof(inner));
             _middleware = middleware;
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource>> ReadPaged(FilterElement<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> filter)
+        public IEnumerable<IPagedResult<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>> ReadPaged(FilterElement<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> filter)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> middleware)
+            if (_middleware is IPageableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> middleware)
             {
                 return middleware.OnReadPaged(filter, _inner.ReadPaged);
             }
@@ -46,9 +46,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource>> ReadPaged(IQuery<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> query)
+        public IEnumerable<IPagedResult<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>> ReadPaged(IQuery<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> query)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> middleware)
+            if (_middleware is IPageableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> middleware)
             {
                 return middleware.OnReadPaged(query, _inner.ReadPaged);
             }
@@ -58,9 +58,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource>> ReadPaged(FilterElement<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> filter, int pageSize)
+        public IEnumerable<IPagedResult<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>> ReadPaged(FilterElement<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> filter, int pageSize)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> middleware)
+            if (_middleware is IPageableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> middleware)
             {
                 return middleware.OnReadPaged(filter, pageSize, _inner.ReadPaged);
             }
@@ -70,9 +70,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource>> ReadPaged(IQuery<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> query, int pageSize)
+        public IEnumerable<IPagedResult<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>> ReadPaged(IQuery<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> query, int pageSize)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> middleware)
+            if (_middleware is IPageableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> middleware)
             {
                 return middleware.OnReadPaged(query, pageSize, _inner.ReadPaged);
             }
@@ -82,9 +82,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public IEnumerable<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> Read(FilterElement<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> filter)
+        public IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> Read(FilterElement<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> filter)
         {
-            if (_middleware is IReadableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> middleware)
+            if (_middleware is IReadableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> middleware)
             {
                 return middleware.OnRead(filter, _inner.Read);
             }
@@ -94,9 +94,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public IEnumerable<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> Read(IQuery<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> query)
+        public IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> Read(IQuery<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> query)
         {
-            if (_middleware is IReadableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> middleware)
+            if (_middleware is IReadableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> middleware)
             {
                 return middleware.OnRead(query, _inner.Read);
             }
@@ -106,9 +106,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public long Count(FilterElement<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> filter)
+        public long Count(FilterElement<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> filter)
         {
-            if (_middleware is ICountableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> middleware)
+            if (_middleware is ICountableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> middleware)
             {
                 return middleware.OnCount(filter, _inner.Count);
             }
@@ -118,9 +118,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public long Count(IQuery<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> query)
+        public long Count(IQuery<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> query)
         {
-            if (_middleware is ICountableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> middleware)
+            if (_middleware is ICountableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> middleware)
             {
                 return middleware.OnCount(query, _inner.Count);
             }
@@ -130,9 +130,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public IReadOnlyCollection<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> Create(IEnumerable<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> oToCreate)
+        public IReadOnlyCollection<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> Create(IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> oToCreate)
         {
-            if (_middleware is IBulkCreatableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> middleware)
+            if (_middleware is IBulkCreatableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> middleware)
             {
                 return middleware.OnCreate(oToCreate, _inner.Create);
             }
@@ -142,9 +142,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public Skyline.DataMiner.DocumentHub.SDM.Models.DomSource Create(Skyline.DataMiner.DocumentHub.SDM.Models.DomSource oToCreate)
+        public Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource Create(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource oToCreate)
         {
-            if (_middleware is ICreatableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> middleware)
+            if (_middleware is ICreatableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> middleware)
             {
                 return middleware.OnCreate(oToCreate, _inner.Create);
             }
@@ -154,9 +154,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public IReadOnlyCollection<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> Update(IEnumerable<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> oToUpdate)
+        public IReadOnlyCollection<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> Update(IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> oToUpdate)
         {
-            if (_middleware is IBulkUpdatableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> middleware)
+            if (_middleware is IBulkUpdatableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> middleware)
             {
                 return middleware.OnUpdate(oToUpdate, _inner.Update);
             }
@@ -166,9 +166,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public Skyline.DataMiner.DocumentHub.SDM.Models.DomSource Update(Skyline.DataMiner.DocumentHub.SDM.Models.DomSource oToUpdate)
+        public Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource Update(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource oToUpdate)
         {
-            if (_middleware is IUpdatableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> middleware)
+            if (_middleware is IUpdatableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> middleware)
             {
                 return middleware.OnUpdate(oToUpdate, _inner.Update);
             }
@@ -178,9 +178,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public void Delete(IEnumerable<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> oToDelete)
+        public void Delete(IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> oToDelete)
         {
-            if (_middleware is IBulkDeletableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> middleware)
+            if (_middleware is IBulkDeletableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> middleware)
             {
                 middleware.OnDelete(oToDelete, _inner.Delete);
             }
@@ -190,9 +190,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public void Delete(Skyline.DataMiner.DocumentHub.SDM.Models.DomSource oToDelete)
+        public void Delete(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource oToDelete)
         {
-            if (_middleware is IDeletableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> middleware)
+            if (_middleware is IDeletableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> middleware)
             {
                 middleware.OnDelete(oToDelete, _inner.Delete);
             }
@@ -201,7 +201,7 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
                 _inner.Delete(oToDelete);
             }
         }
-        public System.Collections.Generic.IReadOnlyCollection<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> CreateOrUpdate(System.Collections.Generic.IEnumerable<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource> oToCreateOrUpdate)
+        public System.Collections.Generic.IReadOnlyCollection<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> CreateOrUpdate(System.Collections.Generic.IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> oToCreateOrUpdate)
         {
             return _inner.CreateOrUpdate(oToCreateOrUpdate);
         }

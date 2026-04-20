@@ -1,7 +1,7 @@
-﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API
 {
-    using Skyline.DataMiner.DocumentHub.SDM.Models;
-    using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Paging;
+    using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
+    using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
     using System;
     using System.Collections.Generic;
 

@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Paging
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API.Paging
 {
     using System.Collections.Generic;
     using Microsoft.Graph;

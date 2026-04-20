@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.DocumentHub.SDM.Models
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps
 {
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Sections;

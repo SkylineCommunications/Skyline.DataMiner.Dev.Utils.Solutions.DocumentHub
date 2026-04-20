@@ -1,10 +1,9 @@
-﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API
 {
-	using System;
-	using System.Collections.Generic;
-	using Skyline.DataMiner.Net;
-    using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.FileAdapters;
-    using Skyline.DataMiner.DocumentHub.SDM.Models;
+    using System;
+    using System.Collections.Generic;
+    using Skyline.DataMiner.Net;
+    using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 
     #region Interface
 

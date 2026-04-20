@@ -4,7 +4,7 @@
 //     Changes to this file will be lost if the code is regenerated.
 // </auto-generated>
 //------------------------------------------------------------------------------
-namespace Skyline.DataMiner.DocumentHub.SDM.Models
+namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
 {
     using System;
     using System.Collections;
@@ -19,14 +19,14 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
 
     public static partial class DocumentCategoryExposers
     {
-        public static readonly Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, string> Identifier = new Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, string>((obj) => obj.Identifier, "Identifier");
-        public static readonly Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, string> Name = new Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, string>((obj) => obj.Name, "Name");
-        public static readonly Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, string> Description = new Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, string>((obj) => obj.Description, "Description");
-        public static readonly Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, string> UploadPath = new Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, string>((obj) => obj.UploadPath, "UploadPath");
-        public static readonly Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, Skyline.DataMiner.DocumentHub.SDM.Models.StorageType> StorageType = new Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, Skyline.DataMiner.DocumentHub.SDM.Models.StorageType>((obj) => obj.StorageType, "StorageType");
-        public static readonly Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, string> Extensions = new Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, string>((obj) => obj.Extensions, "Extensions");
-        public static readonly Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, bool> IsDefault = new Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, bool>((obj) => obj.IsDefault, "IsDefault");
-        public static readonly Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource>> DOMSource = new Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource>>((obj) => obj.DOMSource, "DOMSource");
-        public static readonly Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, string> Definition = new Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategory, string>((obj) => obj.Definition, "Definition");
+        public static readonly Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, string> Identifier = new Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, string> Name = new Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, string>((obj) => obj.Name, "Name");
+        public static readonly Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, string> Description = new Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, string>((obj) => obj.Description, "Description");
+        public static readonly Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, string> UploadPath = new Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, string>((obj) => obj.UploadPath, "UploadPath");
+        public static readonly Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.StorageType> StorageType = new Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.StorageType>((obj) => obj.StorageType, "StorageType");
+        public static readonly Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, string> Extensions = new Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, string>((obj) => obj.Extensions, "Extensions");
+        public static readonly Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, bool> IsDefault = new Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, bool>((obj) => obj.IsDefault, "IsDefault");
+        public static readonly Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>> DOMSource = new Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>>((obj) => obj.DOMSource, "DOMSource");
+        public static readonly Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, string> Definition = new Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, string>((obj) => obj.Definition, "Definition");
     }
 }

@@ -1,12 +1,11 @@
-﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
-	using System.IO;
-	using System.Linq;
-    using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.FileAdapters;
-    using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Paging;
+    using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
+    using System;
+    using System.Collections.Generic;
+    using System.Drawing;
+    using System.IO;
+    using System.Linq;
 
     /// <summary>
     /// Handles file and image storage on the local filesystem.

@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.DocumentHub.SDM.Models
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Models
 {
     using Skyline.DataMiner.SDM;
 

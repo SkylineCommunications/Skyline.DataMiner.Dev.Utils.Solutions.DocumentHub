@@ -1,16 +1,16 @@
-﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API
 {
-	using System;
-	using System.Collections.Generic;
-	using System.IO;
-	using System.Linq;
-    using Skyline.DataMiner.DocumentHub.SDM.Models;
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
     using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.FileAdapters;
-    using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Paging;
+    using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
+    using Skyline.DataMiner.Solutions.DocumentHub.SDM;
+    using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 
     /// <summary>
     /// Storage handler for reading, paging, and uploading files from DOM instances.

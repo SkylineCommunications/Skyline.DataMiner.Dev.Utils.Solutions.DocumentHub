@@ -5,7 +5,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Skyline.DataMiner.DocumentHub.SDM.Models
+namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
 {
     using System;
     using System.Collections.Generic;
@@ -23,20 +23,20 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
-    internal sealed partial class SharePointConfigurationDomRepository_Middleware : Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration>
+    internal sealed partial class SharePointConfigurationDomRepository_Middleware : Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration>
     {
-        private readonly Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> _inner;
-        private readonly IMiddlewareMarker<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> _middleware;
+        private readonly Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> _inner;
+        private readonly IMiddlewareMarker<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> _middleware;
 
-        public SharePointConfigurationDomRepository_Middleware(Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> inner, IMiddlewareMarker<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
+        public SharePointConfigurationDomRepository_Middleware(Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> inner, IMiddlewareMarker<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
         {
             _inner = inner ?? throw new ArgumentNullException(nameof(inner));
             _middleware = middleware;
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration>> ReadPaged(FilterElement<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> filter)
+        public IEnumerable<IPagedResult<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration>> ReadPaged(FilterElement<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> filter)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
+            if (_middleware is IPageableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
             {
                 return middleware.OnReadPaged(filter, _inner.ReadPaged);
             }
@@ -46,9 +46,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration>> ReadPaged(IQuery<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> query)
+        public IEnumerable<IPagedResult<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration>> ReadPaged(IQuery<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> query)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
+            if (_middleware is IPageableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
             {
                 return middleware.OnReadPaged(query, _inner.ReadPaged);
             }
@@ -58,9 +58,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration>> ReadPaged(FilterElement<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> filter, int pageSize)
+        public IEnumerable<IPagedResult<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration>> ReadPaged(FilterElement<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> filter, int pageSize)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
+            if (_middleware is IPageableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
             {
                 return middleware.OnReadPaged(filter, pageSize, _inner.ReadPaged);
             }
@@ -70,9 +70,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration>> ReadPaged(IQuery<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> query, int pageSize)
+        public IEnumerable<IPagedResult<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration>> ReadPaged(IQuery<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> query, int pageSize)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
+            if (_middleware is IPageableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
             {
                 return middleware.OnReadPaged(query, pageSize, _inner.ReadPaged);
             }
@@ -82,9 +82,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public IEnumerable<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> Read(FilterElement<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> filter)
+        public IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> Read(FilterElement<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> filter)
         {
-            if (_middleware is IReadableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
+            if (_middleware is IReadableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
             {
                 return middleware.OnRead(filter, _inner.Read);
             }
@@ -94,9 +94,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public IEnumerable<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> Read(IQuery<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> query)
+        public IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> Read(IQuery<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> query)
         {
-            if (_middleware is IReadableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
+            if (_middleware is IReadableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
             {
                 return middleware.OnRead(query, _inner.Read);
             }
@@ -106,9 +106,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public long Count(FilterElement<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> filter)
+        public long Count(FilterElement<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> filter)
         {
-            if (_middleware is ICountableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
+            if (_middleware is ICountableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
             {
                 return middleware.OnCount(filter, _inner.Count);
             }
@@ -118,9 +118,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public long Count(IQuery<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> query)
+        public long Count(IQuery<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> query)
         {
-            if (_middleware is ICountableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
+            if (_middleware is ICountableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
             {
                 return middleware.OnCount(query, _inner.Count);
             }
@@ -130,9 +130,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public IReadOnlyCollection<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> Create(IEnumerable<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> oToCreate)
+        public IReadOnlyCollection<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> Create(IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> oToCreate)
         {
-            if (_middleware is IBulkCreatableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
+            if (_middleware is IBulkCreatableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
             {
                 return middleware.OnCreate(oToCreate, _inner.Create);
             }
@@ -142,9 +142,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration Create(Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration oToCreate)
+        public Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration Create(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration oToCreate)
         {
-            if (_middleware is ICreatableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
+            if (_middleware is ICreatableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
             {
                 return middleware.OnCreate(oToCreate, _inner.Create);
             }
@@ -154,9 +154,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public IReadOnlyCollection<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> Update(IEnumerable<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> oToUpdate)
+        public IReadOnlyCollection<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> Update(IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> oToUpdate)
         {
-            if (_middleware is IBulkUpdatableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
+            if (_middleware is IBulkUpdatableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
             {
                 return middleware.OnUpdate(oToUpdate, _inner.Update);
             }
@@ -166,9 +166,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration Update(Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration oToUpdate)
+        public Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration Update(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration oToUpdate)
         {
-            if (_middleware is IUpdatableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
+            if (_middleware is IUpdatableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
             {
                 return middleware.OnUpdate(oToUpdate, _inner.Update);
             }
@@ -178,9 +178,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public void Delete(IEnumerable<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> oToDelete)
+        public void Delete(IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> oToDelete)
         {
-            if (_middleware is IBulkDeletableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
+            if (_middleware is IBulkDeletableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
             {
                 middleware.OnDelete(oToDelete, _inner.Delete);
             }
@@ -190,9 +190,9 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
         }
 
-        public void Delete(Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration oToDelete)
+        public void Delete(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration oToDelete)
         {
-            if (_middleware is IDeletableMiddleware<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
+            if (_middleware is IDeletableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
             {
                 middleware.OnDelete(oToDelete, _inner.Delete);
             }
@@ -201,7 +201,7 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
                 _inner.Delete(oToDelete);
             }
         }
-        public System.Collections.Generic.IReadOnlyCollection<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> CreateOrUpdate(System.Collections.Generic.IEnumerable<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> oToCreateOrUpdate)
+        public System.Collections.Generic.IReadOnlyCollection<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> CreateOrUpdate(System.Collections.Generic.IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> oToCreateOrUpdate)
         {
             return _inner.CreateOrUpdate(oToCreateOrUpdate);
         }

@@ -4,7 +4,7 @@
 //     Changes to this file will be lost if the code is regenerated.
 // </auto-generated>
 //------------------------------------------------------------------------------
-namespace Skyline.DataMiner.DocumentHub.SDM.Models
+namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
 {
     using System;
     using System.Collections;
@@ -19,10 +19,10 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
 
     public static partial class DomSourceExposers
     {
-        public static readonly Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource, string> Identifier = new Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource, string>((obj) => obj.Identifier, "Identifier");
-        public static readonly Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource, string> Name = new Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource, string>((obj) => obj.Name, "Name");
-        public static readonly Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource, string> Module = new Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource, string>((obj) => obj.Module, "Module");
-        public static readonly Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource, string> NetworkSharePath = new Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource, string>((obj) => obj.NetworkSharePath, "NetworkSharePath");
-        public static readonly Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource, string> Credential = new Exposer<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource, string>((obj) => obj.Credential, "Credential");
+        public static readonly Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource, string> Identifier = new Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource, string>((obj) => obj.Identifier, "Identifier");
+        public static readonly Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource, string> Name = new Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource, string>((obj) => obj.Name, "Name");
+        public static readonly Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource, string> Module = new Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource, string>((obj) => obj.Module, "Module");
+        public static readonly Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource, string> NetworkSharePath = new Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource, string>((obj) => obj.NetworkSharePath, "NetworkSharePath");
+        public static readonly Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource, string> Credential = new Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource, string>((obj) => obj.Credential, "Credential");
     }
 }

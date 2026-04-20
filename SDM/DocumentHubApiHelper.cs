@@ -1,9 +1,8 @@
-﻿namespace Skyline.DataMiner.DocumentHub.SDM
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
 {
-    using Skyline.DataMiner.DocumentHub.SDM.Models;
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.Utils.DocumentHub.SDM.Models;
+    using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
     using System;
 
     internal class DocumentHubApiHelper : IDocumentHubApiHelper

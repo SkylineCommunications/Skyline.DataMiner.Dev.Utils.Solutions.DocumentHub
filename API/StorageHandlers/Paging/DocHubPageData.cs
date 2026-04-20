@@ -1,7 +1,7 @@
-﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Paging
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API.Paging
 {
     using System;
-    using Skyline.DataMiner.DocumentHub.SDM.Models;
+    using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 
     /// <summary>
     /// Generic factory class that provides methods to create DocHub related objects.

@@ -1,15 +1,13 @@
-﻿namespace Skyline.DataMiner.SDM
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
 {
-    using Skyline.DataMiner.SDM.Middleware;
-    using Skyline.DataMiner.DocumentHub.SDM.Models;
     using Skyline.DataMiner.SDM;
 
     public static class SharePointConfigurationDomRepository_Extensions
     {
 
-        public static Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> WithMiddleware(
-            this Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> repository,
-            IMiddlewareMarker<Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
+        public static IBulkRepository<Models.SharePointConfiguration> WithMiddleware(
+            this IBulkRepository<Models.SharePointConfiguration> repository,
+            IMiddlewareMarker<Models.SharePointConfiguration> middleware)
         {
             return new SharePointConfigurationDomRepository_Middleware(repository, middleware);
         }

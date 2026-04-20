@@ -1,17 +1,14 @@
-﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.DocumentHub
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API
 {
-	using System;
-	using System.Collections.Generic;
-	using System.IO;
-	using System.Linq;
-    using Skyline.DataMiner.DocumentHub.SDM.Models;
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
     using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-    using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers;
-    using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.FileAdapters;
-    using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Paging;
-    using Skyline.DataMiner.Utils.DocumentHub.SDM.Models;
+    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+    using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
+    using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 
     /// <summary>
     /// Provides file related operations within DocumentHub.

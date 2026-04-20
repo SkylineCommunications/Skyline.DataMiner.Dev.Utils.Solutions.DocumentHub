@@ -1,46 +1,46 @@
-﻿namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Drawing;
-	using System.Drawing.Imaging;
-	using System.IO;
-	using System.Linq;
-	using System.Threading.Tasks;
-	using Azure.Identity;
-	using Microsoft.Graph;
-    using Skyline.DataMiner.DocumentHub.SDM.Models;
+    using System;
+    using System.Collections.Generic;
+    using System.Drawing;
+    using System.Drawing.Imaging;
+    using System.IO;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Azure.Identity;
+    using Microsoft.Graph;
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.FileAdapters;
-    using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Paging;
-    using Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Security;
+    using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
+    using Skyline.DataMiner.Solutions.DocumentHub.API.Security;
+    using Skyline.DataMiner.Solutions.DocumentHub.SDM;
+    using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
     using Drive = Microsoft.Graph.Drive;
-	using File = System.IO.File;
+    using File = System.IO.File;
 
-	/// <summary>
-	/// SharePoint storage handler implementation using Microsoft Graph.
-	/// </summary>
-	/// <remarks>
-	/// This class provides file enumeration, existence checks, folder creation, and uploads
-	/// to a SharePoint document library.  
-	/// <para>
-	/// ⚠ Paging is implemented manually because Microsoft Graph paginates per-folder, not recursively.
-	/// This means logical paging must aggregate multiple Graph pages and maintain internal buffers.
-	/// </para>
-	/// </remarks>
-	/// <seealso cref="IStorageHandler"/>
-	/// <seealso cref="GraphServiceClient"/>
-	/// <seealso cref="SharePointPageData"/>
-	/// <example>
-	/// Typical usage:
-	/// <code>
-	/// var handler = new SharePointHandler(helpers, connection);
-	/// var files = handler.ReadFiles(new WebFileReadData { Category = category });
-	/// </code>
-	/// </example>
-	internal class SharePointHandler : IStorageHandler
+    /// <summary>
+    /// SharePoint storage handler implementation using Microsoft Graph.
+    /// </summary>
+    /// <remarks>
+    /// This class provides file enumeration, existence checks, folder creation, and uploads
+    /// to a SharePoint document library.  
+    /// <para>
+    /// ⚠ Paging is implemented manually because Microsoft Graph paginates per-folder, not recursively.
+    /// This means logical paging must aggregate multiple Graph pages and maintain internal buffers.
+    /// </para>
+    /// </remarks>
+    /// <seealso cref="IStorageHandler"/>
+    /// <seealso cref="GraphServiceClient"/>
+    /// <seealso cref="SharePointPageData"/>
+    /// <example>
+    /// Typical usage:
+    /// <code>
+    /// var handler = new SharePointHandler(helpers, connection);
+    /// var files = handler.ReadFiles(new WebFileReadData { Category = category });
+    /// </code>
+    /// </example>
+    internal class SharePointHandler : IStorageHandler
 	{
 		#region Globals
 

@@ -1,4 +1,4 @@
-namespace Skyline.DataMiner.Utils.DocumentHub.API.StorageHandlers.Security
+namespace Skyline.DataMiner.Solutions.DocumentHub.API.Security
 {
 	using System;
 	using System.Security.Cryptography;

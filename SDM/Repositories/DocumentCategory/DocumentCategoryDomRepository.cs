@@ -4,7 +4,7 @@
 //     Changes to this file will be lost if the code is regenerated.
 // </auto-generated>
 //------------------------------------------------------------------------------
-namespace Skyline.DataMiner.DocumentHub.SDM
+namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
 {
     using global::Skyline.DataMiner.Net;
     using global::Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
@@ -12,9 +12,11 @@ namespace Skyline.DataMiner.DocumentHub.SDM
     using global::Skyline.DataMiner.Net.ManagerStore;
     using global::Skyline.DataMiner.Net.Messages.SLDataGateway;
     using global::Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.DocumentHub.SDM.Models;
+    using Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps;
     using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Net.Sections;
+    using Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps;
+    using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
     using System;
@@ -510,52 +512,52 @@ namespace Skyline.DataMiner.DocumentHub.SDM
             {
                 Identifier = instance.ID.Id.ToString()
             };
-            var _documentcategorypropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.SectionDefinitionId));
+            var _documentcategorypropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.SectionDefinitionId));
             if (_documentcategorypropertiesSection != default)
             {
-                var _name = _documentcategorypropertiesSection.GetValue<string>(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Name);
+                var _name = _documentcategorypropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.Name);
                 if (_name != null)
                 {
                     obj.Name = _name.Value;
                 }
 
-                var _description = _documentcategorypropertiesSection.GetValue<string>(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Description);
+                var _description = _documentcategorypropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.Description);
                 if (_description != null)
                 {
                     obj.Description = _description.Value;
                 }
 
-                var _uploadpath = _documentcategorypropertiesSection.GetValue<string>(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.UploadPath);
+                var _uploadpath = _documentcategorypropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.UploadPath);
                 if (_uploadpath != null)
                 {
                     obj.UploadPath = _uploadpath.Value;
                 }
 
-                var _storagetype = _documentcategorypropertiesSection.GetValue<int>(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.StorageType);
+                var _storagetype = _documentcategorypropertiesSection.GetValue<int>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.StorageType);
                 if (_storagetype != null)
                 {
-                    obj.StorageType = (Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers.SlcDocumenthubIds.Enums.Storagetype)_storagetype.Value;
+                    obj.StorageType = (Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.StorageType)_storagetype.Value;
                 }
 
-                var _extensions = _documentcategorypropertiesSection.GetValue<string>(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Extensions);
+                var _extensions = _documentcategorypropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.Extensions);
                 if (_extensions != null)
                 {
                     obj.Extensions = _extensions.Value;
                 }
 
-                var _isdefault = _documentcategorypropertiesSection.GetValue<bool>(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.IsDefault);
+                var _isdefault = _documentcategorypropertiesSection.GetValue<bool>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.IsDefault);
                 if (_isdefault != null)
                 {
                     obj.IsDefault = _isdefault.Value;
                 }
 
-                var _domsource = _documentcategorypropertiesSection.GetValue<string>(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.DOMSource);
+                var _domsource = _documentcategorypropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.DOMSource);
                 if (_domsource != null)
                 {
-                    obj.DOMSource = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource>(Convert.ToString(_domsource.Value));
+                    obj.DOMSource = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>(Convert.ToString(_domsource.Value));
                 }
 
-                var _definition = _documentcategorypropertiesSection.GetValue<string>(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Definition);
+                var _definition = _documentcategorypropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.Definition);
                 if (_definition != null)
                 {
                     obj.Definition = _definition.Value;
@@ -579,47 +581,47 @@ namespace Skyline.DataMiner.DocumentHub.SDM
 
             var instance = new DomInstance
             {
-                DomDefinitionId = Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DomDefinitionId,
+                DomDefinitionId = Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DomDefinitionId,
                 ID = new DomInstanceId(id)
                 {
-                    ModuleId = Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.ModuleId
+                    ModuleId = Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.ModuleId
                 }
             };
-            var _documentcategoryproperties = new Section(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.SectionDefinitionId);
+            var _documentcategoryproperties = new Section(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.SectionDefinitionId);
             if (obj.Name != default)
             {
-                _documentcategoryproperties.AddOrUpdateValue<string>(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Name, Convert.ToString(obj.Name));
+                _documentcategoryproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.Name, Convert.ToString(obj.Name));
             }
 
             if (obj.Description != default)
             {
-                _documentcategoryproperties.AddOrUpdateValue<string>(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Description, Convert.ToString(obj.Description));
+                _documentcategoryproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.Description, Convert.ToString(obj.Description));
             }
 
             if (obj.UploadPath != default)
             {
-                _documentcategoryproperties.AddOrUpdateValue<string>(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.UploadPath, Convert.ToString(obj.UploadPath));
+                _documentcategoryproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.UploadPath, Convert.ToString(obj.UploadPath));
             }
 
-            _documentcategoryproperties.AddOrUpdateValue<int>(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.StorageType, (int)obj.StorageType);
+            _documentcategoryproperties.AddOrUpdateValue<int>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.StorageType, (int)obj.StorageType);
             if (obj.Extensions != default)
             {
-                _documentcategoryproperties.AddOrUpdateValue<string>(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Extensions, Convert.ToString(obj.Extensions));
+                _documentcategoryproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.Extensions, Convert.ToString(obj.Extensions));
             }
 
             if (obj.IsDefault != default)
             {
-                _documentcategoryproperties.AddOrUpdateValue<bool>(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.IsDefault, (bool)obj.IsDefault);
+                _documentcategoryproperties.AddOrUpdateValue<bool>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.IsDefault, (bool)obj.IsDefault);
             }
 
             if (obj.DOMSource != default)
             {
-                _documentcategoryproperties.AddOrUpdateValue<string>(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.DOMSource, obj.DOMSource.Identifier);
+                _documentcategoryproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.DOMSource, obj.DOMSource.Identifier);
             }
 
             if (obj.Definition != default)
             {
-                _documentcategoryproperties.AddOrUpdateValue<string>(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Definition, Convert.ToString(obj.Definition));
+                _documentcategoryproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.Definition, Convert.ToString(obj.Definition));
             }
 
             instance.Sections.Add(_documentcategoryproperties);
@@ -633,21 +635,21 @@ namespace Skyline.DataMiner.DocumentHub.SDM
                 case "Identifier":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
                 case "Name":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Name), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.Name), comparer, (string)value);
                 case "Description":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Description), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.Description), comparer, (string)value);
                 case "UploadPath":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.UploadPath), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.UploadPath), comparer, (string)value);
                 case "StorageType":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.StorageType), comparer, (int)(Skyline.DataMiner.Utils.DocumentHub.API.DataHelpers.SlcDocumenthubIds.Enums.Storagetype)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.StorageType), comparer, (int)(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.StorageType)value);
                 case "Extensions":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Extensions), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.Extensions), comparer, (string)value);
                 case "IsDefault":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.IsDefault), comparer, (bool)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.IsDefault), comparer, (bool)value);
                 case "DOMSource":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.DOMSource), comparer, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.DocumentHub.SDM.Models.DomSource>.Convert(value).Identifier);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.DOMSource), comparer, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>.Convert(value).Identifier);
                 case "Definition":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Definition), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.Definition), comparer, (string)value);
                 default:
                     throw new NotImplementedException();
             }
@@ -660,21 +662,21 @@ namespace Skyline.DataMiner.DocumentHub.SDM
                 case "Identifier":
                     return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
                 case "Name":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Name), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.Name), sortOrder, naturalSort);
                 case "Description":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Description), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.Description), sortOrder, naturalSort);
                 case "UploadPath":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.UploadPath), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.UploadPath), sortOrder, naturalSort);
                 case "StorageType":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.StorageType), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.StorageType), sortOrder, naturalSort);
                 case "Extensions":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Extensions), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.Extensions), sortOrder, naturalSort);
                 case "IsDefault":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.IsDefault), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.IsDefault), sortOrder, naturalSort);
                 case "DOMSource":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.DOMSource), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.DOMSource), sortOrder, naturalSort);
                 case "Definition":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Definition), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.Definition), sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }

@@ -3,8 +3,8 @@
     <TargetFramework>net48</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <AssemblyName>Skyline.DataMiner.Utils.DocumentHub</AssemblyName>
-    <RootNamespace>Skyline.DataMiner.Utils.DocumentHub</RootNamespace>
+    <AssemblyName>Skyline.DataMiner.Dev.Utils.DocumentHub</AssemblyName>
+    <RootNamespace>Skyline.DataMiner.Solutions.DocumentHub</RootNamespace>
     <PackageVersion>1.0.1</PackageVersion>
     <Version>1.0.1</Version>
     <PackageTags>Skyline;DataMiner</PackageTags>

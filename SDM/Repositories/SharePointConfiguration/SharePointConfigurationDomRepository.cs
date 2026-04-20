@@ -4,7 +4,7 @@
 //     Changes to this file will be lost if the code is regenerated.
 // </auto-generated>
 //------------------------------------------------------------------------------
-namespace Skyline.DataMiner.DocumentHub.SDM.Models
+namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
 {
     using System;
     using System.Collections.Generic;
@@ -19,6 +19,7 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
     using Skyline.DataMiner.Net.Sections;
     using Skyline.DataMiner.Net.SubscriptionFilters;
     using Skyline.DataMiner.SDM;
+    using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
@@ -29,7 +30,7 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
         public SharePointConfigurationDomRepository(IConnection connection)
         {
             this.connection = connection;
-            this.helper = new DomHelper(connection.HandleMessages, Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.ModuleId);
+            this.helper = new DomHelper(connection.HandleMessages, Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.ModuleId);
         }
 
         public SharePointConfiguration Create(SharePointConfiguration createObject)
@@ -146,7 +147,7 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
 
             var domFilter = TranslateFullFilter(filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.DomDefinitionId.Id));
             return helper.DomInstances.Count(domFilter);
         }
 
@@ -158,7 +159,7 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
             }
 
             var domFilter = TranslateFullFilter(query.Filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.DomDefinitionId.Id));
             var domOrder = TranslateFullOrderBy(query.Order);
             var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
             return helper.DomInstances.Count(domQuery);
@@ -370,7 +371,7 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.DomDefinitionId.Id));
             var domInstances = helper.DomInstances.Read(domFilter);
             return domInstances.Select(FromInstance);
         }
@@ -382,7 +383,7 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var domInstances = helper.DomInstances.Read(domQuery);
             return domInstances.Select(FromInstance);
@@ -395,7 +396,7 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.DomDefinitionId.Id));
             var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
             while (pagingHelper.MoveToNextPage())
             {
@@ -410,7 +411,7 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
             while (pagingHelper.MoveToNextPage())
@@ -526,10 +527,10 @@ namespace Skyline.DataMiner.DocumentHub.SDM.Models
 
             var instance = new DomInstance
             {
-                DomDefinitionId = Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.DomDefinitionId,
+                DomDefinitionId = Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.DomDefinitionId,
                 ID = new DomInstanceId(id)
                 {
-                    ModuleId = Skyline.DataMiner.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.ModuleId
+                    ModuleId = Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.ModuleId
                 }
             };
             return instance;
