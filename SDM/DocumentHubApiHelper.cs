@@ -17,6 +17,7 @@
             Connection = connection;
             _documentCategories = new DocumentCategoryDomRepository(connection);
             _domSources = new DomSourceDomRepository(connection);
+            _sharePointConfigurations = new SharePointConfigurationDomRepository(connection);
         }
 
         public IConnection Connection { get; }
@@ -55,7 +56,8 @@
                 {
                     throw new ObjectDisposedException(nameof(DocumentHubApiHelper));
                 }
-                throw new NotImplementedException();
+
+                return _sharePointConfigurations;
             }
         }
 
