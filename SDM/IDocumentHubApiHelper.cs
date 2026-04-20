@@ -1,11 +1,10 @@
 ﻿namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
 {
-    using System;
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 
-    internal interface IDocumentHubApiHelper : IDisposable
+    internal interface IDocumentHubApiHelper
     {
         IConnection Connection { get; }
 

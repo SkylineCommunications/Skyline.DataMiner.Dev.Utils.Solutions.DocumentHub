@@ -60,10 +60,5 @@
                 return _sharePointConfigurations;
             }
         }
-
-        public void Dispose()
-        {
-            throw new NotImplementedException();
-        }
     }
 }
