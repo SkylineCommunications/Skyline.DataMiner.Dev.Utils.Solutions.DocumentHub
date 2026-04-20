@@ -15,7 +15,6 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
     using Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps;
     using Skyline.DataMiner.Net.Messages;
     using Skyline.DataMiner.Net.Sections;
-    using Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps;
     using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;

@@ -3,14 +3,12 @@
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
-    using System;
 
     internal class DocumentHubApiHelper : IDocumentHubApiHelper
     {
         private readonly IBulkRepository<DocumentCategory> _documentCategories;
         private readonly IRepository<DomSource> _domSources;
         private readonly IRepository<SharePointConfiguration> _sharePointConfigurations;
-        private bool _disposed;
 
         public DocumentHubApiHelper(IConnection connection)
         {
@@ -26,11 +24,6 @@
         {
             get
             {
-                if (_disposed)
-                {
-                    throw new ObjectDisposedException(nameof(DocumentHubApiHelper));
-                }
-
                 return _documentCategories;
             }
         }
@@ -39,11 +32,6 @@
         {
             get
             {
-                if (_disposed)
-                {
-                    throw new ObjectDisposedException(nameof(DocumentHubApiHelper));
-                }
-
                 return _domSources;
             }
         }
@@ -52,11 +40,6 @@
         {
             get
             {
-                if (_disposed)
-                {
-                    throw new ObjectDisposedException(nameof(DocumentHubApiHelper));
-                }
-
                 return _sharePointConfigurations;
             }
         }
