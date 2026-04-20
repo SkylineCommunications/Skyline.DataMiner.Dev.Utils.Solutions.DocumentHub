@@ -17,19 +17,12 @@
 		/// </param>
 		public DocHubClient(IConnection connection)
 		{
-			//Categories = new Categories(Helpers);
 			Files = new Files(connection);
-			//Sources = new Sources(Helpers);
 		}
 
 		/// <summary>
 		/// Gets or sets provides access to document file operations such as upload and read.
 		/// </summary>
 		public Files Files { get; set; }
-
-
-		/// <summary>
-		/// Gets or sets internal helper layer for DataMiner DOM and storage operations.
-		/// </summary>
 	}
 }
