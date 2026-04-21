@@ -23,12 +23,12 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
-    internal sealed partial class DomSourceDomRepository_Middleware : Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>
+    internal sealed partial class DomSourceDomRepositoryMiddleware : Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>
     {
         private readonly Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> _inner;
         private readonly IMiddlewareMarker<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> _middleware;
 
-        public DomSourceDomRepository_Middleware(Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> inner, IMiddlewareMarker<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> middleware)
+        public DomSourceDomRepositoryMiddleware(Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> inner, IMiddlewareMarker<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource> middleware)
         {
             _inner = inner ?? throw new ArgumentNullException(nameof(inner));
             _middleware = middleware;

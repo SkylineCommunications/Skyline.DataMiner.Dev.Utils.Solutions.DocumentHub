@@ -6,7 +6,7 @@
     /// <summary>
     /// Provides extension methods for adding middleware to an <see cref="IBulkRepository{T}"/> instance.
     /// </summary>
-    public static class DocumentCategoryDomRepository_Extensions
+    public static class DocumentCategoryDomRepositoryExtensions
     {
         /// <summary>
         /// Wraps the specified repository with the provided middleware, enabling interception or augmentation of
@@ -22,7 +22,7 @@
             this IBulkRepository<DocumentCategory> repository,
             IMiddlewareMarker<DocumentCategory> middleware)
         {
-            return new DocumentCategoryDomRepository_Middleware(repository, middleware);
+            return new DocumentCategoryDomRepositoryMiddleware(repository, middleware);
         }
     }
 }

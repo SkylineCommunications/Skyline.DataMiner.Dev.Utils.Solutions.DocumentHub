@@ -6,7 +6,7 @@
     /// <summary>
     /// Provides extension methods for adding middleware to an <see cref="IBulkRepository{T}"/> instance.
     /// </summary>
-    public static class SharePointConfigurationDomRepository_Extensions
+    public static class SharePointConfigurationDomRepositoryExtensions
     {
         /// <summary>
         /// Wraps the specified repository with the provided middleware, enabling interception or augmentation of
@@ -22,7 +22,7 @@
             this IBulkRepository<SharePointConfiguration> repository,
             IMiddlewareMarker<SharePointConfiguration> middleware)
         {
-            return new SharePointConfigurationDomRepository_Middleware(repository, middleware);
+            return new SharePointConfigurationDomRepositoryMiddleware(repository, middleware);
         }
     }
 }

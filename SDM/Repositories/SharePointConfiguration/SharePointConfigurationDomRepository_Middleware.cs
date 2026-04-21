@@ -23,12 +23,12 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
-    internal sealed partial class SharePointConfigurationDomRepository_Middleware : Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration>
+    internal sealed partial class SharePointConfigurationDomRepositoryMiddleware : Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration>
     {
         private readonly Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> _inner;
         private readonly IMiddlewareMarker<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> _middleware;
 
-        public SharePointConfigurationDomRepository_Middleware(Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> inner, IMiddlewareMarker<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
+        public SharePointConfigurationDomRepositoryMiddleware(Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> inner, IMiddlewareMarker<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration> middleware)
         {
             _inner = inner ?? throw new ArgumentNullException(nameof(inner));
             _middleware = middleware;
