@@ -235,17 +235,34 @@
 				&& spContext.FolderQueue.Peek() == "root"
 				&& spContext.NextPageRequest == null)
 			{
-				var folder = _graphClient
-					.Sites[_site.Id]
-					.Drives[_drive.Id]
-					.Root
-					.ItemWithPath(category.UploadPath)
-					.Request()
-					.GetAsync()
-					.GetAwaiter()
-					.GetResult();
+                var trimmedPath = (category.UploadPath ?? string.Empty).Trim('/', '\\');
 
-				if (folder == null || folder.Folder == null)
+                DriveItem folder;
+                if (string.IsNullOrEmpty(trimmedPath))
+                {
+                    folder = _graphClient
+                        .Sites[_site.Id]
+                        .Drives[_drive.Id]
+                        .Root
+                        .Request()
+                        .GetAsync()
+                        .GetAwaiter()
+                        .GetResult();
+                }
+                else
+                {
+                    folder = _graphClient
+                        .Sites[_site.Id]
+                        .Drives[_drive.Id]
+                        .Root
+                        .ItemWithPath(trimmedPath)
+                        .Request()
+                        .GetAsync()
+                        .GetAwaiter()
+                        .GetResult();
+                }
+
+                if (folder == null || folder.Folder == null)
 					throw new InvalidOperationException("Could not find folder with path /" + category.UploadPath);
 
 				// Do NOT replace the queue instance (other code may hold references)
