@@ -509,7 +509,42 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
         {
             var obj = new SharePointConfiguration
             {
+                Identifier = instance.ID.Id.ToString()
             };
+            var _sharepointconfigurationpropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SectionDefinitionId));
+            if (_sharepointconfigurationpropertiesSection != default)
+            {
+                var _tenantid = _sharepointconfigurationpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.SharePointConfigurationProperties.TenantID);
+                if (_tenantid != null)
+                {
+                    obj.TenantID = _tenantid.Value;
+                }
+
+                var _clientid = _sharepointconfigurationpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientID);
+                if (_clientid != null)
+                {
+                    obj.ClientID = _clientid.Value;
+                }
+
+                var _clientsecret = _sharepointconfigurationpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientSecret);
+                if (_clientsecret != null)
+                {
+                    obj.ClientSecret = _clientsecret.Value;
+                }
+
+                var _siteurl = _sharepointconfigurationpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SiteURL);
+                if (_siteurl != null)
+                {
+                    obj.SiteURL = _siteurl.Value;
+                }
+
+                var _documentlibraryname = _sharepointconfigurationpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.SharePointConfigurationProperties.DocumentLibraryName);
+                if (_documentlibraryname != null)
+                {
+                    obj.DocumentLibraryName = _documentlibraryname.Value;
+                }
+            }
+
             return obj;
         }
 
@@ -533,6 +568,33 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
                     ModuleId = Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.ModuleId
                 }
             };
+            var _sharepointconfigurationproperties = new Section(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SectionDefinitionId);
+            if (obj.TenantID != default)
+            {
+                _sharepointconfigurationproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.SharePointConfigurationProperties.TenantID, Convert.ToString(obj.TenantID));
+            }
+
+            if (obj.ClientID != default)
+            {
+                _sharepointconfigurationproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientID, Convert.ToString(obj.ClientID));
+            }
+
+            if (obj.ClientSecret != default)
+            {
+                _sharepointconfigurationproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientSecret, Convert.ToString(obj.ClientSecret));
+            }
+
+            if (obj.SiteURL != default)
+            {
+                _sharepointconfigurationproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SiteURL, Convert.ToString(obj.SiteURL));
+            }
+
+            if (obj.DocumentLibraryName != default)
+            {
+                _sharepointconfigurationproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.SharePointConfigurationProperties.DocumentLibraryName, Convert.ToString(obj.DocumentLibraryName));
+            }
+
+            instance.Sections.Add(_sharepointconfigurationproperties);
             return instance;
         }
 
@@ -540,6 +602,18 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
         {
             switch (fieldName)
             {
+                case "Identifier":
+                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
+                case "TenantID":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.SharePointConfigurationProperties.TenantID), comparer, (string)value);
+                case "ClientID":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientID), comparer, (string)value);
+                case "ClientSecret":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientSecret), comparer, (string)value);
+                case "SiteURL":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SiteURL), comparer, (string)value);
+                case "DocumentLibraryName":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.SharePointConfigurationProperties.DocumentLibraryName), comparer, (string)value);
                 default:
                     throw new NotImplementedException();
             }
@@ -549,6 +623,18 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
         {
             switch (fieldName)
             {
+                case "Identifier":
+                    return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
+                case "TenantID":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.SharePointConfigurationProperties.TenantID), sortOrder, naturalSort);
+                case "ClientID":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientID), sortOrder, naturalSort);
+                case "ClientSecret":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientSecret), sortOrder, naturalSort);
+                case "SiteURL":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SiteURL), sortOrder, naturalSort);
+                case "DocumentLibraryName":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.SharePointConfigurationDomMapper.SharePointConfigurationProperties.DocumentLibraryName), sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }

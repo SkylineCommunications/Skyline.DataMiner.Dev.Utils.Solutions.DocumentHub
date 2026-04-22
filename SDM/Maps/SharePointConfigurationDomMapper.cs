@@ -12,7 +12,7 @@
         public static readonly DomDefinitionId DomDefinitionId = new DomDefinitionId(new Guid("f0492169-2e70-4aa3-a06a-28e8091b785a"))
         { ModuleId = ModuleId };
 
-        internal static class ConfigurationProperties
+        internal static class SharePointConfigurationProperties
         {
             internal static readonly SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(new Guid("2b038372-b61c-43d4-a39d-325e058a62fc"))
             { ModuleId = ModuleId };
