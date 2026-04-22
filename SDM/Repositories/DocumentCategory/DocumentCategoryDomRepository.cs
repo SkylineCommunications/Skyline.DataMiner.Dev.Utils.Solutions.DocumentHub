@@ -603,10 +603,8 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
             }
 
             _documentcategoryproperties.AddOrUpdateValue<int>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.StorageType, (int)obj.StorageType);
-            if (obj.Extensions != default)
-            {
-                _documentcategoryproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.Extensions, Convert.ToString(obj.Extensions));
-            }
+            
+           _documentcategoryproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.Extensions, Convert.ToString(obj.Extensions));
 
             if (obj.IsDefault != default)
             {
