@@ -159,8 +159,12 @@
 
 				// Safety break if no results and no further pages
 				if (page.Count == 0 && !context.HasNextPage())
+				{
 					break;
-			}
+				}
+
+                files.AddRange(page);
+            }
 
 			return files;
 		}
