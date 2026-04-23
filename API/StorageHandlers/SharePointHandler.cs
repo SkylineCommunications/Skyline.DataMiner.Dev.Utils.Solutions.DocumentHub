@@ -235,32 +235,42 @@
 				&& spContext.FolderQueue.Peek() == "root"
 				&& spContext.NextPageRequest == null)
 			{
-                var trimmedPath = (category.UploadPath ?? string.Empty).Trim('/', '\\');
+                //var trimmedPath = (category.UploadPath ?? string.Empty).Trim('/', '\\');
 
-                DriveItem folder;
-                if (string.IsNullOrEmpty(trimmedPath))
-                {
-                    folder = _graphClient
+                //DriveItem folder;
+                //if (string.IsNullOrEmpty(trimmedPath))
+                //{
+                //    folder = _graphClient
+                //        .Sites[_site.Id]
+                //        .Drives[_drive.Id]
+                //        .Root
+                //        .Request()
+                //        .GetAsync()
+                //        .GetAwaiter()
+                //        .GetResult();
+                //}
+                //else
+                //{
+                //    folder = _graphClient
+                //        .Sites[_site.Id]
+                //        .Drives[_drive.Id]
+                //        .Root
+                //        .ItemWithPath(trimmedPath)
+                //        .Request()
+                //        .GetAsync()
+                //        .GetAwaiter()
+                //        .GetResult();
+                //}
+
+                var folder = _graphClient
                         .Sites[_site.Id]
                         .Drives[_drive.Id]
                         .Root
+                        .ItemWithPath(category.UploadPath)
                         .Request()
                         .GetAsync()
                         .GetAwaiter()
                         .GetResult();
-                }
-                else
-                {
-                    folder = _graphClient
-                        .Sites[_site.Id]
-                        .Drives[_drive.Id]
-                        .Root
-                        .ItemWithPath(trimmedPath)
-                        .Request()
-                        .GetAsync()
-                        .GetAwaiter()
-                        .GetResult();
-                }
 
                 if (folder == null || folder.Folder == null)
 					throw new InvalidOperationException("Could not find folder with path /" + category.UploadPath);
