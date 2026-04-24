@@ -282,8 +282,13 @@
 				return new List<IDocHubFile>();
 			}
 
+			// Parse allowed extensions from category
+			var allowedExtensions = category != null && !string.IsNullOrEmpty(category.Extensions)
+										? new HashSet<string>(category.Extensions.Split(','), StringComparer.OrdinalIgnoreCase)
+										: null;
+
 			// Fetch next logical page (Graph paging + remainder buffer)
-			var driveItems = FetchNextPageInternal(filter, spContext);
+			var driveItems = FetchNextPageInternal(filter, allowedExtensions, spContext);
 
 			// Wrap DriveItems in adapter objects
 			var result = new List<IDocHubFile>(driveItems.Count);
@@ -298,41 +303,55 @@
 			return result;
 		}
 
-        /// <summary>
-        /// Retrieves the next logical page of <see cref="DriveItem"/> objects while recursively traversing folders.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// Microsoft Graph paginates per folder, not globally. This method merges folder pages into a
-        /// single logical page of size <see cref="SharePointPageData.PageSize"/>.
-        /// </para>
-        /// <para>
-        /// ⚠ Paging Pitfall: Excess items from Graph pages must be buffered in
-        /// <see cref="SharePointPageData.PageRemainderBuffer"/> or files will be skipped.
-        /// </para>
-        /// </remarks>
-        /// <seealso cref="SharePointPageData"/>
-        /// <seealso cref="SharePointPageData.PageRemainderBuffer"/>
-        private IList<DriveItem> FetchNextPageInternal(string filter, SharePointPageData context)
-        {
-            var collected = new List<DriveItem>(context.PageSize);
+		/// <summary>
+		/// Retrieves the next logical page of <see cref="DriveItem"/> objects by recursively
+		/// traversing the folder queue, applying name and extension filters, and merging
+		/// multiple Graph API responses into a single page of the configured size.
+		/// </summary>
+		/// <remarks>
+		/// Microsoft Graph paginates children per folder, not across the entire drive.
+		/// This method bridges that gap by consuming the <see cref="SharePointPageData.FolderQueue"/>,
+		/// issuing per-folder requests, and collecting results until
+		/// <see cref="SharePointPageData.PageSize"/> items are gathered.
+		/// Any surplus items are stored in <see cref="SharePointPageData.PageRemainderBuffer"/>
+		/// so they are returned on the next call rather than being lost.
+		/// </remarks>
+		/// <param name="filter">
+		/// Optional substring filter applied to <see cref="DriveItem.Name"/> (case-insensitive).
+		/// Pass <c>null</c> or empty to skip name filtering.
+		/// </param>
+		/// <param name="allowedExtensions">
+		/// Optional set of file extensions (without leading dot) to include.
+		/// Pass <c>null</c> to accept all extensions.
+		/// </param>
+		/// <param name="context">
+		/// Paging state that tracks the folder queue, the current Graph continuation token,
+		/// and any buffered overflow items from previous calls.
+		/// </param>
+		/// <returns>
+		/// A list of <see cref="DriveItem"/> objects representing the next logical page of files.
+		/// The list size is at most <see cref="SharePointPageData.PageSize"/>.
+		/// </returns>
+		private IList<DriveItem> FetchNextPageInternal(string filter, HashSet<string> allowedExtensions, SharePointPageData context)
+		{
+			var collected = new List<DriveItem>(context.PageSize);
 
-            // Drain buffered items from previous partial Graph pages
-            DrainRemainderBuffer(context, collected);
+			// Drain buffered items from previous partial Graph pages
+			DrainRemainderBuffer(context, collected);
 
-            // Continue folder traversal until logical page is full or no data remains
-            while (ShouldContinuePaging(context, collected))
-            {
-                EnsureNextPageRequest(context);
+			// Continue folder traversal until logical page is full or no data remains
+			while (ShouldContinuePaging(context, collected))
+			{
+				EnsureNextPageRequest(context);
 
-                var page = ExecuteGraphPageRequest(context);
+				var page = ExecuteGraphPageRequest(context);
 
-                EnqueueSubFolders(context, page);
-                CollectFiles(filter, context, collected, page);
-            }
+				EnqueueSubFolders(context, page);
+				CollectFiles(filter, allowedExtensions, context, collected, page);
+			}
 
-            return collected;
-        }
+			return collected;
+		}
 
         /// <summary>
         /// Drains leftover items from the remainder buffer into the current page.
@@ -393,16 +412,23 @@
             }
         }
 
-        /// <summary>
-        /// Collects file items into the logical page and buffers overflow items.
-        /// </summary>
-        private static void CollectFiles(string filter, SharePointPageData context, ICollection<DriveItem> collected, IDriveItemChildrenCollectionPage page)
-        {
-            var files = page.CurrentPage
-                .Where(i => i.File != null &&
-                            (string.IsNullOrEmpty(filter) ||
-                             i.Name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0))
-                .ToList();
+		/// <summary>
+		/// Collects file items into the logical page and buffers overflow items.
+		/// </summary>
+		private static void CollectFiles(
+			string filter, 
+			HashSet<string> allowedExtensions, 
+			SharePointPageData context, 
+			ICollection<DriveItem> collected, 
+			IDriveItemChildrenCollectionPage page)
+		{
+			var files = page.CurrentPage
+				.Where(i => i.File != null &&
+							(string.IsNullOrEmpty(filter) ||
+							 i.Name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0) &&
+							(allowedExtensions == null ||
+							 allowedExtensions.Contains(Path.GetExtension(i.Name).TrimStart('.'))))
+				.ToList();
 
             foreach (var file in files)
             {
