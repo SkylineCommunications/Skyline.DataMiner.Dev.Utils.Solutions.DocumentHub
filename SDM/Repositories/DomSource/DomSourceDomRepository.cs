@@ -473,7 +473,14 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
             switch (fieldName)
             {
                 case "Identifier":
-                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
+                    {
+                        if (string.IsNullOrEmpty((string)value))
+                        {
+                            throw new ArgumentException("Cannot filter DomSource by Identifier: the provided value is null or empty.");
+                        }
+
+                        return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
+                    }
                 case "Name":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DomSourceDomMapper.DomSourceProperties.Name), comparer, (string)value);
                 case "Module":

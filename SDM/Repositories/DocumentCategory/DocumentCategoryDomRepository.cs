@@ -551,7 +551,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
                 }
 
                 var _domsource = _documentcategorypropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.DOMSource);
-                if (_domsource != null)
+                if (_domsource != null && !string.IsNullOrEmpty(_domsource.Value))
                 {
                     obj.DOMSource = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>(Convert.ToString(_domsource.Value));
                 }
