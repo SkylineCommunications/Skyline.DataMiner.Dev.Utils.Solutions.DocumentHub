@@ -5,7 +5,7 @@
 		<Nullable>disable</Nullable>
 		<AssemblyName>Skyline.DataMiner.Dev.Utils.DocumentHub</AssemblyName>
 		<RootNamespace>Skyline.DataMiner.Solutions.DocumentHub</RootNamespace>
-		<PackageVersion>1.1.1-alpha16</PackageVersion>
+		<PackageVersion>1.1.1-alpha17</PackageVersion>
 		<Version>1.1.1</Version>
 		<PackageTags>Skyline;DataMiner</PackageTags>
 		<PackageProjectUrl>https://skyline.be</PackageProjectUrl>
@@ -29,7 +29,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Azure.Identity" Version="1.13.1" />
+		<PackageReference Include="Azure.Identity" Version="1.16.0" />
 		<PackageReference Include="Microsoft.Graph" Version="4.36.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 		<PackageReference Include="Skyline.DataMiner.Dev.Common" Version="10.6.3.1" />
