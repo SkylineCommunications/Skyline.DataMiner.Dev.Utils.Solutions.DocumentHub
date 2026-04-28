@@ -1,14 +1,13 @@
 ﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Drawing;
-    using System.Drawing.Imaging;
-    using System.IO;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using Azure.Identity;
-    using Microsoft.Graph;
+	using System;
+	using System.Collections.Generic;
+	using System.Drawing;
+	using System.Drawing.Imaging;
+	using System.IO;
+	using System.Linq;
+	using System.Threading.Tasks;
+	using Microsoft.Graph;
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
@@ -93,7 +92,7 @@
 			var clientSecret = RetrieveClientSecret();
 
 			// Authenticate using Azure AD client credentials flow
-			var credential = new ClientSecretCredential(
+			var credential = new Azure.Identity.ClientSecretCredential(
 				_sharePoint.TenantID,
 				_sharePoint.ClientID,
 				clientSecret);
