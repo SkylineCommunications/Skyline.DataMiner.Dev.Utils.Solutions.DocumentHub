@@ -444,18 +444,33 @@
             }
         }
 
-        /// <summary>
-        /// Checks if a file exists asynchronously.
-        /// </summary>
-        private async Task<bool> FileExistsAsync(string directory, string name)
+		/// <summary>
+		/// Checks if a file exists asynchronously.
+		/// </summary>
+		private async Task<bool> FileExistsAsync(string directory, string name)
 		{
 			try
 			{
+				// Normalize directory path
+				var normalizedDirectory = NormalizeDirectoryPath(directory);
+
+				string path;
+				if (string.IsNullOrEmpty(normalizedDirectory))
+				{
+					// File in root directory
+					path = name;
+				}
+				else
+				{
+					// File in subdirectory
+					path = $"{normalizedDirectory}/{name}";
+				}
+
 				var driveItem = await _graphClient
 					.Sites[_site.Id]
 					.Drives[_drive.Id]
 					.Root
-					.ItemWithPath($"{directory}/{name}")
+					.ItemWithPath(path)
 					.Request()
 					.GetAsync();
 
@@ -477,8 +492,8 @@
 		{
 			try
 			{
-				// Normalize directory path
-				var normalizedDirectory = directory?.Trim('/', '\\') ?? string.Empty;
+				// Normalize and validate directory path
+				var normalizedDirectory = NormalizeDirectoryPath(directory);
 
 				// Ensure folder structure exists (skip for root)
 				if (!string.IsNullOrEmpty(normalizedDirectory))
@@ -532,17 +547,39 @@
 		{
 			try
 			{
+				// Normalize directory path
+				var normalizedDirectory = NormalizeDirectoryPath(directory);
+				var filename = $"{name}.jpeg";
+
+				// Ensure folder structure exists (skip for root)
+				if (!string.IsNullOrEmpty(normalizedDirectory))
+				{
+					await EnsureFolderPathExistsAsync(normalizedDirectory);
+				}
+
 				MemoryStream jpegStream = new MemoryStream();
 
 				// Serialize image to memory
 				image.Save(jpegStream, ImageFormat.Jpeg);
 				jpegStream.Position = 0;
 
+				string path;
+				if (string.IsNullOrEmpty(normalizedDirectory))
+				{
+					// Upload to root directory
+					path = filename;
+				}
+				else
+				{
+					// Upload to subdirectory
+					path = $"{normalizedDirectory}/{filename}";
+				}
+
 				var item = await _graphClient
 					.Sites[_site.Id]
 					.Drives[_drive.Id]
 					.Root
-					.ItemWithPath($"{name}.jpeg")
+					.ItemWithPath(path)
 					.Content
 					.Request()
 					.PutAsync<DriveItem>(jpegStream);
@@ -558,11 +595,17 @@
 		/// </summary>
 		private async Task EnsureFolderPathExistsAsync(string directory)
 		{
-			// Split and filter out empty segments
-			var segments = directory.Trim('/', '\\')
-				.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
+			// Validate input
+			if (string.IsNullOrWhiteSpace(directory))
+				return;
 
-			// Nothing to create if no segments
+			// Split and filter out empty/invalid segments
+			var segments = directory.Trim('/', '\\', ' ', '\t')
+				.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries)
+				.Where(s => !string.IsNullOrWhiteSpace(s) && s != "." && s != "..")
+				.ToArray();
+
+			// Nothing to create if no valid segments
 			if (segments.Length == 0)
 				return;
 
@@ -621,6 +664,37 @@
 					throw new IOException(e.ToString());
 				}
 			}
+		}
+
+		/// <summary>
+		/// Normalizes a directory path for use with SharePoint Graph API.
+		/// </summary>
+		/// <param name="directory">The raw directory path.</param>
+		/// <returns>A normalized path string, or empty string for root directory.</returns>
+		private string NormalizeDirectoryPath(string directory)
+		{
+			// Handle null or whitespace
+			if (string.IsNullOrWhiteSpace(directory))
+				return string.Empty;
+
+			// Trim leading/trailing slashes, backslashes, and whitespace
+			var normalized = directory.Trim('/', '\\', ' ', '\t');
+
+			// Return empty for special cases
+			if (string.IsNullOrWhiteSpace(normalized) || normalized == "." || normalized == "..")
+				return string.Empty;
+
+			// Remove any remaining relative path components and clean up
+			var segments = normalized
+				.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries)
+				.Where(s => !string.IsNullOrWhiteSpace(s) && s != "." && s != "..")
+				.ToArray();
+
+			if (segments.Length == 0)
+				return string.Empty;
+
+			// Reconstruct path with forward slashes
+			return string.Join("/", segments);
 		}
 
 		private string RetrieveClientSecret()
