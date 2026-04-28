@@ -477,21 +477,44 @@
 		{
 			try
 			{
-				// Ensure folder structure exists
-				await EnsureFolderPathExistsAsync(directory);
+				// Normalize directory path
+				var normalizedDirectory = directory?.Trim('/', '\\') ?? string.Empty;
+
+				// Ensure folder structure exists (skip for root)
+				if (!string.IsNullOrEmpty(normalizedDirectory))
+				{
+					await EnsureFolderPathExistsAsync(normalizedDirectory);
+				}
 
 				using (var stream = File.OpenRead(filepath))
 				{
-					var path = $"{directory.TrimEnd('/')}/{name}";
+					DriveItem item;
 
-					var item = await _graphClient
-						.Sites[_site.Id]
-						.Drives[_drive.Id]
-						.Root
-						.ItemWithPath(path)
-						.Content
-						.Request()
-						.PutAsync<DriveItem>(stream);
+					if (string.IsNullOrEmpty(normalizedDirectory))
+					{
+						// Upload to root directory
+						item = await _graphClient
+							.Sites[_site.Id]
+							.Drives[_drive.Id]
+							.Root
+							.ItemWithPath(name)
+							.Content
+							.Request()
+							.PutAsync<DriveItem>(stream);
+					}
+					else
+					{
+						// Upload to subdirectory
+						var path = $"{normalizedDirectory}/{name}";
+						item = await _graphClient
+							.Sites[_site.Id]
+							.Drives[_drive.Id]
+							.Root
+							.ItemWithPath(path)
+							.Content
+							.Request()
+							.PutAsync<DriveItem>(stream);
+					}
 
 					return item?.WebUrl;
 				}
@@ -535,7 +558,13 @@
 		/// </summary>
 		private async Task EnsureFolderPathExistsAsync(string directory)
 		{
-			var segments = directory.Trim('/').Split('/');
+			// Split and filter out empty segments
+			var segments = directory.Trim('/', '\\')
+				.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
+
+			// Nothing to create if no segments
+			if (segments.Length == 0)
+				return;
 
 			string currentPath = string.Empty;
 			foreach (var segment in segments)
