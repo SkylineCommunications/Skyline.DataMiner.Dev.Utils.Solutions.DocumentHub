@@ -29,8 +29,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Azure.Identity" Version="1.6.0" />
-		<PackageReference Include="Microsoft.Graph" Version="4.25.0" />
+		<PackageReference Include="Azure.Identity" Version="1.21.0" />
+		<PackageReference Include="Microsoft.Graph" Version="4.54.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 		<PackageReference Include="Skyline.DataMiner.Dev.Common" Version="10.6.3.1" />
 		<PackageReference Include="Skyline.DataMiner.SDM" Version="1.0.1" />
