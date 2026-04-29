@@ -51,5 +51,10 @@
         /// Gets or sets a string value indicating the definition associated with this category.
         /// </summary>
         public string Definition { get; set; }
+
+        /// <summary>
+        /// Gets or sets the maximum allowed file size for this category, in kilobytes (KB).
+        /// </summary>
+        public int SizeLimit { get; set; }
     }
 }

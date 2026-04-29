@@ -561,6 +561,12 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
                 {
                     obj.Definition = _definition.Value;
                 }
+
+                var _sizelimit = _documentcategorypropertiesSection.GetValue<int>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.SizeLimit);
+                if (_sizelimit != null)
+                {
+                    obj.SizeLimit = _sizelimit.Value;
+                }
             }
 
             return obj;
@@ -621,6 +627,8 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
                 _documentcategoryproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.Definition, Convert.ToString(obj.Definition));
             }
 
+            _documentcategoryproperties.AddOrUpdateValue<int>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.SizeLimit, obj.SizeLimit);
+
             instance.Sections.Add(_documentcategoryproperties);
             return instance;
         }
@@ -647,6 +655,8 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.DOMSource), comparer, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>.Convert(value).Identifier);
                 case "Definition":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.Definition), comparer, (string)value);
+                case "SizeLimit":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.SizeLimit), comparer, (int)value);
                 default:
                     throw new NotImplementedException();
             }
@@ -674,6 +684,8 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.DOMSource), sortOrder, naturalSort);
                 case "Definition":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.Definition), sortOrder, naturalSort);
+                case "SizeLimit":
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Maps.DocumentCategoryDomMapper.DocumentCategoryProperties.SizeLimit), sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }
