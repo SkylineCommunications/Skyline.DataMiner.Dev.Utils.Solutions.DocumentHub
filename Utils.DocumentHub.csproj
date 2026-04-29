@@ -5,8 +5,8 @@
 		<Nullable>disable</Nullable>
 		<AssemblyName>Skyline.DataMiner.Dev.Utils.DocumentHub</AssemblyName>
 		<RootNamespace>Skyline.DataMiner.Solutions.DocumentHub</RootNamespace>
-		<PackageVersion>1.1.1-alpha14</PackageVersion>
-		<Version>1.1.1</Version>
+		<PackageVersion>1.2.1-alpha0</PackageVersion>
+		<Version>1.2.1</Version>
 		<PackageTags>Skyline;DataMiner</PackageTags>
 		<PackageProjectUrl>https://skyline.be</PackageProjectUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>

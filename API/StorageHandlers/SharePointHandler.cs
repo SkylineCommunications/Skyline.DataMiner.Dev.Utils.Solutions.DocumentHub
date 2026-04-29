@@ -485,18 +485,13 @@
 		{
 			try
 			{
-				var rootDrive = await _graphClient
-					.Drives[_drive.Id]
-					.Root
-					.GetAsync();
-
 				var searchResponse = await _graphClient
 					.Drives[_drive.Id]
-					.Items[rootDrive.Id]
+					.Root
 					.ItemWithPath($"{directory}/{name}")
 					.GetAsync();
 
-				return searchResponse != null && searchResponse.File != null && searchResponse.Name.Contains(name);
+				return searchResponse != null && searchResponse.File != null;
             }
 			catch (ODataError ex)
 			{
@@ -510,7 +505,7 @@
 		/// <summary>
 		/// Uploads a file to SharePoint and returns the resulting Web URL.
 		/// </summary>
-		private async Task<string> UploadFileAsync(string directory, string filepath, string name)
+		private async Task<string> UploadFileAsync(string directory, string filePath, string name)
 		{
 			try
 			{
@@ -523,34 +518,29 @@
 					await EnsureFolderPathExistsAsync(normalizedDirectory);
 				}
 
-				using (var stream = File.OpenRead(filepath))
+				using (var stream = File.OpenRead(filePath))
 				{
 					DriveItem item;
-
+					string pathPart;
 					if (string.IsNullOrEmpty(normalizedDirectory))
 					{
 						// Upload to root directory
-						item = await _graphClient
-							//.Sites[_site.Id]
-							.Drives[_drive.Id]
-							.Root
-							.ItemWithPath(name)
-							.Content
-							.PutAsync(stream);
+						pathPart = name;
 					}
 					else
 					{
-						// Upload to subdirectory
-						var path = $"{normalizedDirectory}/{name}";
-						item = await _graphClient
-							.Drives[_drive.Id]
-							.Root
-							.ItemWithPath(path)
-							.Content
-							.PutAsync(stream);
+                        // Upload to subdirectory
+						pathPart = $"{normalizedDirectory}/{name}";						
 					}
 
-					return item?.WebUrl;
+                    item = await _graphClient
+                            .Drives[_drive.Id]
+                            .Root
+                            .ItemWithPath(pathPart)
+                            .Content
+                            .PutAsync(stream);
+
+                    return item?.WebUrl;
 				}
 			}
 			catch (Exception e)
@@ -566,6 +556,7 @@
 		{
 			try
 			{
+				// TODO: directory is unused here. Will the upload work for non-root DriveItems?
 				MemoryStream jpegStream = new MemoryStream();
 
 				// Serialize image to memory
