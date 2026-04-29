@@ -6,6 +6,7 @@
     using System.Drawing;
     using System.IO;
     using System.Linq;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Handles file and image storage on the local filesystem.
@@ -148,17 +149,27 @@
 			return files;
 		}
 
-		/// <summary>
-		/// Reads files from the local file system using a paged enumerator.
-		/// Supports optional category-based paths and filename filtering.
-		/// </summary>
-		/// <param name="data">"
-		/// The storage handler data containing category, filter, and context.
-		/// </param>
-		/// <returns>
-		/// A list of <see cref="IDocHubFile"/> representing the files in the current page.
-		/// </returns>
-		private List<IDocHubFile> ReadPage(ReadData data)
+        /// <summary>
+        /// Asynchronous version of <see cref="ReadFiles(ReadData)"/>.
+        /// </summary>
+        /// <param name="data">The storage handler data containing category and filter information.</param>
+        /// <returns>A list of all <see cref="IDocHubFile"/> matching the criteria.</returns>
+        public async Task<List<IDocHubFile>> ReadFilesAsync(ReadData data)
+        {
+			return await Task.FromResult(ReadFiles(data));
+        }
+
+        /// <summary>
+        /// Reads files from the local file system using a paged enumerator.
+        /// Supports optional category-based paths and filename filtering.
+        /// </summary>
+        /// <param name="data">"
+        /// The storage handler data containing category, filter, and context.
+        /// </param>
+        /// <returns>
+        /// A list of <see cref="IDocHubFile"/> representing the files in the current page.
+        /// </returns>
+        private List<IDocHubFile> ReadPage(ReadData data)
 		{
 			// Validate input data
 			if (!(data is WebFileReadData args))
@@ -222,5 +233,5 @@
 
 			return result;
 		}
-	}
+    }
 }

@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 
@@ -48,6 +49,15 @@
 		/// A list of <see cref="IDocHubFile"/> objects representing the files read from storage.
 		/// </returns>
 		List<IDocHubFile> ReadFiles(ReadData data);
+
+		/// <summary>
+		/// Asynchronously reads files from the storage based on the specified category and filter.
+		/// </summary>
+		/// <param name="data">
+		/// The storage handler data containing category and filter information.
+		/// </param>
+		/// <returns>/ list of <see cref="IDocHubFile"/> objects representing the files read from storage.</returns>
+		Task<List<IDocHubFile>> ReadFilesAsync(ReadData data);
 	}
 	#endregion
 
