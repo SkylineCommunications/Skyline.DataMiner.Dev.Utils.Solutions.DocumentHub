@@ -46,7 +46,7 @@ Each test class covers:
 - **CRUD**: Create, Update, ReadPaged, DeleteSingle, DeleteBulk
 - **Filters**: Equal, Contains, AND, OR, TRUE
 
-### About DataMiner
+## About DataMiner
 
 DataMiner is a transformational platform that provides vendor-independent control and monitoring of devices and services. Out of the box and by design, it addresses key challenges such as security, complexity, multi-cloud, and much more. It has a pronounced open architecture and powerful capabilities enabling users to evolve easily and continuously.
 
