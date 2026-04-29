@@ -2,10 +2,109 @@
 {
 	using System.Collections.Generic;
 
+	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 
 	public static class DemoData
 	{
+		public static List<DomSource> DomSources => new List<DomSource>
+		{
+			new DomSource
+			{
+				Name = "Inventory Attachments",
+				Module = "inventory",
+				NetworkSharePath = @"\\server01\inventory\attachments",
+				Credential = "cred-inventory-001",
+			},
+			new DomSource
+			{
+				Name = "Maintenance Logs",
+				Module = "maintenance",
+				NetworkSharePath = @"\\server01\maintenance\logs",
+				Credential = "cred-maintenance-001",
+			},
+			new DomSource
+			{
+				Name = "Network Diagrams",
+				Module = "network",
+				NetworkSharePath = @"\\server02\network\diagrams",
+				Credential = "cred-network-001",
+			},
+			new DomSource
+			{
+				Name = "Service Reports",
+				Module = "inventory",
+				NetworkSharePath = @"\\server02\services\reports",
+				Credential = "cred-inventory-001",
+			},
+			new DomSource
+			{
+				Name = "Audit Trail",
+				Module = "audit",
+				NetworkSharePath = @"\\server03\audit\trail",
+				Credential = "cred-audit-001",
+			},
+		};
+
+		public static List<DocumentCategory> DocumentCategories => new List<DocumentCategory>
+		{
+			new DocumentCategory
+			{
+				Name = "Technical Documentation",
+				Description = "Technical manuals and guides",
+				UploadPath = "/docs/technical",
+				StorageType = StorageType.SharePoint,
+				Extensions = "pdf,docx",
+				IsDefault = true,
+				Definition = "TechDocs",
+				SizeLimit = 10240,
+			},
+			new DocumentCategory
+			{
+				Name = "Network Diagrams",
+				Description = "Network topology and diagrams",
+				UploadPath = "/docs/network",
+				StorageType = StorageType.DOM,
+				Extensions = "png,vsdx,pdf",
+				IsDefault = false,
+				Definition = "NetDiag",
+				SizeLimit = 20480,
+			},
+			new DocumentCategory
+			{
+				Name = "Maintenance Reports",
+				Description = "Scheduled maintenance reports",
+				UploadPath = "/docs/maintenance",
+				StorageType = StorageType.SharePoint,
+				Extensions = "pdf,xlsx",
+				IsDefault = false,
+				Definition = "MaintRep",
+				SizeLimit = 10240,
+			},
+			new DocumentCategory
+			{
+				Name = "Configuration Backups",
+				Description = "Device configuration backups",
+				UploadPath = "/docs/config",
+				StorageType = StorageType.Local,
+				Extensions = "xml,json,cfg",
+				IsDefault = false,
+				Definition = "ConfigBak",
+				SizeLimit = 5120,
+			},
+			new DocumentCategory
+			{
+				Name = "Service Level Agreements",
+				Description = "SLA documents and contracts",
+				UploadPath = "/docs/sla",
+				StorageType = StorageType.SharePoint,
+				Extensions = "pdf,docx",
+				IsDefault = false,
+				Definition = "SLA",
+				SizeLimit = 10240,
+			},
+		};
+
 		public static List<SharePointConfiguration> SharePointConfigurations => new List<SharePointConfiguration>
 		{
 			new SharePointConfiguration

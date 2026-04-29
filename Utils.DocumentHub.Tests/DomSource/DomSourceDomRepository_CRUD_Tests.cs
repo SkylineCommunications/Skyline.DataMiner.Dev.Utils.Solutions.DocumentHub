@@ -1,0 +1,152 @@
+namespace Skyline.DataMiner.Utils.DocumentHub.Tests.DomSource
+{
+	using System.Linq;
+
+	using FluentAssertions;
+	using FluentAssertions.Execution;
+
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM;
+	using Skyline.DataMiner.Utils.DocumentHub.Tests.Setup;
+
+	[TestClass]
+	public class DomSourceDomRepository_CRUD_Tests
+	{
+		[TestMethod]
+		public void EmptyDom_Create()
+		{
+			// Arrange
+			var helper = Helper.GetHelper();
+
+			// Act
+			CreateAll(helper);
+
+			// Assert
+			using (new AssertionScope())
+			{
+				var all = helper.DomSources.Read(new TRUEFilterElement<Solutions.DocumentHub.SDM.Models.DomSource>());
+				all.Count().Should().Be(DemoData.DomSources.Count);
+
+				foreach (var demo in DemoData.DomSources)
+				{
+					var created = all.SingleOrDefault(d => d.Name == demo.Name);
+					created.Should().NotBeNull();
+					created.Module.Should().Be(demo.Module);
+					created.NetworkSharePath.Should().Be(demo.NetworkSharePath);
+					created.Credential.Should().Be(demo.Credential);
+				}
+			}
+		}
+
+		[TestMethod]
+		public void EmptyDom_Update()
+		{
+			// Arrange
+			var helper = Helper.GetHelper();
+			var nameToFind = DemoData.DomSources[0].Name;
+			var newModule = "updated-module";
+			var newNetworkSharePath = @"\\updated-server\share";
+			var newCredential = "cred-updated";
+
+			// Act
+			CreateAll(helper);
+
+			var itemToUpdate = helper.DomSources.Read(DomSourceExposers.Name.Equal(nameToFind)).SingleOrDefault();
+			itemToUpdate.Module = newModule;
+			itemToUpdate.NetworkSharePath = newNetworkSharePath;
+			itemToUpdate.Credential = newCredential;
+
+			helper.DomSources.Update(itemToUpdate);
+
+			// Assert
+			using (new AssertionScope())
+			{
+				var updated = helper.DomSources.Read(DomSourceExposers.Name.Equal(nameToFind)).SingleOrDefault();
+				updated.Should().NotBeNull();
+				updated.Module.Should().Be(newModule);
+				updated.NetworkSharePath.Should().Be(newNetworkSharePath);
+				updated.Credential.Should().Be(newCredential);
+			}
+		}
+
+		[TestMethod]
+		public void EmptyDom_ReadPaged()
+		{
+			// Arrange
+			const int pageCount = 1;
+			var helper = Helper.GetHelper();
+
+			// Act
+			CreateAll(helper);
+
+			FilterElement<Solutions.DocumentHub.SDM.Models.DomSource> allFilter = new TRUEFilterElement<Solutions.DocumentHub.SDM.Models.DomSource>();
+			var pagedResult = helper.DomSources.ReadPaged(allFilter, pageCount);
+			var count = helper.DomSources.Count(allFilter);
+
+			// Assert
+			using (new AssertionScope())
+			{
+				pagedResult.Should().NotBeNull();
+				pagedResult.Should().HaveCount((int)(count / pageCount));
+				pagedResult.Should().AllSatisfy(page => page.Should().HaveCount(pageCount));
+			}
+		}
+
+		[TestMethod]
+		public void DeleteSingle()
+		{
+			// Arrange
+			var helper = Helper.GetHelper();
+			var nameToDelete = DemoData.DomSources[0].Name;
+
+			// Act
+			CreateAll(helper);
+
+			var filter = DomSourceExposers.Name.Equal(nameToDelete);
+			var itemToDelete = helper.DomSources.Read(filter).SingleOrDefault();
+
+			helper.DomSources.Delete(itemToDelete);
+
+			// Assert
+			using (new AssertionScope())
+			{
+				helper.DomSources.Count(new TRUEFilterElement<Solutions.DocumentHub.SDM.Models.DomSource>()).Should().Be(DemoData.DomSources.Count - 1);
+				helper.DomSources.Count(DomSourceExposers.Name.Equal(nameToDelete)).Should().Be(0);
+			}
+		}
+
+		[TestMethod]
+		public void DeleteBulk()
+		{
+			// Arrange
+			var helper = Helper.GetHelper();
+			var moduleToDelete = "inventory";
+
+			// Act
+			CreateAll(helper);
+
+			var filter = DomSourceExposers.Module.Equal(moduleToDelete);
+			var itemsToDelete = helper.DomSources.Read(filter);
+
+			foreach (var item in itemsToDelete)
+			{
+				helper.DomSources.Delete(item);
+			}
+
+			// Assert
+			using (new AssertionScope())
+			{
+				helper.DomSources.Count(new TRUEFilterElement<Solutions.DocumentHub.SDM.Models.DomSource>()).Should().Be(DemoData.DomSources.Count - 2);
+				helper.DomSources.Count(DomSourceExposers.Module.Equal(moduleToDelete)).Should().Be(0);
+			}
+		}
+
+		private static void CreateAll(Solutions.DocumentHub.SDM.Helpers.IDocumentHubApiHelper helper)
+		{
+			foreach (var item in DemoData.DomSources)
+			{
+				helper.DomSources.Create(item);
+			}
+		}
+	}
+}
