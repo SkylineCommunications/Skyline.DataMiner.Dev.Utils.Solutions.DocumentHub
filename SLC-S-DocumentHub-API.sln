@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Code Analysis", "Code Analy
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedMappers", "SharedMappers\SharedMappers.shproj", "{0C843C63-2D8E-40C3-9BA1-186C66F0C372}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utils.DocumentHub.Tests", "Utils.DocumentHub.Tests\Utils.DocumentHub.Tests.csproj", "{9C487DBA-A22C-4E07-AD05-A849A2E2E4DB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{CBB917D1-B759-4965-86D2-79E99BBC1635}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CBB917D1-B759-4965-86D2-79E99BBC1635}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CBB917D1-B759-4965-86D2-79E99BBC1635}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C487DBA-A22C-4E07-AD05-A849A2E2E4DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C487DBA-A22C-4E07-AD05-A849A2E2E4DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C487DBA-A22C-4E07-AD05-A849A2E2E4DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C487DBA-A22C-4E07-AD05-A849A2E2E4DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

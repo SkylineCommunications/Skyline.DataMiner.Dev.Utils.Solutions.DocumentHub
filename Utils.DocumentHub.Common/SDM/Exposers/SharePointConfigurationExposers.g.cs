@@ -25,5 +25,6 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
         public static readonly Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration, string> ClientSecret = new Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration, string>((obj) => obj.ClientSecret, "ClientSecret");
         public static readonly Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration, string> SiteURL = new Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration, string>((obj) => obj.SiteURL, "SiteURL");
         public static readonly Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration, string> DocumentLibraryName = new Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration, string>((obj) => obj.DocumentLibraryName, "DocumentLibraryName");
+        public static readonly Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration, Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationStatus> Status = new Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration, Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationStatus>((obj) => obj.Status, "Status");
     }
 }

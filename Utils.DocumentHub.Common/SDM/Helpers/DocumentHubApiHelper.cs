@@ -5,11 +5,12 @@
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 
 	/// <summary>
-	/// Provides access to repositories and configuration data for the Document Hub API.
+	/// Provides centralized access to Document Hub repositories and configuration data.
 	/// </summary>
-	/// <remarks>This helper class centralizes access to document categories, DOM sources, and SharePoint
-	/// configuration repositories.. It is intended to simplify data access patterns for
-	/// consumers of the Document Hub API.</remarks>
+	/// <remarks>
+	/// This helper class centralizes access to document categories, DOM sources, and SharePoint
+	/// configuration repositories. It simplifies data access patterns for consumers of the Document Hub API.
+	/// </remarks>
 	public class DocumentHubApiHelper : IDocumentHubApiHelper
     {
         private readonly IBulkRepository<DocumentCategory> _documentCategories;
@@ -17,7 +18,7 @@
         private readonly IRepository<SharePointConfiguration> _sharePointConfigurations;
 
         /// <summary>
-        /// Initializes a new instance of the DocumentHubApiHelper class using the specified connection.
+        /// Initializes a new instance of the <see cref="DocumentHubApiHelper"/> class using the specified connection.
         /// </summary>
         /// <param name="connection">The <see cref="IConnection"/> to use for data repository access.</param>
         public DocumentHubApiHelper(IConnection connection)
@@ -28,15 +29,11 @@
             _sharePointConfigurations = new SharePointConfigurationDomRepository(connection);
         }
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public IConnection Connection { get; }
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
-        public IBulkRepository<DocumentCategory> DocumentCategories 
+        public IBulkRepository<DocumentCategory> DocumentCategories
         {
             get
             {
@@ -44,10 +41,8 @@
             }
         }
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
-        public IRepository<DomSource> DomSources 
+        public IRepository<DomSource> DomSources
         {
             get
             {
@@ -55,9 +50,7 @@
             }
         }
 
-        /// <summary>
         /// <inheritdoc/>
-        /// </summary>
         public IRepository<SharePointConfiguration> SharePointConfigurations
         {
             get

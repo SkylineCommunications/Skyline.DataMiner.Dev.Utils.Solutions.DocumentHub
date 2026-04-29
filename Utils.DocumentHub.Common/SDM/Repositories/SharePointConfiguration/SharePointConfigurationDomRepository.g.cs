@@ -6,638 +6,650 @@
 //------------------------------------------------------------------------------
 namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Skyline.DataMiner.Net;
-    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Apps.Sections.Sections;
-    using Skyline.DataMiner.Net.Helper;
-    using Skyline.DataMiner.Net.ManagerStore;
-    using Skyline.DataMiner.Net.Messages;
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
-    using Skyline.DataMiner.Net.Sections;
-    using Skyline.DataMiner.Net.SubscriptionFilters;
-    using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
-    using SLDataGateway.API.Querying;
-    using SLDataGateway.API.Types.Querying;
-
-    internal partial class SharePointConfigurationDomRepository : IBulkRepository<SharePointConfiguration>
-    {
-        private readonly IConnection connection;
-        private readonly DomHelper helper;
-        public SharePointConfigurationDomRepository(IConnection connection)
-        {
-            this.connection = connection;
-            this.helper = new DomHelper(connection.HandleMessages, Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.ModuleId);
-        }
-
-        public SharePointConfiguration Create(SharePointConfiguration createObject)
-        {
-            if (createObject is null)
-            {
-                throw new ArgumentNullException(nameof(createObject));
-            }
-
-            var instance = ToInstance(createObject);
-            instance = helper.DomInstances.Create(instance);
-            return FromInstance(instance);
-        }
-
-        public IReadOnlyCollection<SharePointConfiguration> Create(IEnumerable<SharePointConfiguration> createObjects)
-        {
-            if (createObjects is null || !createObjects.Any())
-            {
-                return Array.Empty<SharePointConfiguration>();
-            }
-
-            // Check if some of the objects already exist
-            var existing = new HashSet<string>();
-            foreach (var batch in createObjects.Batch(500))
-            {
-                existing.UnionWith(Read(new ORFilterElement<SharePointConfiguration>(batch.Select(obj => SharePointConfigurationExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
-            }
-
-            // Create the remainder
-            var SuccessfulItems = new List<SharePointConfiguration>();
-            var failures = new Dictionary<string, Exception>();
-            var objects = createObjects.Where(obj => !existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
-            foreach (var batch in createObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
-            {
-                helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
-                foreach (var failure in result.UnsuccessfulIds)
-                {
-                    failures.Add(failure.Id.ToString(), new CrudFailedException(result.TraceDataPerItem[failure]));
-                }
-
-                foreach (var success in result.SuccessfulItems)
-                {
-                    SuccessfulItems.Add(FromInstance(success));
-                }
-            }
-
-            // If everything went fine, return the successful creations
-            if (!existing.Any() && !failures.Any())
-            {
-                return SuccessfulItems;
-            }
-
-            // Otherwise, build and throw an exception
-            var exceptionBuilder = new SdmBulkCrudException<SharePointConfiguration>.Builder();
-            foreach (var obj in createObjects)
-            {
-                if (existing.Contains(obj.Identifier))
-                {
-                    exceptionBuilder.AddFailed(obj, new SdmCrudException<SharePointConfiguration>(obj, $"Could not create SharePointConfiguration with guid: '{obj.Identifier}', it already exists."));
-                    continue;
-                }
-
-                if (failures.ContainsKey(obj.Identifier))
-                {
-                    exceptionBuilder.AddFailed(obj, failures[obj.Identifier]);
-                    continue;
-                }
-
-                exceptionBuilder.AddSuccessful(obj);
-            }
-
-            throw exceptionBuilder.Build();
-        }
-
-        public IReadOnlyCollection<SharePointConfiguration> CreateOrUpdate(IEnumerable<SharePointConfiguration> items)
-        {
-            if (items is null || !items.Any())
-            {
-                return Array.Empty<SharePointConfiguration>();
-            }
-
-            var successful = new List<SharePointConfiguration>();
-            var exceptionBuilder = new SdmBulkCrudException<SharePointConfiguration>.Builder();
-            var objects = items.ToDictionary(obj => obj.Identifier);
-            foreach (var batch in items.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
-            {
-                helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
-                foreach (var failure in result.UnsuccessfulIds)
-                {
-                    exceptionBuilder.AddFailed(objects[failure.Id.ToString()], new CrudFailedException(result.TraceDataPerItem[failure]));
-                }
-
-                foreach (var success in result.SuccessfulItems)
-                {
-                    var item = FromInstance(success);
-                    exceptionBuilder.AddSuccessful(item);
-                    successful.Add(item);
-                }
-            }
-
-            if (exceptionBuilder.HasFailure)
-            {
-                throw exceptionBuilder.Build();
-            }
-
-            return successful;
-        }
-
-        public long Count(FilterElement<SharePointConfiguration> filter)
-        {
-            if (filter is null)
-            {
-                throw new ArgumentNullException(nameof(filter));
-            }
-
-            var domFilter = TranslateFullFilter(filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.DomDefinitionId.Id));
-            return helper.DomInstances.Count(domFilter);
-        }
-
-        public long Count(IQuery<SharePointConfiguration> query)
-        {
-            if (query is null)
-            {
-                throw new ArgumentNullException(nameof(query));
-            }
-
-            var domFilter = TranslateFullFilter(query.Filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.DomDefinitionId.Id));
-            var domOrder = TranslateFullOrderBy(query.Order);
-            var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
-            return helper.DomInstances.Count(domQuery);
-        }
-
-        public IEnumerable<SharePointConfiguration> Read(FilterElement<SharePointConfiguration> filter)
-        {
-            if (filter is null)
-            {
-                throw new ArgumentNullException(nameof(filter));
-            }
-
-            var domFilter = TranslateFullFilter(filter);
-            return Read(domFilter);
-        }
-
-        public IEnumerable<SharePointConfiguration> Read(IQuery<SharePointConfiguration> query)
-        {
-            if (query is null)
-            {
-                throw new ArgumentNullException(nameof(query));
-            }
-
-            var domFilter = TranslateFullFilter(query.Filter);
-            var domOrder = TranslateFullOrderBy(query.Order);
-            var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
-            return Read(domQuery);
-        }
-
-        public IEnumerable<IPagedResult<SharePointConfiguration>> ReadPaged(FilterElement<SharePointConfiguration> filter)
-        {
-            return ReadPaged(filter, 500);
-        }
-
-        public IEnumerable<IPagedResult<SharePointConfiguration>> ReadPaged(FilterElement<SharePointConfiguration> filter, int pageSize)
-        {
-            if (filter is null)
-            {
-                throw new ArgumentNullException(nameof(filter));
-            }
-
-            if (pageSize <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(pageSize), "The page size must be 1 or higher");
-            }
-
-            var domFilter = TranslateFullFilter(filter);
-            var paging = ReadPaged(domFilter, pageSize).GetEnumerator();
-            var moveNext = paging.MoveNext();
-            var i = 0;
-            while (moveNext)
-            {
-                var page = paging.Current.ToList();
-                moveNext = paging.MoveNext();
-                var result = new PagedResult<SharePointConfiguration>(page, i, pageSize, moveNext);
-                yield return result;
-                i++;
-            }
-        }
-
-        public IEnumerable<IPagedResult<SharePointConfiguration>> ReadPaged(IQuery<SharePointConfiguration> query)
-        {
-            return ReadPaged(query, 500);
-        }
-
-        public IEnumerable<IPagedResult<SharePointConfiguration>> ReadPaged(IQuery<SharePointConfiguration> query, int pageSize)
-        {
-            if (query is null)
-            {
-                throw new ArgumentNullException(nameof(query));
-            }
-
-            if (pageSize <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(pageSize), "The page size must be 1 or higher");
-            }
-
-            var domFilter = TranslateFullFilter(query.Filter);
-            var domOrder = TranslateFullOrderBy(query.Order);
-            var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
-            var paging = ReadPaged(domQuery, pageSize).GetEnumerator();
-            var moveNext = paging.MoveNext();
-            var i = 0;
-            while (moveNext)
-            {
-                var page = paging.Current.ToList();
-                moveNext = paging.MoveNext();
-                var result = new PagedResult<SharePointConfiguration>(page, i, pageSize, moveNext);
-                yield return result;
-                i++;
-            }
-        }
-
-        public SharePointConfiguration Update(SharePointConfiguration updateObject)
-        {
-            if (updateObject is null)
-            {
-                throw new ArgumentNullException(nameof(updateObject));
-            }
-
-            var instance = ToInstance(updateObject);
-            instance = helper.DomInstances.Update(instance);
-            return FromInstance(instance);
-        }
-
-        public IReadOnlyCollection<SharePointConfiguration> Update(IEnumerable<SharePointConfiguration> updateObjects)
-        {
-            if (updateObjects is null || !updateObjects.Any())
-            {
-                return Array.Empty<SharePointConfiguration>();
-            }
-
-            // Check if which objects already exist
-            var existing = new HashSet<string>();
-            foreach (var batch in updateObjects.Batch(500))
-            {
-                existing.UnionWith(Read(new ORFilterElement<SharePointConfiguration>(batch.Select(obj => SharePointConfigurationExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
-            }
-
-            // Update the existing objects
-            var successfulItems = new List<SharePointConfiguration>();
-            var failures = new Dictionary<string, Exception>();
-            var objects = updateObjects.Where(obj => existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
-            foreach (var batch in updateObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
-            {
-                helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
-                foreach (var failure in result.UnsuccessfulIds)
-                {
-                    failures.Add(failure.Id.ToString(), new CrudFailedException(result.TraceDataPerItem[failure]));
-                }
-
-                foreach (var success in result.SuccessfulItems)
-                {
-                    successfulItems.Add(FromInstance(success));
-                }
-            }
-
-            // Check for failures and build exception if needed
-            var exceptionBuilder = new SdmBulkCrudException<SharePointConfiguration>.Builder();
-            foreach (var obj in updateObjects)
-            {
-                if (!existing.Contains(obj.Identifier))
-                {
-                    exceptionBuilder.AddFailed(obj, new SdmCrudException<SharePointConfiguration>(obj, "Could not update a non existing SharePointConfiguration"));
-                    continue;
-                }
-
-                if (failures.ContainsKey(obj.Identifier))
-                {
-                    exceptionBuilder.AddFailed(obj, failures[obj.Identifier]);
-                    continue;
-                }
-
-                exceptionBuilder.AddSuccessful(obj);
-            }
-
-            if (exceptionBuilder.HasFailure)
-            {
-                throw exceptionBuilder.Build();
-            }
-
-            return successfulItems;
-        }
-
-        public void Delete(SharePointConfiguration deleteObject)
-        {
-            if (deleteObject is null)
-            {
-                throw new ArgumentNullException(nameof(deleteObject));
-            }
-
-            var instance = ToInstance(deleteObject);
-            helper.DomInstances.Delete(instance);
-        }
-
-        public void Delete(IEnumerable<SharePointConfiguration> deleteObjects)
-        {
-            if (deleteObjects is null || !deleteObjects.Any())
-            {
-                return;
-            }
-
-            var exceptionBuilder = new SdmBulkCrudException<SharePointConfiguration>.Builder();
-            var objects = deleteObjects.ToDictionary(obj => obj.Identifier);
-            foreach (var batch in deleteObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
-            {
-                helper.DomInstances.TryDelete(batch.ToList(), out var result);
-                foreach (var failure in result.UnsuccessfulIds)
-                {
-                    exceptionBuilder.AddFailed(objects[failure.Id.ToString()], new CrudFailedException(result.TraceDataPerItem[failure]));
-                }
-
-                foreach (var success in result.SuccessfulIds)
-                {
-                    exceptionBuilder.AddSuccessful(objects[success.Id.ToString()]);
-                }
-            }
-
-            if (exceptionBuilder.HasFailure)
-            {
-                throw exceptionBuilder.Build();
-            }
-        }
-
-        private IEnumerable<SharePointConfiguration> Read(FilterElement<DomInstance> domFilter)
-        {
-            if (domFilter is null)
-            {
-                throw new ArgumentNullException(nameof(domFilter));
-            }
-
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.DomDefinitionId.Id));
-            var domInstances = helper.DomInstances.Read(domFilter);
-            return domInstances.Select(FromInstance);
-        }
-
-        private IEnumerable<SharePointConfiguration> Read(IQuery<DomInstance> domQuery)
-        {
-            if (domQuery is null)
-            {
-                throw new ArgumentNullException(nameof(domQuery));
-            }
-
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.DomDefinitionId.Id));
-            domQuery = domQuery.WithFilter(domFilter);
-            var domInstances = helper.DomInstances.Read(domQuery);
-            return domInstances.Select(FromInstance);
-        }
-
-        private IEnumerable<IEnumerable<SharePointConfiguration>> ReadPaged(FilterElement<DomInstance> domFilter, int pageSize)
-        {
-            if (domFilter is null)
-            {
-                throw new ArgumentNullException(nameof(domFilter));
-            }
-
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.DomDefinitionId.Id));
-            var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
-            while (pagingHelper.MoveToNextPage())
-            {
-                yield return pagingHelper.GetCurrentPage().Select(FromInstance);
-            }
-        }
-
-        private IEnumerable<IEnumerable<SharePointConfiguration>> ReadPaged(IQuery<DomInstance> domQuery, int pageSize)
-        {
-            if (domQuery is null)
-            {
-                throw new ArgumentNullException(nameof(domQuery));
-            }
-
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.DomDefinitionId.Id));
-            domQuery = domQuery.WithFilter(domFilter);
-            var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
-            while (pagingHelper.MoveToNextPage())
-            {
-                yield return pagingHelper.GetCurrentPage().Select(FromInstance);
-            }
-        }
-
-        private FilterElement<DomInstance> TranslateFullFilter(FilterElement<SharePointConfiguration> filter)
-        {
-            if (filter is null)
-            {
-                throw new ArgumentNullException(nameof(filter));
-            }
-
-            FilterElement<DomInstance> translated;
-            if (filter is ANDFilterElement<SharePointConfiguration> and)
-            {
-                translated = new ANDFilterElement<DomInstance>(and.subFilters.Select(TranslateFullFilter).ToArray());
-            }
-            else if (filter is ORFilterElement<SharePointConfiguration> or)
-            {
-                translated = new ORFilterElement<DomInstance>(or.subFilters.Select(TranslateFullFilter).ToArray());
-            }
-            else if (filter is NOTFilterElement<SharePointConfiguration> not)
-            {
-                translated = new NOTFilterElement<DomInstance>(TranslateFullFilter(not));
-            }
-            else if (filter is TRUEFilterElement<SharePointConfiguration>)
-            {
-                translated = new TRUEFilterElement<DomInstance>();
-            }
-            else if (filter is FALSEFilterElement<SharePointConfiguration>)
-            {
-                translated = new FALSEFilterElement<DomInstance>();
-            }
-            else if (filter is ManagedFilterIdentifier managedFilter)
-            {
-                translated = TranslateFilter(managedFilter);
-            }
-            else
-            {
-                throw new NotSupportedException($"Unsupported filter: {filter}");
-            }
-
-            return translated;
-        }
-
-        private IOrderBy TranslateFullOrderBy(IOrderBy order)
-        {
-            if (order is null)
-            {
-                throw new ArgumentNullException(nameof(order));
-            }
-
-            var translatedElements = new List<IOrderByElement>();
-            foreach (var orderByElement in order.Elements)
-            {
-                var translated = TranslateOrderBy(orderByElement);
-                translatedElements.Add(translated);
-            }
-
-            return new OrderBy(translatedElements);
-        }
-
-        private FilterElement<DomInstance> TranslateFilter(ManagedFilterIdentifier managedFilter)
-        {
-            if (managedFilter is null)
-            {
-                throw new ArgumentNullException(nameof(managedFilter));
-            }
-
-            var fieldName = managedFilter.getFieldName().fieldName;
-            var comparer = managedFilter.getComparer();
-            var value = managedFilter.getValue();
-            var translated = CreateFilter(fieldName, comparer, value);
-            return translated;
-        }
-
-        private IOrderByElement TranslateOrderBy(IOrderByElement orderByElement)
-        {
-            if (orderByElement is null)
-            {
-                throw new ArgumentNullException(nameof(orderByElement));
-            }
-
-            var fieldName = orderByElement.Exposer.fieldName;
-            var sortOrder = orderByElement.SortOrder;
-            var naturalSort = orderByElement.Options.NaturalSort;
-            var translated = CreateOrderBy(fieldName, sortOrder, naturalSort);
-            return translated;
-        }
-
-        private SharePointConfiguration FromInstance(DomInstance instance)
-        {
-            var obj = new SharePointConfiguration
-            {
-                Identifier = instance.ID.Id.ToString()
-            };
-            var _sharepointconfigurationpropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SectionDefinitionId));
-            if (_sharepointconfigurationpropertiesSection != default)
-            {
-                var _tenantid = _sharepointconfigurationpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.TenantID);
-                if (_tenantid != null)
-                {
-                    obj.TenantID = _tenantid.Value;
-                }
-
-                var _clientid = _sharepointconfigurationpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientID);
-                if (_clientid != null)
-                {
-                    obj.ClientID = _clientid.Value;
-                }
-
-                var _clientsecret = _sharepointconfigurationpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientSecret);
-                if (_clientsecret != null)
-                {
-                    obj.ClientSecret = _clientsecret.Value;
-                }
-
-                var _siteurl = _sharepointconfigurationpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SiteURL);
-                if (_siteurl != null)
-                {
-                    obj.SiteURL = _siteurl.Value;
-                }
-
-                var _documentlibraryname = _sharepointconfigurationpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.DocumentLibraryName);
-                if (_documentlibraryname != null)
-                {
-                    obj.DocumentLibraryName = _documentlibraryname.Value;
-                }
-            }
-
-            return obj;
-        }
-
-        private DomInstance ToInstance(SharePointConfiguration obj)
-        {
-            Guid id = default(Guid);
-            if (!String.IsNullOrEmpty(obj.Identifier))
-            {
-                id = Guid.Parse(obj.Identifier);
-            }
-            else
-            {
-                id = Guid.NewGuid();
-            }
-
-            var instance = new DomInstance
-            {
-                DomDefinitionId = Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.DomDefinitionId,
-                ID = new DomInstanceId(id)
-                {
-                    ModuleId = Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.ModuleId
-                }
-            };
-            var _sharepointconfigurationproperties = new Section(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SectionDefinitionId);
-            if (obj.TenantID != default)
-            {
-                _sharepointconfigurationproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.TenantID, Convert.ToString(obj.TenantID));
-            }
-
-            if (obj.ClientID != default)
-            {
-                _sharepointconfigurationproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientID, Convert.ToString(obj.ClientID));
-            }
-
-            if (obj.ClientSecret != default)
-            {
-                _sharepointconfigurationproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientSecret, Convert.ToString(obj.ClientSecret));
-            }
-
-            if (obj.SiteURL != default)
-            {
-                _sharepointconfigurationproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SiteURL, Convert.ToString(obj.SiteURL));
-            }
-
-            if (obj.DocumentLibraryName != default)
-            {
-                _sharepointconfigurationproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.DocumentLibraryName, Convert.ToString(obj.DocumentLibraryName));
-            }
-
-            instance.Sections.Add(_sharepointconfigurationproperties);
-            return instance;
-        }
-
-        private FilterElement<DomInstance> CreateFilter(string fieldName, Comparer comparer, object value)
-        {
-            switch (fieldName)
-            {
-                case "Identifier":
-                    return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
-                case "TenantID":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.TenantID), comparer, (string)value);
-                case "ClientID":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientID), comparer, (string)value);
-                case "ClientSecret":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientSecret), comparer, (string)value);
-                case "SiteURL":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SiteURL), comparer, (string)value);
-                case "DocumentLibraryName":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.DocumentLibraryName), comparer, (string)value);
-                default:
-                    throw new NotImplementedException();
-            }
-        }
-
-        private IOrderByElement CreateOrderBy(string fieldName, SortOrder sortOrder, bool naturalSort = false)
-        {
-            switch (fieldName)
-            {
-                case "Identifier":
-                    return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
-                case "TenantID":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.TenantID), sortOrder, naturalSort);
-                case "ClientID":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientID), sortOrder, naturalSort);
-                case "ClientSecret":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientSecret), sortOrder, naturalSort);
-                case "SiteURL":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SiteURL), sortOrder, naturalSort);
-                case "DocumentLibraryName":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.DocumentLibraryName), sortOrder, naturalSort);
-                default:
-                    throw new NotImplementedException();
-            }
-        }
-    }
+	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Apps.Sections.Sections;
+	using Skyline.DataMiner.Net.Helper;
+	using Skyline.DataMiner.Net.ManagerStore;
+	using Skyline.DataMiner.Net.Messages;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.Net.Sections;
+	using Skyline.DataMiner.Net.SubscriptionFilters;
+	using Skyline.DataMiner.SDM;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
+	using SLDataGateway.API.Querying;
+	using SLDataGateway.API.Types.Querying;
+
+	internal partial class SharePointConfigurationDomRepository : IBulkRepository<SharePointConfiguration>
+	{
+		private readonly IConnection connection;
+		private readonly DomHelper helper;
+		public SharePointConfigurationDomRepository(IConnection connection)
+		{
+			this.connection = connection;
+			this.helper = new DomHelper(connection.HandleMessages, Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.ModuleId);
+		}
+
+		public SharePointConfiguration Create(SharePointConfiguration createObject)
+		{
+			if (createObject is null)
+			{
+				throw new ArgumentNullException(nameof(createObject));
+			}
+
+			var instance = ToInstance(createObject);
+			instance = helper.DomInstances.Create(instance);
+			return FromInstance(instance);
+		}
+
+		public IReadOnlyCollection<SharePointConfiguration> Create(IEnumerable<SharePointConfiguration> createObjects)
+		{
+			if (createObjects is null || !createObjects.Any())
+			{
+				return Array.Empty<SharePointConfiguration>();
+			}
+
+			// Check if some of the objects already exist
+			var existing = new HashSet<string>();
+			foreach (var batch in createObjects.Batch(500))
+			{
+				existing.UnionWith(Read(new ORFilterElement<SharePointConfiguration>(batch.Select(obj => SharePointConfigurationExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
+			}
+
+			// Create the remainder
+			var SuccessfulItems = new List<SharePointConfiguration>();
+			var failures = new Dictionary<string, Exception>();
+			var objects = createObjects.Where(obj => !existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
+			foreach (var batch in createObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
+			{
+				helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
+				foreach (var failure in result.UnsuccessfulIds)
+				{
+					failures.Add(failure.Id.ToString(), new CrudFailedException(result.TraceDataPerItem[failure]));
+				}
+
+				foreach (var success in result.SuccessfulItems)
+				{
+					SuccessfulItems.Add(FromInstance(success));
+				}
+			}
+
+			// If everything went fine, return the successful creations
+			if (!existing.Any() && !failures.Any())
+			{
+				return SuccessfulItems;
+			}
+
+			// Otherwise, build and throw an exception
+			var exceptionBuilder = new SdmBulkCrudException<SharePointConfiguration>.Builder();
+			foreach (var obj in createObjects)
+			{
+				if (existing.Contains(obj.Identifier))
+				{
+					exceptionBuilder.AddFailed(obj, new SdmCrudException<SharePointConfiguration>(obj, $"Could not create SharePointConfiguration with guid: '{obj.Identifier}', it already exists."));
+					continue;
+				}
+
+				if (failures.ContainsKey(obj.Identifier))
+				{
+					exceptionBuilder.AddFailed(obj, failures[obj.Identifier]);
+					continue;
+				}
+
+				exceptionBuilder.AddSuccessful(obj);
+			}
+
+			throw exceptionBuilder.Build();
+		}
+
+		public IReadOnlyCollection<SharePointConfiguration> CreateOrUpdate(IEnumerable<SharePointConfiguration> items)
+		{
+			if (items is null || !items.Any())
+			{
+				return Array.Empty<SharePointConfiguration>();
+			}
+
+			var successful = new List<SharePointConfiguration>();
+			var exceptionBuilder = new SdmBulkCrudException<SharePointConfiguration>.Builder();
+			var objects = items.ToDictionary(obj => obj.Identifier);
+			foreach (var batch in items.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
+			{
+				helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
+				foreach (var failure in result.UnsuccessfulIds)
+				{
+					exceptionBuilder.AddFailed(objects[failure.Id.ToString()], new CrudFailedException(result.TraceDataPerItem[failure]));
+				}
+
+				foreach (var success in result.SuccessfulItems)
+				{
+					var item = FromInstance(success);
+					exceptionBuilder.AddSuccessful(item);
+					successful.Add(item);
+				}
+			}
+
+			if (exceptionBuilder.HasFailure)
+			{
+				throw exceptionBuilder.Build();
+			}
+
+			return successful;
+		}
+
+		public long Count(FilterElement<SharePointConfiguration> filter)
+		{
+			if (filter is null)
+			{
+				throw new ArgumentNullException(nameof(filter));
+			}
+
+			var domFilter = TranslateFullFilter(filter);
+			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.DomDefinitionId.Id));
+			return helper.DomInstances.Count(domFilter);
+		}
+
+		public long Count(IQuery<SharePointConfiguration> query)
+		{
+			if (query is null)
+			{
+				throw new ArgumentNullException(nameof(query));
+			}
+
+			var domFilter = TranslateFullFilter(query.Filter);
+			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.DomDefinitionId.Id));
+			var domOrder = TranslateFullOrderBy(query.Order);
+			var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
+			return helper.DomInstances.Count(domQuery);
+		}
+
+		public IEnumerable<SharePointConfiguration> Read(FilterElement<SharePointConfiguration> filter)
+		{
+			if (filter is null)
+			{
+				throw new ArgumentNullException(nameof(filter));
+			}
+
+			var domFilter = TranslateFullFilter(filter);
+			return Read(domFilter);
+		}
+
+		public IEnumerable<SharePointConfiguration> Read(IQuery<SharePointConfiguration> query)
+		{
+			if (query is null)
+			{
+				throw new ArgumentNullException(nameof(query));
+			}
+
+			var domFilter = TranslateFullFilter(query.Filter);
+			var domOrder = TranslateFullOrderBy(query.Order);
+			var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
+			return Read(domQuery);
+		}
+
+		public IEnumerable<IPagedResult<SharePointConfiguration>> ReadPaged(FilterElement<SharePointConfiguration> filter)
+		{
+			return ReadPaged(filter, 500);
+		}
+
+		public IEnumerable<IPagedResult<SharePointConfiguration>> ReadPaged(FilterElement<SharePointConfiguration> filter, int pageSize)
+		{
+			if (filter is null)
+			{
+				throw new ArgumentNullException(nameof(filter));
+			}
+
+			if (pageSize <= 0)
+			{
+				throw new ArgumentOutOfRangeException(nameof(pageSize), "The page size must be 1 or higher");
+			}
+
+			var domFilter = TranslateFullFilter(filter);
+			var paging = ReadPaged(domFilter, pageSize).GetEnumerator();
+			var moveNext = paging.MoveNext();
+			var i = 0;
+			while (moveNext)
+			{
+				var page = paging.Current.ToList();
+				moveNext = paging.MoveNext();
+				var result = new PagedResult<SharePointConfiguration>(page, i, pageSize, moveNext);
+				yield return result;
+				i++;
+			}
+		}
+
+		public IEnumerable<IPagedResult<SharePointConfiguration>> ReadPaged(IQuery<SharePointConfiguration> query)
+		{
+			return ReadPaged(query, 500);
+		}
+
+		public IEnumerable<IPagedResult<SharePointConfiguration>> ReadPaged(IQuery<SharePointConfiguration> query, int pageSize)
+		{
+			if (query is null)
+			{
+				throw new ArgumentNullException(nameof(query));
+			}
+
+			if (pageSize <= 0)
+			{
+				throw new ArgumentOutOfRangeException(nameof(pageSize), "The page size must be 1 or higher");
+			}
+
+			var domFilter = TranslateFullFilter(query.Filter);
+			var domOrder = TranslateFullOrderBy(query.Order);
+			var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
+			var paging = ReadPaged(domQuery, pageSize).GetEnumerator();
+			var moveNext = paging.MoveNext();
+			var i = 0;
+			while (moveNext)
+			{
+				var page = paging.Current.ToList();
+				moveNext = paging.MoveNext();
+				var result = new PagedResult<SharePointConfiguration>(page, i, pageSize, moveNext);
+				yield return result;
+				i++;
+			}
+		}
+
+		public SharePointConfiguration Update(SharePointConfiguration updateObject)
+		{
+			if (updateObject is null)
+			{
+				throw new ArgumentNullException(nameof(updateObject));
+			}
+
+			var instance = ToInstance(updateObject);
+			instance = helper.DomInstances.Update(instance);
+			return FromInstance(instance);
+		}
+
+		public IReadOnlyCollection<SharePointConfiguration> Update(IEnumerable<SharePointConfiguration> updateObjects)
+		{
+			if (updateObjects is null || !updateObjects.Any())
+			{
+				return Array.Empty<SharePointConfiguration>();
+			}
+
+			// Check if which objects already exist
+			var existing = new HashSet<string>();
+			foreach (var batch in updateObjects.Batch(500))
+			{
+				existing.UnionWith(Read(new ORFilterElement<SharePointConfiguration>(batch.Select(obj => SharePointConfigurationExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
+			}
+
+			// Update the existing objects
+			var successfulItems = new List<SharePointConfiguration>();
+			var failures = new Dictionary<string, Exception>();
+			var objects = updateObjects.Where(obj => existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
+			foreach (var batch in updateObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
+			{
+				helper.DomInstances.TryCreateOrUpdate(batch.ToList(), out var result);
+				foreach (var failure in result.UnsuccessfulIds)
+				{
+					failures.Add(failure.Id.ToString(), new CrudFailedException(result.TraceDataPerItem[failure]));
+				}
+
+				foreach (var success in result.SuccessfulItems)
+				{
+					successfulItems.Add(FromInstance(success));
+				}
+			}
+
+			// Check for failures and build exception if needed
+			var exceptionBuilder = new SdmBulkCrudException<SharePointConfiguration>.Builder();
+			foreach (var obj in updateObjects)
+			{
+				if (!existing.Contains(obj.Identifier))
+				{
+					exceptionBuilder.AddFailed(obj, new SdmCrudException<SharePointConfiguration>(obj, "Could not update a non existing SharePointConfiguration"));
+					continue;
+				}
+
+				if (failures.ContainsKey(obj.Identifier))
+				{
+					exceptionBuilder.AddFailed(obj, failures[obj.Identifier]);
+					continue;
+				}
+
+				exceptionBuilder.AddSuccessful(obj);
+			}
+
+			if (exceptionBuilder.HasFailure)
+			{
+				throw exceptionBuilder.Build();
+			}
+
+			return successfulItems;
+		}
+
+		public void Delete(SharePointConfiguration deleteObject)
+		{
+			if (deleteObject is null)
+			{
+				throw new ArgumentNullException(nameof(deleteObject));
+			}
+
+			var instance = ToInstance(deleteObject);
+			helper.DomInstances.Delete(instance);
+		}
+
+		public void Delete(IEnumerable<SharePointConfiguration> deleteObjects)
+		{
+			if (deleteObjects is null || !deleteObjects.Any())
+			{
+				return;
+			}
+
+			var exceptionBuilder = new SdmBulkCrudException<SharePointConfiguration>.Builder();
+			var objects = deleteObjects.ToDictionary(obj => obj.Identifier);
+			foreach (var batch in deleteObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
+			{
+				helper.DomInstances.TryDelete(batch.ToList(), out var result);
+				foreach (var failure in result.UnsuccessfulIds)
+				{
+					exceptionBuilder.AddFailed(objects[failure.Id.ToString()], new CrudFailedException(result.TraceDataPerItem[failure]));
+				}
+
+				foreach (var success in result.SuccessfulIds)
+				{
+					exceptionBuilder.AddSuccessful(objects[success.Id.ToString()]);
+				}
+			}
+
+			if (exceptionBuilder.HasFailure)
+			{
+				throw exceptionBuilder.Build();
+			}
+		}
+
+		private IEnumerable<SharePointConfiguration> Read(FilterElement<DomInstance> domFilter)
+		{
+			if (domFilter is null)
+			{
+				throw new ArgumentNullException(nameof(domFilter));
+			}
+
+			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.DomDefinitionId.Id));
+			var domInstances = helper.DomInstances.Read(domFilter);
+			return domInstances.Select(FromInstance);
+		}
+
+		private IEnumerable<SharePointConfiguration> Read(IQuery<DomInstance> domQuery)
+		{
+			if (domQuery is null)
+			{
+				throw new ArgumentNullException(nameof(domQuery));
+			}
+
+			var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.DomDefinitionId.Id));
+			domQuery = domQuery.WithFilter(domFilter);
+			var domInstances = helper.DomInstances.Read(domQuery);
+			return domInstances.Select(FromInstance);
+		}
+
+		private IEnumerable<IEnumerable<SharePointConfiguration>> ReadPaged(FilterElement<DomInstance> domFilter, int pageSize)
+		{
+			if (domFilter is null)
+			{
+				throw new ArgumentNullException(nameof(domFilter));
+			}
+
+			domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.DomDefinitionId.Id));
+			var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
+			while (pagingHelper.MoveToNextPage())
+			{
+				yield return pagingHelper.GetCurrentPage().Select(FromInstance);
+			}
+		}
+
+		private IEnumerable<IEnumerable<SharePointConfiguration>> ReadPaged(IQuery<DomInstance> domQuery, int pageSize)
+		{
+			if (domQuery is null)
+			{
+				throw new ArgumentNullException(nameof(domQuery));
+			}
+
+			var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.DomDefinitionId.Id));
+			domQuery = domQuery.WithFilter(domFilter);
+			var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
+			while (pagingHelper.MoveToNextPage())
+			{
+				yield return pagingHelper.GetCurrentPage().Select(FromInstance);
+			}
+		}
+
+		private FilterElement<DomInstance> TranslateFullFilter(FilterElement<SharePointConfiguration> filter)
+		{
+			if (filter is null)
+			{
+				throw new ArgumentNullException(nameof(filter));
+			}
+
+			FilterElement<DomInstance> translated;
+			if (filter is ANDFilterElement<SharePointConfiguration> and)
+			{
+				translated = new ANDFilterElement<DomInstance>(and.subFilters.Select(TranslateFullFilter).ToArray());
+			}
+			else if (filter is ORFilterElement<SharePointConfiguration> or)
+			{
+				translated = new ORFilterElement<DomInstance>(or.subFilters.Select(TranslateFullFilter).ToArray());
+			}
+			else if (filter is NOTFilterElement<SharePointConfiguration> not)
+			{
+				translated = new NOTFilterElement<DomInstance>(TranslateFullFilter(not));
+			}
+			else if (filter is TRUEFilterElement<SharePointConfiguration>)
+			{
+				translated = new TRUEFilterElement<DomInstance>();
+			}
+			else if (filter is FALSEFilterElement<SharePointConfiguration>)
+			{
+				translated = new FALSEFilterElement<DomInstance>();
+			}
+			else if (filter is ManagedFilterIdentifier managedFilter)
+			{
+				translated = TranslateFilter(managedFilter);
+			}
+			else
+			{
+				throw new NotSupportedException($"Unsupported filter: {filter}");
+			}
+
+			return translated;
+		}
+
+		private IOrderBy TranslateFullOrderBy(IOrderBy order)
+		{
+			if (order is null)
+			{
+				throw new ArgumentNullException(nameof(order));
+			}
+
+			var translatedElements = new List<IOrderByElement>();
+			foreach (var orderByElement in order.Elements)
+			{
+				var translated = TranslateOrderBy(orderByElement);
+				translatedElements.Add(translated);
+			}
+
+			return new OrderBy(translatedElements);
+		}
+
+		private FilterElement<DomInstance> TranslateFilter(ManagedFilterIdentifier managedFilter)
+		{
+			if (managedFilter is null)
+			{
+				throw new ArgumentNullException(nameof(managedFilter));
+			}
+
+			var fieldName = managedFilter.getFieldName().fieldName;
+			var comparer = managedFilter.getComparer();
+			var value = managedFilter.getValue();
+			var translated = CreateFilter(fieldName, comparer, value);
+			return translated;
+		}
+
+		private IOrderByElement TranslateOrderBy(IOrderByElement orderByElement)
+		{
+			if (orderByElement is null)
+			{
+				throw new ArgumentNullException(nameof(orderByElement));
+			}
+
+			var fieldName = orderByElement.Exposer.fieldName;
+			var sortOrder = orderByElement.SortOrder;
+			var naturalSort = orderByElement.Options.NaturalSort;
+			var translated = CreateOrderBy(fieldName, sortOrder, naturalSort);
+			return translated;
+		}
+
+		private SharePointConfiguration FromInstance(DomInstance instance)
+		{
+			var obj = new SharePointConfiguration
+			{
+				Identifier = instance.ID.Id.ToString()
+			};
+			var _sharepointconfigurationpropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SectionDefinitionId));
+			if (_sharepointconfigurationpropertiesSection != default)
+			{
+				var _tenantid = _sharepointconfigurationpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.TenantID);
+				if (_tenantid != null)
+				{
+					obj.TenantID = _tenantid.Value;
+				}
+
+				var _clientid = _sharepointconfigurationpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientID);
+				if (_clientid != null)
+				{
+					obj.ClientID = _clientid.Value;
+				}
+
+				var _clientsecret = _sharepointconfigurationpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientSecret);
+				if (_clientsecret != null)
+				{
+					obj.ClientSecret = _clientsecret.Value;
+				}
+
+				var _siteurl = _sharepointconfigurationpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SiteURL);
+				if (_siteurl != null)
+				{
+					obj.SiteURL = _siteurl.Value;
+				}
+
+				var _documentlibraryname = _sharepointconfigurationpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.DocumentLibraryName);
+				if (_documentlibraryname != null)
+				{
+					obj.DocumentLibraryName = _documentlibraryname.Value;
+				}
+
+				var _status = _sharepointconfigurationpropertiesSection.GetValue<int>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.Status);
+				if (_status != null)
+				{
+					obj.Status = (SharePointConfigurationStatus)_status.Value;
+				}
+			}
+
+			return obj;
+		}
+
+		private DomInstance ToInstance(SharePointConfiguration obj)
+		{
+			Guid id = default(Guid);
+			if (!String.IsNullOrEmpty(obj.Identifier))
+			{
+				id = Guid.Parse(obj.Identifier);
+			}
+			else
+			{
+				id = Guid.NewGuid();
+			}
+
+			var instance = new DomInstance
+			{
+				DomDefinitionId = Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.DomDefinitionId,
+				ID = new DomInstanceId(id)
+				{
+					ModuleId = Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.ModuleId
+				}
+			};
+			var _sharepointconfigurationproperties = new Section(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SectionDefinitionId);
+			if (obj.TenantID != default)
+			{
+				_sharepointconfigurationproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.TenantID, Convert.ToString(obj.TenantID));
+			}
+
+			if (obj.ClientID != default)
+			{
+				_sharepointconfigurationproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientID, Convert.ToString(obj.ClientID));
+			}
+
+			if (obj.ClientSecret != default)
+			{
+				_sharepointconfigurationproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientSecret, Convert.ToString(obj.ClientSecret));
+			}
+
+			if (obj.SiteURL != default)
+			{
+				_sharepointconfigurationproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SiteURL, Convert.ToString(obj.SiteURL));
+			}
+
+			if (obj.DocumentLibraryName != default)
+			{
+				_sharepointconfigurationproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.DocumentLibraryName, Convert.ToString(obj.DocumentLibraryName));
+			}
+
+			_sharepointconfigurationproperties.AddOrUpdateValue<int>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.Status, (int)obj.Status);
+
+			instance.Sections.Add(_sharepointconfigurationproperties);
+			return instance;
+		}
+
+		private FilterElement<DomInstance> CreateFilter(string fieldName, Comparer comparer, object value)
+		{
+			switch (fieldName)
+			{
+				case "Identifier":
+					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
+				case "TenantID":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.TenantID), comparer, (string)value);
+				case "ClientID":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientID), comparer, (string)value);
+				case "ClientSecret":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientSecret), comparer, (string)value);
+				case "SiteURL":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SiteURL), comparer, (string)value);
+				case "DocumentLibraryName":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.DocumentLibraryName), comparer, (string)value);
+				case "Status":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.Status), comparer, value);
+				default:
+					throw new NotImplementedException();
+			}
+		}
+
+		private IOrderByElement CreateOrderBy(string fieldName, SortOrder sortOrder, bool naturalSort = false)
+		{
+			switch (fieldName)
+			{
+				case "Identifier":
+					return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
+				case "TenantID":
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.TenantID), sortOrder, naturalSort);
+				case "ClientID":
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientID), sortOrder, naturalSort);
+				case "ClientSecret":
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientSecret), sortOrder, naturalSort);
+				case "SiteURL":
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SiteURL), sortOrder, naturalSort);
+				case "DocumentLibraryName":
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.DocumentLibraryName), sortOrder, naturalSort);
+				case "Status":
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.Status), sortOrder, naturalSort);
+				default:
+					throw new NotImplementedException();
+			}
+		}
+	}
 }
