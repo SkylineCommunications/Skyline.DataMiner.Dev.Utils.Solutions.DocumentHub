@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.4.11620.152
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevPack", "Utils.DocumentHub.Common\DevPack.csproj", "{19EFBB1B-FF5E-82DC-C5E6-DBD18A726A59}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevPack", "DevPack\DevPack.csproj", "{19EFBB1B-FF5E-82DC-C5E6-DBD18A726A59}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevPack.Installer", "Utils.DocumentHub.Installer\DevPack.Installer.csproj", "{CBB917D1-B759-4965-86D2-79E99BBC1635}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevPack.Installer", "DevPack.Installer\DevPack.Installer.csproj", "{CBB917D1-B759-4965-86D2-79E99BBC1635}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Internal", "Internal", "{833FB715-4133-4B62-A7CD-6A01F7C4B95C}"
 EndProject
@@ -18,7 +18,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Code Analysis", "Code Analy
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedMappers", "SharedMappers\SharedMappers.shproj", "{0C843C63-2D8E-40C3-9BA1-186C66F0C372}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevPack.Tests", "Utils.DocumentHub.Tests\DevPack.Tests.csproj", "{9C487DBA-A22C-4E07-AD05-A849A2E2E4DB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevPack.Tests", "DevPack.Tests\DevPack.Tests.csproj", "{9C487DBA-A22C-4E07-AD05-A849A2E2E4DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
