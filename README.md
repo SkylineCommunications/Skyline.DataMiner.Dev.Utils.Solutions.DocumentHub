@@ -1,4 +1,4 @@
-# Skyline.DataMiner.Utils.DocumentHub
+# Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub
 
 ## About
 
