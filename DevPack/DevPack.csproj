@@ -20,7 +20,7 @@
 		<Company>Skyline Communications</Company>
 		<Description>NuGet Class Library API to interact with DocumentHub functionality.</Description>
 		<RepositoryType>git</RepositoryType>
-		<RepositoryUrl>https://github.com/SkylineCommunications/SLC-App-DocumentHub-API</RepositoryUrl>
+		<RepositoryUrl>https://github.com/SkylineCommunications/Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub</RepositoryUrl>
 	</PropertyGroup>
 
 	<ItemGroup>
