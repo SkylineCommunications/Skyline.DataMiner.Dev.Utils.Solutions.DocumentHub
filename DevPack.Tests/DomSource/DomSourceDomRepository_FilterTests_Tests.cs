@@ -7,7 +7,6 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DomSource
 	using FluentAssertions.Execution;
 
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.Solutions.DocumentHub.SDM;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 	using Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup;
 

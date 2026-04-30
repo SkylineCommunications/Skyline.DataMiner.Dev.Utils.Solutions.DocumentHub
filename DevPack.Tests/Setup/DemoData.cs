@@ -2,7 +2,6 @@
 {
 	using System.Collections.Generic;
 
-	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 
 	public static class DemoData
