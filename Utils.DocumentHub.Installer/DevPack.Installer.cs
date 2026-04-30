@@ -15,7 +15,7 @@ using System;
 using Skyline.AppInstaller;
 using Skyline.DataMiner.Automation;
 using Skyline.DataMiner.Net.AppPackages;
-using Skyline.DataMiner.Utils.DocumentHub.Installer.DOM;
+using Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM;
 
 /// <summary>
 /// DataMiner Script Class.

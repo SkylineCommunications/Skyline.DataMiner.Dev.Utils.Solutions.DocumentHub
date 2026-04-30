@@ -14,7 +14,7 @@
 		<!-- Do NOT fill in the Organization Token here. This points to either an Environment Variable skyline__sdk__dataminertoken holding the organization token or a Visual Studio User Secret holding the token. -->
 		<CatalogPublishKeyName>skyline:sdk:dataminertoken</CatalogPublishKeyName>
 		<CatalogDefaultDownloadKeyName>skyline:sdk:dataminertoken</CatalogDefaultDownloadKeyName>
-		<AssemblyTitle>Skyline.DataMiner.Utils.DocumentHub.Installer</AssemblyTitle>
+		<AssemblyTitle>Skyline.DataMiner.Solutions.DocumentHub.Installer</AssemblyTitle>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Skyline.DataMiner.CICD.CSharpAnalysis.Analyzer" Version="2.1.2">

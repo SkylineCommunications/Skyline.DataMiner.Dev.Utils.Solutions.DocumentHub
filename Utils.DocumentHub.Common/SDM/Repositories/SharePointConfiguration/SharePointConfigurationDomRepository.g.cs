@@ -4,7 +4,7 @@
 //     Changes to this file will be lost if the code is regenerated.
 // </auto-generated>
 //------------------------------------------------------------------------------
-namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
+namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointConfiguration
 {
 	using System;
 	using System.Collections.Generic;
@@ -19,6 +19,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
 	using Skyline.DataMiner.Net.Sections;
 	using Skyline.DataMiner.Net.SubscriptionFilters;
 	using Skyline.DataMiner.SDM;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using SLDataGateway.API.Querying;
 	using SLDataGateway.API.Types.Querying;

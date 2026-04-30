@@ -8,14 +8,17 @@
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
-    using Skyline.DataMiner.Solutions.DocumentHub.SDM;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM;
     using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DomSource;
 
-    /// <summary>
-    /// Storage handler for reading, paging, and uploading files from DOM instances.
-    /// </summary>
-    internal class DomAttachmentsHandler : IStorageHandler
+	/// <summary>
+	/// Storage handler for reading, paging, and uploading files from DOM instances.
+	/// </summary>
+	internal class DomAttachmentsHandler : IStorageHandler
 	{
 		private readonly IConnection _connection;
 		private readonly IRepository<DomSource> _domSourceRepository;

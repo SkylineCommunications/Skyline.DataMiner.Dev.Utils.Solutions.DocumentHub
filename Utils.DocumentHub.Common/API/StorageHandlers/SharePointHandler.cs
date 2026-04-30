@@ -11,11 +11,14 @@
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
     using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
     using Skyline.DataMiner.Solutions.DocumentHub.API.Security;
-    using Skyline.DataMiner.Solutions.DocumentHub.SDM;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM;
     using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
-    using Drive = Microsoft.Graph.Drive;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointConfiguration;
+	using Drive = Microsoft.Graph.Drive;
     using File = System.IO.File;
 
     /// <summary>

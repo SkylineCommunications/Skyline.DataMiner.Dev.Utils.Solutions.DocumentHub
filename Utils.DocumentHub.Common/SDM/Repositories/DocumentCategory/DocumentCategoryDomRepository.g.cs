@@ -4,7 +4,7 @@
 //     Changes to this file will be lost if the code is regenerated.
 // </auto-generated>
 //------------------------------------------------------------------------------
-namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
+namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
 {
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
@@ -20,8 +20,9 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
     using System;
     using System.Collections.Generic;
     using System.Linq;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 
-    internal partial class DocumentCategoryDomRepository : IBulkRepository<DocumentCategory>
+	internal partial class DocumentCategoryDomRepository : IBulkRepository<DocumentCategory>
     {
         private readonly IConnection connection;
         private readonly DomHelper helper;

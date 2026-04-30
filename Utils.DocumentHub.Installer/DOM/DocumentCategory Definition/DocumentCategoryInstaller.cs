@@ -1,10 +1,10 @@
-﻿namespace Skyline.DataMiner.Utils.DocumentHub.Installer.DOM.DocumentCategory_Definition
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM.DocumentCategory_Definition
 {
 	using System;
 	using System.Collections.Generic;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
-	using Skyline.DataMiner.Utils.DocumentHub.Installer.DOM;
+	using Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM;
 
 	internal class DocumentCategoryInstaller : BaseMigrator
 	{

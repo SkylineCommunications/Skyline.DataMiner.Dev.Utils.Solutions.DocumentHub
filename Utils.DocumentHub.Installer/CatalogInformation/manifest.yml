@@ -33,7 +33,7 @@ id: a411fa82-e6aa-45c9-93e9-b854d06b7839
 #   Max length: 100 characters.
 #   Cannot contain newlines.
 #   Cannot contain leading or trailing whitespace characters.
-title: DocumentHub.DOM.Installer
+title: DocumentHub Storage Installer
 
 # [Optional]
 # General information about the Catalog item.

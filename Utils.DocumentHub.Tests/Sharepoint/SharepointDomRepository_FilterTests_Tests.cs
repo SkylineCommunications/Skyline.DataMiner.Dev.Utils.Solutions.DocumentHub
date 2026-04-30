@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Utils.DocumentHub.Tests.Sharepoint
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.Sharepoint
 {
 	using System;
 	using System.Linq;
@@ -8,8 +8,9 @@
 
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
-	using Skyline.DataMiner.Utils.DocumentHub.Tests.Setup;
+	using Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup;
 
 	[TestClass]
 	public class SharepointDomRepository_FilterTests_Tests

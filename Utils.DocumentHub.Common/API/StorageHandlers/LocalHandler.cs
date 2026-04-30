@@ -1,7 +1,9 @@
 ﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API
 {
-    using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
-    using System;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
+	using System;
     using System.Collections.Generic;
     using System.Drawing;
     using System.IO;

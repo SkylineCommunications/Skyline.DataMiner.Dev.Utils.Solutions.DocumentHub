@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters
 {
     using System;
     using System.IO;

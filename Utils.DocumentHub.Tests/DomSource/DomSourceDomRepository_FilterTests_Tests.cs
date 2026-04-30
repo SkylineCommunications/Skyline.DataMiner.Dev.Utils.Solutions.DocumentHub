@@ -1,4 +1,4 @@
-namespace Skyline.DataMiner.Utils.DocumentHub.Tests.DomSource
+namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DomSource
 {
 	using System;
 	using System.Linq;
@@ -8,7 +8,8 @@ namespace Skyline.DataMiner.Utils.DocumentHub.Tests.DomSource
 
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM;
-	using Skyline.DataMiner.Utils.DocumentHub.Tests.Setup;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
+	using Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup;
 
 	[TestClass]
 	public class DomSourceDomRepository_FilterTests_Tests

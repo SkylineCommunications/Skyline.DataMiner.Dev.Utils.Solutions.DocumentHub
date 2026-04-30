@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Utils.DocumentHub.Common\Utils.DocumentHub.Common.csproj" />
+    <ProjectReference Include="..\Utils.DocumentHub.Common\DevPack.csproj" />
   </ItemGroup>
 
 </Project>

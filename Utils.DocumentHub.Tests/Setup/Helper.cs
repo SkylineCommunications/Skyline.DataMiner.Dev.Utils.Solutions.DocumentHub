@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Utils.DocumentHub.Tests.Setup
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup
 {
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Helpers;
 

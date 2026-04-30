@@ -3,7 +3,9 @@
     using System;
     using System.Collections.Generic;
     using Skyline.DataMiner.Net;
-    using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 
     #region Interface
 

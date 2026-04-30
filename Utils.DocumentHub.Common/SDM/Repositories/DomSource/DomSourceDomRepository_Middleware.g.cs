@@ -5,7 +5,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
+namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DocumentCategory
 {
     using System;
     using System.Collections.Generic;

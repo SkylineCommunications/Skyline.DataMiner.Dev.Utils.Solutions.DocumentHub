@@ -2,7 +2,10 @@
 {
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.SDM;
+	using Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DomSource;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointConfiguration;
 
 	/// <summary>
 	/// Provides centralized access to Document Hub repositories and configuration data.

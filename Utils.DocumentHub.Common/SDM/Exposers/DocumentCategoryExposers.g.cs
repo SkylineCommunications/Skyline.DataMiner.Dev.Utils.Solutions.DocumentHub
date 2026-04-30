@@ -4,7 +4,7 @@
 //     Changes to this file will be lost if the code is regenerated.
 // </auto-generated>
 //------------------------------------------------------------------------------
-namespace Skyline.DataMiner.Solutions.DocumentHub.SDM
+namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers
 {
     using System;
     using System.Collections;

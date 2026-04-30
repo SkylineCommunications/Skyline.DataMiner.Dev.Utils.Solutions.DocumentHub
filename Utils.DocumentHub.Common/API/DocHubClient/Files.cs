@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient
 {
     using System;
     using System.Collections.Generic;
@@ -7,15 +7,17 @@
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
     using Skyline.DataMiner.Net.Messages.SLDataGateway;
-    using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
-    using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 
-    /// <summary>
-    /// Provides file related operations within DocumentHub.
-    /// This class is the main entry point for uploading and reading files
-    /// across different storage backends such as local storage and SharePoint.
-    /// </summary>
-    public class Files
+	/// <summary>
+	/// Provides file related operations within DocumentHub.
+	/// This class is the main entry point for uploading and reading files
+	/// across different storage backends such as local storage and SharePoint.
+	/// </summary>
+	public class Files
 	{
 		/// <summary>
 		/// The DataMiner connection used for communication with the system.

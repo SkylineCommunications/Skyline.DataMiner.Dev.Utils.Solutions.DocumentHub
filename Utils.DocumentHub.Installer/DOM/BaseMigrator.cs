@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Utils.DocumentHub.Installer.DOM
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM
 {
 	using System;
 	using System.Collections.Generic;
