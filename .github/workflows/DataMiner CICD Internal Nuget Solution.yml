@@ -1,0 +1,24 @@
+name: DataMiner CICD Internal Nuget Solution
+on:
+  push:
+    branches:
+    - '**'
+    tags:
+    - '[0-9]+.[0-9]+.[0-9]+'
+    - '[0-9]+.[0-9]+.[0-9]+-[0-9a-zA-Z]+'
+  workflow_dispatch:
+
+jobs:
+  CICD:
+    name: CICD
+    uses: SkylineCommunications/_ReusableWorkflows/.github/workflows/Internal NuGet Solution Master Workflow.yml@ArneM
+    with:
+      referenceName: ${{ github.ref_name }}
+      runNumber: ${{ github.run_number }}
+      referenceType: ${{ github.ref_type }}
+      repository: ${{ github.repository }}
+      owner: ${{ github.repository_owner }}
+      sonarCloudProjectName: ${{ vars.SONAR_NAME }}
+      solutionFilterName: Nuget.slnf
+    secrets:
+      nugetApiKey: ${{ secrets.NUGETAPIKEY_GITHUB  }}

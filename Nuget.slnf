@@ -1,0 +1,9 @@
+{
+  "solution": {
+    "path": "SLC-S-DocumentHub-API.sln",
+    "projects": [
+      "SharedMappers\\SharedMappers.shproj",
+      "Utils.DocumentHub.Common\\Utils.DocumentHub.Common.csproj"
+    ]
+  }
+}
