@@ -6,7 +6,7 @@
 		<AssemblyName>Skyline.DataMiner.Solutions.DocumentHub</AssemblyName>
 		<RootNamespace>Skyline.DataMiner.Solutions.DocumentHub</RootNamespace>
 		<PackageId>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub</PackageId>
-		<PackageVersion>1.1.1-alpha19</PackageVersion>
+		<PackageVersion>1.1.1-alpha20</PackageVersion>
 		<Version>1.1.1</Version>
 		<PackageTags>Skyline;DataMiner</PackageTags>
 		<PackageProjectUrl>https://skyline.be</PackageProjectUrl>
