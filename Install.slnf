@@ -3,7 +3,7 @@
     "path": "SLC-S-DocumentHub-API.sln",
     "projects": [
       "SharedMappers\\SharedMappers.shproj",
-      "Utils.DocumentHub.Installer\\Utils.DocumentHub.Installer.csproj"
+      "Utils.DocumentHub.Installer\\DevPack.Installer.csproj"
     ]
   }
 }
