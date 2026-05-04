@@ -70,7 +70,8 @@ owners:
 #   Cannot contain newlines.
 #   Cannot contain leading or trailing whitespace characters.
 tags:
-  - 
+  - SDM
+  - DocumentHub
 
 # [Optional]
 # The ID of the vendor.
