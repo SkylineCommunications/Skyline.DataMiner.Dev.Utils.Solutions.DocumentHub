@@ -6,11 +6,11 @@ NuGet Class Library API to interact with DocumentHub functionality. It provides 
 
 ## Solution Structure
 
-| Project | Description |
-|---------|-------------|
-| `DevPack` | Core library containing models, repositories, exposers, `DocumentHubApiHelper`, and the `DocHubClient` API. |
-| `DevPack.Installer` | DOM installer that provisions module settings, section definitions, and DOM definitions. |
-| `DevPack.Tests` | Unit tests covering CRUD operations, filter queries, and API validation for all components. |
+| Project             | Description                                                                                                 |
+|---------------------|-------------------------------------------------------------------------------------------------------------|
+| `DevPack`           | Core library containing models, repositories, exposers, `DocumentHubApiHelper`, and the `DocHubClient` API. |
+| `DevPack.Installer` | DOM installer that provisions module settings, section definitions, and DOM definitions.                    |
+| `DevPack.Tests`     | Unit tests covering CRUD operations, filter queries, and API validation for all components.                 |
 
 ## Getting Started
 
