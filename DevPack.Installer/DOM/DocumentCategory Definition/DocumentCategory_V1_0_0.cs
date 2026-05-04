@@ -74,6 +74,12 @@
 					.WithModule(DomSourceDomMapper.ModuleId)
 					.WithDefinitions(new[] { DomSourceDomMapper.DomDefinitionId })
 					.WithTooltip("Reference to the DOM source configuration for this category"))
+				.AddFieldDescriptor(new FieldDescriptorBuilder()
+					.WithID(DocumentCategoryDomMapper.DocumentCategoryProperties.SizeLimit)
+					.WithName(nameof(DocumentCategoryDomMapper.DocumentCategoryProperties.SizeLimit))
+					.WithType(typeof(Int64))
+					.WithIsOptional(true)
+					.WithTooltip("Maximum file size allowed for uploads in this category (in bytes). Leave empty for no limit."))
 				.Build();
 
 			Import(SectionDefinitionExposers.ID.Equal(DocumentCategoryDomMapper.DocumentCategoryProperties.SectionDefinitionId), section);
