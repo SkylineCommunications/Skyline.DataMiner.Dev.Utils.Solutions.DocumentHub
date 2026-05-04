@@ -52,7 +52,7 @@
 
 		protected void Log(string message)
 		{
-			_logMethod?.Invoke($"SDM.CMDB.Installer: {message}");
+			_logMethod?.Invoke($"|BaseMigrator|DevPack.Installer: {message}");
 		}
 	}
 }

@@ -25,7 +25,7 @@
 
 		protected void Log(string message)
 		{
-			_logMethod?.Invoke($"SDM.DocumentHub.Installer: {message}");
+			_logMethod?.Invoke($"|DomMigration|DevPack.Installer: {message}");
 		}
 
 		protected SectionDefinition Get(FilterElement<SectionDefinition> equalityFilter)

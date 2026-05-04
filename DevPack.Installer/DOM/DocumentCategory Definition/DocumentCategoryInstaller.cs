@@ -3,8 +3,8 @@
 	using System;
 	using System.Collections.Generic;
 	using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 
 	internal class DocumentCategoryInstaller : BaseMigrator
 	{

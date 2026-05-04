@@ -8,11 +8,11 @@
 	using Skyline.DataMiner.Net.ManagerStore;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Net.Sections;
-	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM.DocumentCategory_Definition;
 	using Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM.DomSource_Definition;
 	using Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM.Sharepoint_Definition;
 	using Skyline.DataMiner.Solutions.DocumentHub.Installer.Module;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Utils.DOM.Builders;
 
 	public class DomInstaller
@@ -64,7 +64,7 @@
 
 		internal void Log(string message)
 		{
-			_logMethod?.Invoke($"Utils.DocumentHub.Installer: {message}");
+			_logMethod?.Invoke($"|DomInstaller|DevPack.Installer: {message}");
 		}
 
 		private void Import<T>(ICrudHelperComponent<T> crudHelperComponent, FilterElement<T> equalityFilter, T dataType)
