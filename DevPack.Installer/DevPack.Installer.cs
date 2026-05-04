@@ -12,10 +12,9 @@ DATE		VERSION		AUTHOR			COMMENTS
 */
 
 using System;
-using Skyline.AppInstaller;
+using DevPack.Installer;
 using Skyline.DataMiner.Automation;
 using Skyline.DataMiner.Net.AppPackages;
-using Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM;
 
 /// <summary>
 /// DataMiner Script Class.
@@ -32,14 +31,10 @@ internal class Script
 	{
 		try
 		{
-			engine.Timeout = new TimeSpan(0, 10, 0);
-			engine.GenerateInformation("Starting installation");
-			var installer = new AppInstaller(Engine.SLNetRaw, context);
-			installer.InstallDefaultContent();
-
-			// Custom installation logic
-			var domInstaller = new DomInstaller(engine.GetUserConnection(), installer.Log);
-			domInstaller.InstallDefaultContent();
+			engine.Timeout = new TimeSpan(0, 30, 0);
+			var solutionInstaller = new SolutionInstaller(engine, context);
+			solutionInstaller.InstallDefaultContent();
+			solutionInstaller.InstallDom();
 		}
 		catch (Exception e)
 		{
