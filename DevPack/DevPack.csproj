@@ -6,7 +6,7 @@
 		<AssemblyName>Skyline.DataMiner.Solutions.DocumentHub</AssemblyName>
 		<RootNamespace>Skyline.DataMiner.Solutions.DocumentHub</RootNamespace>
 		<PackageId>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub</PackageId>
-		<PackageVersion>1.1.1-alpha23</PackageVersion>
+		<PackageVersion>1.1.1-alpha24</PackageVersion>
 		<Version>1.1.1</Version>
 		<PackageTags>Skyline;DataMiner</PackageTags>
 		<PackageProjectUrl>https://skyline.be</PackageProjectUrl>
@@ -35,7 +35,6 @@
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 		<PackageReference Include="Skyline.DataMiner.Dev.Common" Version="10.6.3.1" />
 		<PackageReference Include="Skyline.DataMiner.SDM" Version="1.0.1" />
-		<PackageReference Include="Skyline.DataMiner.SDM.Registration.Common" Version="2.0.5" />
 		<PackageReference Include="Skyline.DataMiner.SDM.SourceGenerator.Runtime" Version="1.0.1" OutputItemType="Analyzer" ReferenceoutputAssembly="false" />
 		<PackageReference Include="Skyline.DataMiner.Utils.DOM" Version="10.5.2.6" />
 		<PackageReference Include="Skyline.DataMiner.Utils.SecureCoding" Version="2.2.3" />
