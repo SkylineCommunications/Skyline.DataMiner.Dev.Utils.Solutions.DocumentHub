@@ -9,7 +9,7 @@
 		<GenerateDataMinerPackage>True</GenerateDataMinerPackage>
 		<MinimumRequiredDmVersion>10.4.0.0 - 14003</MinimumRequiredDmVersion>
 		<!-- <MinimumRequiredDmWebVersion>10.6.2 (CU0)</MinimumRequiredDmWebVersion> -->
-		<PackageVersion>1.1.1-alpha23</PackageVersion>
+		<PackageVersion>1.1.1-alpha24</PackageVersion>
 		<Version>1.0.0</Version>
 		<VersionComment>Initial Version</VersionComment>
 		<!-- Do NOT fill in the Organization Token here. This points to either an Environment Variable skyline__sdk__dataminertoken holding the organization token or a Visual Studio User Secret holding the token. -->
@@ -23,7 +23,6 @@
 		</PackageReference>
 		<PackageReference Include="Skyline.DataMiner.Core.AppPackageInstaller" Version="4.0.0" />
 		<PackageReference Include="Skyline.DataMiner.Dev.Automation" Version="10.6.3.1" />
-		<PackageReference Include="Skyline.DataMiner.Dev.Utils.SDM.Abstractions" Version="1.0.1" />
 		<PackageReference Include="Skyline.DataMiner.SDM" Version="1.0.1" />
 		<PackageReference Include="Skyline.DataMiner.Utils.DOM" Version="10.5.2.6" />
 		<PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="2.2.3">
