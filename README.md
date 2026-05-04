@@ -2,19 +2,46 @@
 
 ## About
 
-NuGet Class Library API to interact with DocumentHub functionality. It provides repositories and helpers for managing document categories, SharePoint configurations, and DOM sources.
+NuGet Class Library API to interact with DocumentHub functionality. It provides repositories and helpers for managing document categories, SharePoint configurations, and DOM sources, as well as a high-level API for file upload and read operations across multiple storage backends.
 
 ## Solution Structure
 
-| Project						| Description																				  |
-|-------------------------------|---------------------------------------------------------------------------------------------|
-| `Utils.DocumentHub.Common`    | Core library containing models, repositories, exposers, and the `DocumentHubApiHelper`.     |
-| `Utils.DocumentHub.Installer` | DOM installer that provisions module settings, section definitions, and DOM definitions.    |
-| `Utils.DocumentHub.Tests`     | Unit tests covering CRUD operations and filter queries for all repositories.                |
+| Project | Description |
+|---------|-------------|
+| `DevPack` | Core library containing models, repositories, exposers, `DocumentHubApiHelper`, and the `DocHubClient` API. |
+| `DevPack.Installer` | DOM installer that provisions module settings, section definitions, and DOM definitions. |
+| `DevPack.Tests` | Unit tests covering CRUD operations, filter queries, and API validation for all components. |
 
 ## Getting Started
 
-Use the `DocumentHubApiHelper` to access repositories:
+### Using the DocHubClient API
+
+The `DocHubClient` provides a simplified interface for file operations:
+
+```csharp
+using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient;
+
+var client = new DocHubClient(connection);
+
+// Upload a file to a document category
+client.Files.UploadFile(category, @"C:\Documents\report.pdf");
+
+// Upload with custom name
+client.Files.UploadFile(category, filePath, name: "CustomName");
+
+// Upload to DOM instance
+client.Files.UploadFile(category, filePath, domInstanceId);
+
+// Read files from a category
+var files = client.Files.ReadFiles(category);
+
+// Read files with filter
+var filtered = client.Files.ReadFiles(category, filter: "invoice");
+```
+
+### Using the DocumentHubApiHelper
+
+For direct repository access and DOM operations:
 
 ```csharp
 var helper = new DocumentHubApiHelper(connection);
@@ -36,15 +63,39 @@ var results = helper.DocumentCategories.Read(
 
 ## Unit Tests
 
-The `Utils.DocumentHub.Tests` project contains integration-style tests using an in-memory DOM mock (`DomSLNetMessageHandler`). Tests are organized per repository:
+The `DevPack.Tests` project contains unit tests using an in-memory DOM mock (`DomSLNetMessageHandler`).
 
-- **SharePoint** — `SharepointDomRepository_CRUD_Tests`, `SharepointDomRepository_FilterTests_Tests`
-- **DomSource** — `DomSourceDomRepository_CRUD_Tests`, `DomSourceDomRepository_FilterTests_Tests`
-- **DocumentCategory** — `DocumentCategoryDomRepository_CRUD_Tests`, `DocumentCategoryDomRepository_FilterTests_Tests`
+### Test Coverage
 
-Each test class covers:
+| Area                       | Test Classes                                                                                  | Tests |
+|----------------------------|-----------------------------------------------------------------------------------------------|-------|
+| **API - DocHubClient**     | `DocHubClient_Tests`                                                                          | 3     |
+| **API - Files Upload**     | `Files_UploadFile_Tests`                                                                      | 8     |
+| **API - Files Read**       | `Files_ReadFiles_Tests`                                                                       | 5     |
+| **SDM - SharePoint**       | `SharepointDomRepository_CRUD_Tests`, `SharepointDomRepository_FilterTests_Tests`             | 13    |
+| **SDM - DomSource**        | `DomSourceDomRepository_CRUD_Tests`, `DomSourceDomRepository_FilterTests_Tests`               | 12    |
+| **SDM - DocumentCategory** | `DocumentCategoryDomRepository_CRUD_Tests`, `DocumentCategoryDomRepository_FilterTests_Tests` | 12    |
+
+**Total: 53 tests**
+
+### SDM Repository Tests
+
+Each repository test class covers:
 - **CRUD**: Create, Update, ReadPaged, DeleteSingle, DeleteBulk
 - **Filters**: Equal, Contains, AND, OR, TRUE
+
+### API Tests
+
+API tests validate parameter handling:
+- Null category, filePath, and domInstanceId validation
+- Storage type restrictions (e.g., DOM storage with qualifier overload)
+- DomSource module validation
+
+### Running Tests
+
+```bash
+dotnet test DevPack.Tests
+```
 
 ## About DataMiner
 

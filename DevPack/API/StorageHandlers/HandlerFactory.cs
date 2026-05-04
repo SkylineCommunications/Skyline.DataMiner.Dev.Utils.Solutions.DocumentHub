@@ -1,22 +1,22 @@
 ﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API
 {
-    using System;
-    using System.Collections.Generic;
-    using Skyline.DataMiner.Net;
+	using System;
+	using System.Collections.Generic;
+	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 
-    #region Interface
+	#region Interface
 
-    /// <summary>
-    /// Defines the contract for different file storage implementations.
-    /// </summary>
-    /// <remarks>
-    /// Implementations of this interface (e.g., <see cref="LocalHandler"/> and <see cref="SharePointHandler"/>)
-    /// handle how files or images are uploaded and verified in their respective storage environments.
-    /// </remarks>
-    internal interface IStorageHandler
+	/// <summary>
+	/// Defines the contract for different file storage implementations.
+	/// </summary>
+	/// <remarks>
+	/// Implementations of this interface (e.g., <see cref="LocalHandler"/> and <see cref="SharePointHandler"/>)
+	/// handle how files or images are uploaded and verified in their respective storage environments.
+	/// </remarks>
+	internal interface IStorageHandler
 	{
 		/// <summary>
 		/// Checks whether a file with the specified name already exists in the given directory.
@@ -86,8 +86,8 @@
 			// Select the appropriate storage handler based on the given storage type.
 			switch (storage)
 			{
-                // TODO: if it's sharepoint, don't initialize each time. Instead, consider caching the handler instance or implementing a singleton pattern if appropriate.
-                case StorageType.SharePoint:
+				// TODO: if it's sharepoint, don't initialize each time. Instead, consider caching the handler instance or implementing a singleton pattern if appropriate.
+				case StorageType.SharePoint:
 					// SharePoint-based storage implementation.
 					return new SharePointHandler(connection);
 

@@ -1,12 +1,12 @@
 ﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using Skyline.DataMiner.Net;
-    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using System;
+	using System.Collections.Generic;
+	using System.IO;
+	using System.Linq;
+	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
@@ -155,35 +155,35 @@
 			});
 		}
 
-        /// <summary>
-        /// Uploads a file to the storage location configured in the given document category,
-        /// allowing the caller to further qualify the category's UploadPath with an additional relative segment.
-        /// Useful for adding a subfolder or logical qualifier without mutating the original category.
-        /// </summary>
-        /// <param name="category">
-        /// The document category defining the storage type and base upload path.
-        /// </param>
-        /// <param name="filePath">
-        /// The full local path of the file to upload.
-        /// </param>
-        /// <param name="uploadPathQualifier">
-        /// Additional relative path segment to append to the category's UploadPath.
-        /// May be null or empty to behave the same as <see cref="UploadFile(DocumentCategory,string,string)"/>.
-        /// </param>
-        /// <param name="name">
-        /// Optional custom file name without extension.
-        /// If null, the original file name is used.
-        /// </param>
-        /// <returns>
-        /// The path or identifier of the uploaded file.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown when <paramref name="category"/> or <paramref name="filePath"/> is null.
-        /// </exception>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when called for DOM storage (use the DOM overload) or when a file with the same name already exists.
-        /// </exception>
-        public string UploadFile(DocumentCategory category, string filePath, string uploadPathQualifier, string name = null)
+		/// <summary>
+		/// Uploads a file to the storage location configured in the given document category,
+		/// allowing the caller to further qualify the category's UploadPath with an additional relative segment.
+		/// Useful for adding a subfolder or logical qualifier without mutating the original category.
+		/// </summary>
+		/// <param name="category">
+		/// The document category defining the storage type and base upload path.
+		/// </param>
+		/// <param name="filePath">
+		/// The full local path of the file to upload.
+		/// </param>
+		/// <param name="uploadPathQualifier">
+		/// Additional relative path segment to append to the category's UploadPath.
+		/// May be null or empty to behave the same as <see cref="UploadFile(DocumentCategory,string,string)"/>.
+		/// </param>
+		/// <param name="name">
+		/// Optional custom file name without extension.
+		/// If null, the original file name is used.
+		/// </param>
+		/// <returns>
+		/// The path or identifier of the uploaded file.
+		/// </returns>
+		/// <exception cref="ArgumentNullException">
+		/// Thrown when <paramref name="category"/> or <paramref name="filePath"/> is null.
+		/// </exception>
+		/// <exception cref="InvalidOperationException">
+		/// Thrown when called for DOM storage (use the DOM overload) or when a file with the same name already exists.
+		/// </exception>
+		public string UploadFile(DocumentCategory category, string filePath, string uploadPathQualifier, string name = null)
 		{
 			if (category == null)
 				throw new ArgumentNullException(nameof(category));
@@ -251,36 +251,36 @@
 				Name = $"{name}{extension}",
 			});
 		}
-        #endregion
+		#endregion
 
-        #region Read
+		#region Read
 
-        /// <summary>
-        /// Reads files from the specified storage type.
-        /// </summary>
-        /// <param name="storageType">
-        /// The storage backend to read from.
-        /// </param>
-        /// <param name="context">
-        /// Optional paging context that maintains paging state between calls.
-        /// Pass the same instance to continue paging.
-        /// Use named arguments to skip this parameter if not needed.
-        /// </param>
-        /// <param name="filter">
-        /// Optional case-insensitive filter applied to file names.
-        /// Use named arguments to specify this parameter without passing a paging context.
-        /// </param>
-        /// <returns>
-        /// A list of files represented as <see cref="IDocHubFile"/>.
-        /// </returns>
-        /// <remarks>
-        /// Named arguments allow callers to specify only the parameters they need:
-        /// <code>
-        /// ReadFiles(<seealso cref="StorageType.DOM"/>, filter: "invoice");
-        /// ReadFiles(<seealso cref="StorageType.DOM"/>, context: pageData);
-        /// </code>
-        /// </remarks>
-        public List<IDocHubFile> ReadFiles(StorageType storageType, DocHubPageData context = null, string filter = null)
+		/// <summary>
+		/// Reads files from the specified storage type.
+		/// </summary>
+		/// <param name="storageType">
+		/// The storage backend to read from.
+		/// </param>
+		/// <param name="context">
+		/// Optional paging context that maintains paging state between calls.
+		/// Pass the same instance to continue paging.
+		/// Use named arguments to skip this parameter if not needed.
+		/// </param>
+		/// <param name="filter">
+		/// Optional case-insensitive filter applied to file names.
+		/// Use named arguments to specify this parameter without passing a paging context.
+		/// </param>
+		/// <returns>
+		/// A list of files represented as <see cref="IDocHubFile"/>.
+		/// </returns>
+		/// <remarks>
+		/// Named arguments allow callers to specify only the parameters they need:
+		/// <code>
+		/// ReadFiles(<seealso cref="StorageType.DOM"/>, filter: "invoice");
+		/// ReadFiles(<seealso cref="StorageType.DOM"/>, context: pageData);
+		/// </code>
+		/// </remarks>
+		public List<IDocHubFile> ReadFiles(StorageType storageType, DocHubPageData context = null, string filter = null)
 		{
 			ReadData data = storageType == StorageType.DOM
 				? (ReadData)new DomFileReadData()

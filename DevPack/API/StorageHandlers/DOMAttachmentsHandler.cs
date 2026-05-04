@@ -1,18 +1,17 @@
 ﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using Skyline.DataMiner.Net;
-    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
-    using Skyline.DataMiner.SDM;
+	using System;
+	using System.Collections.Generic;
+	using System.IO;
+	using System.Linq;
+	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
-	using Skyline.DataMiner.Solutions.DocumentHub.SDM;
-    using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DomSource;
 
 	/// <summary>
@@ -219,62 +218,62 @@
 				page.Done = true;
 		}
 
-        /// <summary>
-        /// Reads files from the current module, advancing paging helper and DOM instances.
-        /// </summary>
-        private void ReadFromModule(DomHelper domHelper, DOMPageData page, string filter, List<IDocHubFile> results, int pageSize)
-        {
-            while (results.Count < pageSize)
-            {
-                var instances = page.PagingHelper.GetCurrentPage()?.ToList();
+		/// <summary>
+		/// Reads files from the current module, advancing paging helper and DOM instances.
+		/// </summary>
+		private void ReadFromModule(DomHelper domHelper, DOMPageData page, string filter, List<IDocHubFile> results, int pageSize)
+		{
+			while (results.Count < pageSize)
+			{
+				var instances = page.PagingHelper.GetCurrentPage()?.ToList();
 
-                // Ensure we have a valid page with instances
-                while (instances == null || page.InstanceIndexInPage >= instances.Count)
-                {
-                    if (!page.PagingHelper.MoveToNextPage())
-                        return; // no more pages in this module
+				// Ensure we have a valid page with instances
+				while (instances == null || page.InstanceIndexInPage >= instances.Count)
+				{
+					if (!page.PagingHelper.MoveToNextPage())
+						return; // no more pages in this module
 
-                    page.InstanceIndexInPage = 0;
-                    instances = page.PagingHelper.GetCurrentPage()?.ToList();
-                }
+					page.InstanceIndexInPage = 0;
+					instances = page.PagingHelper.GetCurrentPage()?.ToList();
+				}
 
-                var instance = instances[page.InstanceIndexInPage];
-                var attachments = GetInstanceAttachments(domHelper, page, instance);
+				var instance = instances[page.InstanceIndexInPage];
+				var attachments = GetInstanceAttachments(domHelper, page, instance);
 
-                // Apply filename filter
-                if (!string.IsNullOrEmpty(filter))
-                {
-                    attachments = attachments
-                        .Where(a => a.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0)
-                        .ToList();
-                }
+				// Apply filename filter
+				if (!string.IsNullOrEmpty(filter))
+				{
+					attachments = attachments
+						.Where(a => a.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0)
+						.ToList();
+				}
 
-                // Add attachments
-                while (page.AttachmentIndex < attachments.Count && results.Count < pageSize)
-                {
-                    results.Add(new DomFileAdapter
-                    {
-                        Filename = attachments[page.AttachmentIndex++],
-                        Module = domHelper.ModuleId,
-                        Instance = instance,
-                    });
-                }
+				// Add attachments
+				while (page.AttachmentIndex < attachments.Count && results.Count < pageSize)
+				{
+					results.Add(new DomFileAdapter
+					{
+						Filename = attachments[page.AttachmentIndex++],
+						Module = domHelper.ModuleId,
+						Instance = instance,
+					});
+				}
 
-                // If all attachments consumed → move to next instance
-                if (page.AttachmentIndex >= attachments.Count)
-                {
-                    page.AttachmentIndex = 0;
-                    page.CurrentAttachments = null;
-                    page.InstanceIndexInPage++;
-                }
-            }
-        }
+				// If all attachments consumed → move to next instance
+				if (page.AttachmentIndex >= attachments.Count)
+				{
+					page.AttachmentIndex = 0;
+					page.CurrentAttachments = null;
+					page.InstanceIndexInPage++;
+				}
+			}
+		}
 
-        /// <summary>
-        /// Retrieves the attachment file names for a DOM instance.
-        /// Reuses cached attachments if already loaded for the instance.
-        /// </summary>
-        private List<string> GetInstanceAttachments(DomHelper domHelper, DOMPageData page, DomInstance instance)
+		/// <summary>
+		/// Retrieves the attachment file names for a DOM instance.
+		/// Reuses cached attachments if already loaded for the instance.
+		/// </summary>
+		private List<string> GetInstanceAttachments(DomHelper domHelper, DOMPageData page, DomInstance instance)
 		{
 			if (page.CurrentAttachments != null && page.CurrentInstanceId == instance.ID.Id)
 				return page.CurrentAttachments;

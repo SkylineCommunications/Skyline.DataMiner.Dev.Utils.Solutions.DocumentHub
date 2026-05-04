@@ -1,22 +1,24 @@
-﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API
+﻿using Skyline.DataMiner.Utils.SecureCoding.SecureIO;
+
+namespace Skyline.DataMiner.Solutions.DocumentHub.API
 {
+	using System;
+	using System.Collections.Generic;
+	using System.Drawing;
+	using System.IO;
+	using System.Linq;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
-	using System;
-    using System.Collections.Generic;
-    using System.Drawing;
-    using System.IO;
-    using System.Linq;
 
-    /// <summary>
-    /// Handles file and image storage on the local filesystem.
-    /// </summary>
-    /// <remarks>
-    /// Implements <see cref="IStorageHandler"/> to provide local storage operations.
-    /// Used for storing files and images under the DataMiner Webpages folder.
-    /// </remarks>
-    internal class LocalHandler : IStorageHandler
+	/// <summary>
+	/// Handles file and image storage on the local filesystem.
+	/// </summary>
+	/// <remarks>
+	/// Implements <see cref="IStorageHandler"/> to provide local storage operations.
+	/// Used for storing files and images under the DataMiner Webpages folder.
+	/// </remarks>
+	internal class LocalHandler : IStorageHandler
 	{
 		/// <summary>
 		/// Initializes a new instance of the <see cref="LocalHandler"/> class.
@@ -42,7 +44,7 @@
 			var directory = args.Directory;
 			var name = args.Name;
 
-			string filePath = Path.Combine(directory, $"{name}");
+			string filePath = SecurePath.ConstructSecurePath(directory, $"{name}");
 			return File.Exists(filePath);
 		}
 
@@ -61,7 +63,7 @@
 			}
 
 			// Construct the full file path and save the image as JPEG
-			string filePath = Path.Combine(directory, $"{name}.jpeg");
+			string filePath = SecurePath.ConstructSecurePath(directory, $"{name}.jpeg");
 			image.Save(filePath);
 		}
 
@@ -91,7 +93,7 @@
 			directory = directory.TrimStart('/', '\\');
 
 			// Combine root and relative path to get full target directory
-			var targetDirectory = Path.Combine(root, directory);
+			var targetDirectory = SecurePath.ConstructSecurePath(root, directory);
 
 			// Ensure the target directory exists
 			if (!Directory.Exists(targetDirectory))
@@ -100,7 +102,7 @@
 			}
 
 			// Combine directory and target filename
-			string targetPath = Path.Combine(targetDirectory, name);
+			string targetPath = SecurePath.ConstructSecurePath(targetDirectory, name);
 
 			// Copy the file to the target location (overwrite if exists)
 			File.Copy(filePath, targetPath, overwrite: true);
@@ -182,7 +184,7 @@
 			// Apply category upload path before enumeration starts
 			if (category != null && localContext.FileEnumerator == null)
 			{
-				localContext.CurrentRoot = Path.Combine(localContext.CurrentRoot, category.UploadPath.TrimStart('\\', '/'));
+				localContext.CurrentRoot = SecurePath.ConstructSecurePathWithSubDirectories(localContext.CurrentRoot, category.UploadPath.TrimStart('\\', '/'));
 			}
 
 			// Initialize file enumeration if not already created

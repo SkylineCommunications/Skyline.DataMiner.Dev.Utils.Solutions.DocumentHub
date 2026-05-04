@@ -1,12 +1,12 @@
-namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DocumentCategory
+namespace DevPack.Tests.SDM.DocumentCategory
 {
 	using System.Linq;
-
 	using FluentAssertions;
 	using FluentAssertions.Execution;
-
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Helpers;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup;
 
 	[TestClass]
@@ -24,7 +24,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DocumentCategory
 			// Assert
 			using (new AssertionScope())
 			{
-				var all = helper.DocumentCategories.Read(new TRUEFilterElement<Solutions.DocumentHub.SDM.Models.DocumentCategory>());
+				var all = helper.DocumentCategories.Read(new TRUEFilterElement<DocumentCategory>());
 				all.Count().Should().Be(DemoData.DocumentCategories.Count);
 
 				foreach (var demo in DemoData.DocumentCategories)
@@ -86,7 +86,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DocumentCategory
 			// Act
 			CreateAll(helper);
 
-			FilterElement<Solutions.DocumentHub.SDM.Models.DocumentCategory> allFilter = new TRUEFilterElement<Solutions.DocumentHub.SDM.Models.DocumentCategory>();
+			FilterElement<DocumentCategory> allFilter = new TRUEFilterElement<DocumentCategory>();
 			var pagedResult = helper.DocumentCategories.ReadPaged(allFilter, pageCount);
 			var count = helper.DocumentCategories.Count(allFilter);
 
@@ -117,7 +117,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DocumentCategory
 			// Assert
 			using (new AssertionScope())
 			{
-				helper.DocumentCategories.Count(new TRUEFilterElement<Solutions.DocumentHub.SDM.Models.DocumentCategory>()).Should().Be(DemoData.DocumentCategories.Count - 1);
+				helper.DocumentCategories.Count(new TRUEFilterElement<DocumentCategory>()).Should().Be(DemoData.DocumentCategories.Count - 1);
 				helper.DocumentCategories.Count(DocumentCategoryExposers.Name.Equal(nameToDelete)).Should().Be(0);
 			}
 		}
@@ -140,12 +140,12 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DocumentCategory
 			// Assert
 			using (new AssertionScope())
 			{
-				helper.DocumentCategories.Count(new TRUEFilterElement<Solutions.DocumentHub.SDM.Models.DocumentCategory>()).Should().Be(DemoData.DocumentCategories.Count - 4);
+				helper.DocumentCategories.Count(new TRUEFilterElement<DocumentCategory>()).Should().Be(DemoData.DocumentCategories.Count - 4);
 				helper.DocumentCategories.Count(DocumentCategoryExposers.Extensions.Contains(extensionToDelete, System.StringComparison.OrdinalIgnoreCase)).Should().Be(0);
 			}
 		}
 
-		private static void CreateAll(Solutions.DocumentHub.SDM.Helpers.IDocumentHubApiHelper helper)
+		private static void CreateAll(IDocumentHubApiHelper helper)
 		{
 			foreach (var item in DemoData.DocumentCategories)
 			{

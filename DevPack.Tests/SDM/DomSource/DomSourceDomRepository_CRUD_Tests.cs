@@ -1,4 +1,4 @@
-namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DomSource
+namespace DevPack.Tests.SDM.DomSource
 {
 	using System.Linq;
 
@@ -7,6 +7,8 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DomSource
 
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Helpers;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup;
 
 	[TestClass]
@@ -24,7 +26,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DomSource
 			// Assert
 			using (new AssertionScope())
 			{
-				var all = helper.DomSources.Read(new TRUEFilterElement<Solutions.DocumentHub.SDM.Models.DomSource>());
+				var all = helper.DomSources.Read(new TRUEFilterElement<DomSource>());
 				all.Count().Should().Be(DemoData.DomSources.Count);
 
 				foreach (var demo in DemoData.DomSources)
@@ -79,7 +81,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DomSource
 			// Act
 			CreateAll(helper);
 
-			FilterElement<Solutions.DocumentHub.SDM.Models.DomSource> allFilter = new TRUEFilterElement<Solutions.DocumentHub.SDM.Models.DomSource>();
+			FilterElement<DomSource> allFilter = new TRUEFilterElement<DomSource>();
 			var pagedResult = helper.DomSources.ReadPaged(allFilter, pageCount);
 			var count = helper.DomSources.Count(allFilter);
 
@@ -110,7 +112,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DomSource
 			// Assert
 			using (new AssertionScope())
 			{
-				helper.DomSources.Count(new TRUEFilterElement<Solutions.DocumentHub.SDM.Models.DomSource>()).Should().Be(DemoData.DomSources.Count - 1);
+				helper.DomSources.Count(new TRUEFilterElement<DomSource>()).Should().Be(DemoData.DomSources.Count - 1);
 				helper.DomSources.Count(DomSourceExposers.Name.Equal(nameToDelete)).Should().Be(0);
 			}
 		}
@@ -136,12 +138,12 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DomSource
 			// Assert
 			using (new AssertionScope())
 			{
-				helper.DomSources.Count(new TRUEFilterElement<Solutions.DocumentHub.SDM.Models.DomSource>()).Should().Be(DemoData.DomSources.Count - 2);
+				helper.DomSources.Count(new TRUEFilterElement<DomSource>()).Should().Be(DemoData.DomSources.Count - 2);
 				helper.DomSources.Count(DomSourceExposers.Module.Equal(moduleToDelete)).Should().Be(0);
 			}
 		}
 
-		private static void CreateAll(Solutions.DocumentHub.SDM.Helpers.IDocumentHubApiHelper helper)
+		private static void CreateAll(IDocumentHubApiHelper helper)
 		{
 			foreach (var item in DemoData.DomSources)
 			{

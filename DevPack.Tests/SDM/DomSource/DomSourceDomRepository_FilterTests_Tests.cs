@@ -1,4 +1,4 @@
-namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DomSource
+namespace DevPack.Tests.SDM.DomSource
 {
 	using System;
 	using System.Linq;
@@ -8,6 +8,8 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DomSource
 
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Helpers;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup;
 
 	[TestClass]
@@ -106,7 +108,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DomSource
 		{
 			// Arrange
 			var helper = Helper.GetHelper();
-			var filter = new ANDFilterElement<Solutions.DocumentHub.SDM.Models.DomSource>(
+			var filter = new ANDFilterElement<DomSource>(
 				DomSourceExposers.Module.Equal("inventory"),
 				DomSourceExposers.Credential.Equal("cred-inventory-001"));
 
@@ -128,7 +130,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DomSource
 		{
 			// Arrange
 			var helper = Helper.GetHelper();
-			var filter = new ORFilterElement<Solutions.DocumentHub.SDM.Models.DomSource>(
+			var filter = new ORFilterElement<DomSource>(
 				DomSourceExposers.Module.Equal("network"),
 				DomSourceExposers.Module.Equal("audit"));
 
@@ -150,7 +152,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DomSource
 		{
 			// Arrange
 			var helper = Helper.GetHelper();
-			var filter = new TRUEFilterElement<Solutions.DocumentHub.SDM.Models.DomSource>();
+			var filter = new TRUEFilterElement<DomSource>();
 
 			// Act
 			CreateAll(helper);
@@ -165,7 +167,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DomSource
 			}
 		}
 
-		private static void CreateAll(Solutions.DocumentHub.SDM.Helpers.IDocumentHubApiHelper helper)
+		private static void CreateAll(IDocumentHubApiHelper helper)
 		{
 			foreach (var item in DemoData.DomSources)
 			{

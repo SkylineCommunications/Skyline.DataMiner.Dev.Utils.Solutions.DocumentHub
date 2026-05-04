@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.Sharepoint
+﻿namespace DevPack.Tests.SDM.Sharepoint
 {
 	using System.Linq;
 
@@ -7,6 +7,7 @@
 
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Helpers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup;
 
@@ -143,7 +144,7 @@
 			}
 		}
 
-		private static void CreateAll(Solutions.DocumentHub.SDM.Helpers.IDocumentHubApiHelper helper)
+		private static void CreateAll(IDocumentHubApiHelper helper)
 		{
 			foreach (var config in DemoData.SharePointConfigurations)
 			{

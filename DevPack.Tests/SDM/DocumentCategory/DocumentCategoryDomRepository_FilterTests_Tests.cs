@@ -1,13 +1,13 @@
-namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DocumentCategory
+namespace DevPack.Tests.SDM.DocumentCategory
 {
 	using System;
 	using System.Linq;
-
 	using FluentAssertions;
 	using FluentAssertions.Execution;
-
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Helpers;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup;
 
 	[TestClass]
@@ -131,7 +131,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DocumentCategory
 		{
 			// Arrange
 			var helper = Helper.GetHelper();
-			var filter = new ANDFilterElement<Solutions.DocumentHub.SDM.Models.DocumentCategory>(
+			var filter = new ANDFilterElement<DocumentCategory>(
 				DocumentCategoryExposers.Extensions.Contains("pdf", StringComparison.OrdinalIgnoreCase),
 				DocumentCategoryExposers.SizeLimit.Equal(10240));
 
@@ -153,7 +153,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DocumentCategory
 		{
 			// Arrange
 			var helper = Helper.GetHelper();
-			var filter = new ORFilterElement<Solutions.DocumentHub.SDM.Models.DocumentCategory>(
+			var filter = new ORFilterElement<DocumentCategory>(
 				DocumentCategoryExposers.Definition.Equal("ConfigBak"),
 				DocumentCategoryExposers.Definition.Equal("NetDiag"));
 
@@ -175,7 +175,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DocumentCategory
 		{
 			// Arrange
 			var helper = Helper.GetHelper();
-			var filter = new TRUEFilterElement<Solutions.DocumentHub.SDM.Models.DocumentCategory>();
+			var filter = new TRUEFilterElement<DocumentCategory>();
 
 			// Act
 			CreateAll(helper);
@@ -190,7 +190,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.DocumentCategory
 			}
 		}
 
-		private static void CreateAll(Solutions.DocumentHub.SDM.Helpers.IDocumentHubApiHelper helper)
+		private static void CreateAll(IDocumentHubApiHelper helper)
 		{
 			foreach (var item in DemoData.DocumentCategories)
 			{

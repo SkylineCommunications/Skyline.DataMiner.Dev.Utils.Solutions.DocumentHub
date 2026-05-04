@@ -17,6 +17,7 @@ Or search for `Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub` in the Visual 
 ## Getting Started
 
 ```csharp
+
 using Skyline.DataMiner.Net;
 using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient;
 
@@ -24,10 +25,10 @@ using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient;
 var client = new DocHubClient(connection);
 
 // Upload a file to a document category
-client.Files.Upload(category, @"C:\Documents\report.pdf");
+client.Files.UploadFile(category, @"C:\Documents\report.pdf");
 
 // Read files from a document category
-var files = client.Files.Read(category);
+var files = client.Files.ReadFiles(category);
 ```
 
 ## Features
