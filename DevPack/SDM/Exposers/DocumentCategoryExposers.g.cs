@@ -28,6 +28,6 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers
         public static readonly Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, bool> IsDefault = new Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, bool>((obj) => obj.IsDefault, "IsDefault");
         public static readonly Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>> DOMSource = new Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>>((obj) => obj.DOMSource, "DOMSource");
         public static readonly Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, string> Definition = new Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, string>((obj) => obj.Definition, "Definition");
-        public static readonly Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, int> SizeLimit = new Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, int>((obj) => obj.SizeLimit, "SizeLimit");
+        public static readonly Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, long> SizeLimit = new Exposer<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory, long>((obj) => obj.SizeLimit, "SizeLimit");
     }
 }

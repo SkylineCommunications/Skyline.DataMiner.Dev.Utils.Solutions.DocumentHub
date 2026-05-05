@@ -53,8 +53,8 @@
         public string Definition { get; set; }
 
         /// <summary>
-        /// Gets or sets the maximum allowed file size for this category, in kilobytes (KB).
+        /// Gets or sets the maximum allowed file size for this category, in bytes.
         /// </summary>
-        public int SizeLimit { get; set; }
+        public long SizeLimit { get; set; }
     }
 }
