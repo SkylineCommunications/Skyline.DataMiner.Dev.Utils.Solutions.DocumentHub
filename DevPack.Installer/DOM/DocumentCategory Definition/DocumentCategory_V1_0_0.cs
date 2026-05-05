@@ -77,7 +77,7 @@
 				.AddFieldDescriptor(new FieldDescriptorBuilder()
 					.WithID(DocumentCategoryDomMapper.DocumentCategoryProperties.SizeLimit)
 					.WithName(nameof(DocumentCategoryDomMapper.DocumentCategoryProperties.SizeLimit))
-					.WithType(typeof(Int64))
+					.WithType(typeof(long))
 					.WithIsOptional(true)
 					.WithTooltip("Maximum file size allowed for uploads in this category (in bytes). Leave empty for no limit."))
 				.Build();
