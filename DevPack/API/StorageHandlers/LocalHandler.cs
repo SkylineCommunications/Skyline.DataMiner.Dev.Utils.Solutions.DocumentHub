@@ -82,7 +82,7 @@
 			}
 
 			// Construct the full file path and save the image as JPEG
-			string filePath = Path.Combine(directory, $"{name}.jpeg");
+			string filePath = SecurePath.ConstructSecurePath(directory, $"{name}.jpeg");
 			image.Save(filePath);
 		}
 
@@ -118,7 +118,7 @@
 			}
 
 			// Combine directory and target filename
-			string targetPath = Path.Combine(targetDirectory, name);
+			string targetPath = SecurePath.ConstructSecurePath(targetDirectory, name);
 
 			// Copy the file to the target location (overwrite if exists)
 			File.Copy(filePath, targetPath, overwrite: true);
