@@ -55,7 +55,7 @@
 					.WithTooltip("The current connection status to the SharePoint site"))
 				.AddFieldDescriptor(new FieldDescriptorBuilder()
 					.WithID(SharePointConfigurationDomMapper.SharePointConfigurationProperties.TenantID)
-					.WithType(typeof(bool))
+					.WithType(typeof(string))
 					.WithName(nameof(SharePointConfigurationDomMapper.SharePointConfigurationProperties.TenantID))
 					.WithIsOptional(true)
 					.WithTooltip("The Azure AD tenant ID for SharePoint authentication"))
