@@ -1,8 +1,10 @@
 ﻿namespace Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM.DocumentCategory_Definition
 {
 	using System;
+	using System.Collections.Generic;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel.Concatenation;
 	using Skyline.DataMiner.Net.GenericEnums;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Net.Sections;
@@ -95,6 +97,17 @@
 					IsSoftDeleted = false,
 				})
 				.Build();
+
+			documentCategoryDefinition.ModuleSettingsOverrides = new ModuleSettingsOverrides
+			{
+				NameDefinition = new DomInstanceNameDefinition
+				{
+					ConcatenationItems = new List<IDomInstanceConcatenationItem>
+					{
+						new FieldValueConcatenationItem { FieldDescriptorId = DocumentCategoryDomMapper.DocumentCategoryProperties.Name },
+					},
+				},
+			};
 
 			Import(DomDefinitionExposers.Id.Equal(DocumentCategoryDomMapper.DomDefinitionId.Id), documentCategoryDefinition);
 		}
