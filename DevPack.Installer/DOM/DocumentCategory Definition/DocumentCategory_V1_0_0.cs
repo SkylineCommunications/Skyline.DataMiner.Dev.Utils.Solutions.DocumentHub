@@ -98,16 +98,22 @@
 				})
 				.Build();
 
-			documentCategoryDefinition.ModuleSettingsOverrides = new ModuleSettingsOverrides
+			// Ensure ModuleSettingsOverrides is not null before setting NameDefinition
+			if (documentCategoryDefinition.ModuleSettingsOverrides == null)
 			{
-				NameDefinition = new DomInstanceNameDefinition
+				documentCategoryDefinition.ModuleSettingsOverrides = new ModuleSettingsOverrides();
+			}
+
+			// Set instance naming definition on the DomDefinition level (takes priority over module level)
+			documentCategoryDefinition.ModuleSettingsOverrides.NameDefinition = new DomInstanceNameDefinition
+			{
+				ConcatenationItems = new List<IDomInstanceConcatenationItem>
 				{
-					ConcatenationItems = new List<IDomInstanceConcatenationItem>
-					{
-						new FieldValueConcatenationItem { FieldDescriptorId = DocumentCategoryDomMapper.DocumentCategoryProperties.Name },
-					},
+					new FieldValueConcatenationItem { FieldDescriptorId = DocumentCategoryDomMapper.DocumentCategoryProperties.Name },
 				},
 			};
+
+			Log($"Setting NameDefinition with {documentCategoryDefinition.ModuleSettingsOverrides.NameDefinition.ConcatenationItems.Count} concatenation items");
 
 			Import(DomDefinitionExposers.Id.Equal(DocumentCategoryDomMapper.DomDefinitionId.Id), documentCategoryDefinition);
 		}
