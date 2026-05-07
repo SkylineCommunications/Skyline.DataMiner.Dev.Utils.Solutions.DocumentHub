@@ -1,7 +1,7 @@
 ﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API
 {
     using Azure.Identity;
-	using Microsoft.Graph;
+    using Microsoft.Graph;
 	using Microsoft.Graph.Models;
     using Microsoft.Graph.Models.ODataErrors;
     using Skyline.DataMiner.Net;
@@ -92,7 +92,7 @@
 
 			// Retrieve client secret
 			var clientSecret = RetrieveClientSecret();
-
+			
 			// Authenticate using Azure AD client credentials flow
 			var credential = new ClientSecretCredential(
 				_sharePoint.TenantID,
