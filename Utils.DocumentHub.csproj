@@ -29,7 +29,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Azure.Core" Version="1.53.0" />
+		<PackageReference Include="Azure.Core" Version="1.50.0" />
 		<PackageReference Include="Microsoft.Graph" Version="5.104.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
 		<PackageReference Include="Skyline.DataMiner.Dev.Common" Version="10.6.3.1" />
