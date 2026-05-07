@@ -85,6 +85,10 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API
 			var filePath = args.FilePath;
 			var name = args.Name;
 
+			// Validate that the source file exists
+			if (!File.Exists(filePath))
+				throw new FileNotFoundException($"Source file not found: '{filePath}'", filePath);
+
 			// Root path for DataMiner WebFileManager
 			var root = @"C:\Skyline DataMiner\Webpages\Public\WebFileManager";
 

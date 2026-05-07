@@ -61,6 +61,9 @@
 			if (filePath == null)
 				throw new ArgumentNullException(nameof(filePath));
 
+			// Normalize the file path to an absolute path to avoid issues with relative paths
+			filePath = Path.GetFullPath(filePath);
+
 			// Create appropriate storage handler based on category's storage type.
 			var storageHandler = StorageHandlerFactory.Create(category.StorageType, _connection);
 
@@ -123,6 +126,9 @@
 				throw new ArgumentNullException(nameof(filePath));
 			if (domInstanceId == Guid.Empty)
 				throw new ArgumentNullException(nameof(domInstanceId));
+
+			// Normalize the file path to an absolute path to avoid issues with relative paths
+			filePath = Path.GetFullPath(filePath);
 
 			// Create appropriate storage handler based on category's storage type.
 			var storageHandler = StorageHandlerFactory.Create(category.StorageType, _connection);
@@ -189,6 +195,9 @@
 				throw new ArgumentNullException(nameof(category));
 			if (filePath == null)
 				throw new ArgumentNullException(nameof(filePath));
+
+			// Normalize the file path to an absolute path to avoid issues with relative paths
+			filePath = Path.GetFullPath(filePath);
 
 			// This overload is intended for web-like storage backends that use UploadPath.
 			// DOM storage uses DOM instances instead; instruct caller to use the DOM overload.

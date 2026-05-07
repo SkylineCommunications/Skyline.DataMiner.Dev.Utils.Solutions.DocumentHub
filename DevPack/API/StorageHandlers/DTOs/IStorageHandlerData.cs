@@ -1,11 +1,11 @@
 ﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs
 {
-    using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
-    using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
-    using System;
-    using System.Collections.Generic;
+	using System;
+	using System.Collections.Generic;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 
-    internal interface IStorageHandlerData
+	internal interface IStorageHandlerData
 	{
 	}
 
