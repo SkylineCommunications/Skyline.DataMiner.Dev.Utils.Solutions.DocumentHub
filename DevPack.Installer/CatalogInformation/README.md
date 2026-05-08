@@ -1,46 +1,46 @@
-# Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub
+# DocumentHub Storage Installer
 
-## About
-
-A .NET class library providing API access to the **DocumentHub** solution for DataMiner. It enables automation scripts and connectors to manage document categories, upload/read files, and interact with storage backends such as local storage and SharePoint.
+This documentation describes how to use the public API exposed by `Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub`. The API is intended to be used when developing custom solutions based on the DocumentHub solution.
 
 ## Installation
 
-Install via NuGet:
+Add the NuGet package to your solution:
 
 ```
 dotnet add package Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub
 ```
 
-Or search for `Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub` in the Visual Studio NuGet Package Manager.
+Depending on your project type, one of the following additional packages is also required:
 
-## Getting Started
+- Automation scripts: `Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub.Automation`
+- Protocols: `Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub.Protocol`
+- GQI Ad-hoc data sources and custom operators: `Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub.GQI`
 
-```csharp
+> **Note**
+> This library targets `.NET Framework 4.8`.
 
-using Skyline.DataMiner.Net;
-using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient;
+## Documentation
 
-// Create the client using an active DataMiner connection
-var client = new DocHubClient(connection);
+| Document																																					 | Description                                                                  |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------- | -----------------------------------------------------------------------------|
+| [Getting Started](https://github.com/SkylineCommunications/Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub/blob/main/Documentation/Getting%20Started.md) | Installation, prerequisites, and basic usage                                 |
+| [Quick Reference](https://github.com/SkylineCommunications/Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub/blob/main/Documentation/Quick%20Reference.md) | Common code snippets for file operations, repositories, and storage backends |
 
-// Upload a file to a document category
-client.Files.UploadFile(category, @"C:\Documents\report.pdf");
+External resources:
 
-// Read files from a document category
-var files = client.Files.ReadFiles(category);
-```
+- [DataMiner Docs](https://docs.dataminer.services/) – Official DataMiner documentation
 
-## Features
+## About DataMiner
 
-| Area                    | Description                                                                                          |
-|-----------------------  |------------------------------------------------------------------------------------------------------|
-| **File Operations**     | Upload and read files across configured storage backends                                             |
-| **Storage Backends**    | Supports local DataMiner storage and SharePoint integration                                          |
-| **Document Categories** | Organize documents by category with configurable storage types                                       |
-| **DOM Repositories**    | Typed CRUD and filter operations for SharePoint configurations, DOM sources, and document categories |
+DataMiner is a transformational platform that provides vendor-independent control and monitoring of devices and services. Out of the box and by design, it addresses key challenges such as security, complexity, multi-cloud, and much more. It has a pronounced open architecture and powerful capabilities enabling users to evolve easily and continuously.
 
-## Requirements
+The foundation of DataMiner is its powerful and versatile data acquisition and control layer. With DataMiner, there are no restrictions to what data users can access. Data sources may reside on premises, in the cloud, or in a hybrid setup.
 
-- DataMiner System with DOM module enabled
-- .NET Framework 4.8
+A unique catalog of 7000+ connectors already exists. In addition, you can leverage DataMiner Development Packages to build your own connectors (also known as "protocols" or "drivers").
+
+> **Note**  
+> See also: [About DataMiner](https://aka.dataminer.services/about-dataminer).
+
+## About Skyline Communications
+
+At Skyline Communications, we deal with world-class solutions that are deployed by leading companies around the globe. Check out [our proven track record](https://aka.dataminer.services/about-skyline) and see how we make our customers' lives easier by empowering them to take their operations to the next level.
