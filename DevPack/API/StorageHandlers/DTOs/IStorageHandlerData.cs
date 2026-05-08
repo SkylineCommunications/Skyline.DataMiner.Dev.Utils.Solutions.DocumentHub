@@ -12,7 +12,7 @@
 	#region Upload
 	internal class UploadData : IStorageHandlerData
 	{
-		public DocumentCategory Category { get; set; }
+		public DocumentBucket Bucket { get; set; }
 
 		public string FilePath { get; set; }
 
@@ -32,7 +32,7 @@
 	#region Read
 	internal class ReadData : IStorageHandlerData
 	{
-		public DocumentCategory Category { get; set; }
+		public DocumentBucket Bucket { get; set; }
 
 		public string Filter { get; set; }
 
@@ -64,7 +64,7 @@
 
 	internal class DomFileExistsData : FileExistsData
 	{
-		public DocumentCategory Category { get; set; }
+		public DocumentBucket Bucket { get; set; }
 
 		public Guid DomInstanceId { get; set; }
 	}

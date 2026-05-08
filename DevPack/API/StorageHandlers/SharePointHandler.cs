@@ -38,7 +38,7 @@
 	/// Typical usage:
 	/// <code>
 	/// var handler = new SharePointHandler(helpers, connection);
-	/// var files = handler.ReadFiles(new WebFileReadData { Category = category });
+	/// var files = handler.ReadFiles(new WebFileReadData { Bucket = bucket });
 	/// </code>
 	/// </example>
 	internal class SharePointHandler : IStorageHandler
@@ -194,11 +194,11 @@
 			if (!(data is WebFileUploadData args))
 				throw new ArgumentException("SharePointHandler requires WebFileUploadData.", nameof(data));
 
-			var category = args.Category;
+			var bucket = args.Bucket;
 			var filePath = args.FilePath;
 			var name = args.Name;
 
-			return UploadFileAsync(category.UploadPath, filePath, name)
+			return UploadFileAsync(bucket.UploadPath, filePath, name)
 				.GetAwaiter()
 				.GetResult();
 		}
@@ -231,16 +231,16 @@
 			if (spContext == null)
 				throw new ArgumentException("SharePointHandler requires SharePointPageContext.", nameof(args.Context));
 
-			var category = args.Category;
+			var bucket = args.Bucket;
 			var filter = args.Filter;
 
-			// Initialize category root exactly once (replace initial "root" sentinel)
-			if (category != null
+			// Initialize bucket root exactly once (replace initial "root" sentinel)
+			if (bucket != null
 				&& spContext.FolderQueue.Count == 1
 				&& spContext.FolderQueue.Peek() == "root"
 				&& spContext.NextPageRequest == null)
 			{
-				var trimmedPath = (category.UploadPath ?? string.Empty).Trim('/', '\\');
+				var trimmedPath = (bucket.UploadPath ?? string.Empty).Trim('/', '\\');
 
 				DriveItem folder;
 				if (string.IsNullOrEmpty(trimmedPath))
@@ -268,7 +268,7 @@
 				}
 
 				if (folder == null || folder.Folder == null)
-					throw new InvalidOperationException("Could not find folder with path /" + category.UploadPath);
+					throw new InvalidOperationException("Could not find folder with path /" + bucket.UploadPath);
 
 				// Do NOT replace the queue instance (other code may hold references)
 				spContext.FolderQueue.Clear();
@@ -283,9 +283,9 @@
 				return new List<IDocHubFile>();
 			}
 
-			// Parse allowed extensions from category
-			var allowedExtensions = category != null && !string.IsNullOrEmpty(category.Extensions)
-										? new HashSet<string>(category.Extensions.Split(','), StringComparer.OrdinalIgnoreCase)
+			// Parse allowed extensions from bucket
+			var allowedExtensions = bucket != null && !string.IsNullOrEmpty(bucket.Extensions)
+										? new HashSet<string>(bucket.Extensions.Split(','), StringComparer.OrdinalIgnoreCase)
 										: null;
 
 			// Fetch next logical page (Graph paging + remainder buffer)

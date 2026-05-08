@@ -2,11 +2,11 @@
 {
     using Skyline.DataMiner.Net;
 
-    /// <summary>
-    /// Entry point for interacting with the DocumentHub API.
-    /// Provides access to document categories and file operations.
-    /// </summary>
-    public class DocHubClient
+	/// <summary>
+	/// Entry point for interacting with the DocumentHub API.
+	/// Provides access to document buckets and file operations.
+	/// </summary>
+	public class DocHubClient
 	{
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DocHubClient"/> class.

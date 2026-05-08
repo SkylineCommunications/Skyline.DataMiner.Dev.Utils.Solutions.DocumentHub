@@ -1,4 +1,4 @@
-namespace DevPack.Tests.SDM.DocumentCategory
+namespace DevPack.Tests.SDM.DocumentBucket
 {
 	using System;
 	using System.Linq;
@@ -11,21 +11,21 @@ namespace DevPack.Tests.SDM.DocumentCategory
 	using Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup;
 
 	[TestClass]
-	public class DocumentCategoryDomRepository_FilterTests_Tests
+	public class DocumentBucketDomRepository_FilterTests_Tests
 	{
 		[TestMethod]
 		public void ReadFilter_Name_Equals()
 		{
 			// Arrange
 			var helper = Helper.GetHelper();
-			var nameToTest = DemoData.DocumentCategories[0].Name;
-			var filter = DocumentCategoryExposers.Name.Equal(nameToTest);
+			var nameToTest = DemoData.DocumentBuckets[0].Name;
+			var filter = DocumentBucketExposers.Name.Equal(nameToTest);
 
 			// Act
 			CreateAll(helper);
 
-			var expected = DemoData.DocumentCategories.Single(c => c.Name.Equals(nameToTest));
-			var retrieved = helper.DocumentCategories.Read(filter).SingleOrDefault();
+			var expected = DemoData.DocumentBuckets.Single(c => c.Name.Equals(nameToTest));
+			var retrieved = helper.DocumentBuckets.Read(filter).SingleOrDefault();
 
 			// Assert
 			using (new AssertionScope())
@@ -48,12 +48,12 @@ namespace DevPack.Tests.SDM.DocumentCategory
 			// Arrange
 			var helper = Helper.GetHelper();
 			var uploadPathToTest = "/docs/";
-			var filter = DocumentCategoryExposers.UploadPath.Contains(uploadPathToTest, StringComparison.OrdinalIgnoreCase);
+			var filter = DocumentBucketExposers.UploadPath.Contains(uploadPathToTest, StringComparison.OrdinalIgnoreCase);
 
 			// Act
 			CreateAll(helper);
 
-			var retrieved = helper.DocumentCategories.Read(filter);
+			var retrieved = helper.DocumentBuckets.Read(filter);
 
 			// Assert
 			using (new AssertionScope())
@@ -69,12 +69,12 @@ namespace DevPack.Tests.SDM.DocumentCategory
 			// Arrange
 			var helper = Helper.GetHelper();
 			var descriptionToTest = "maintenance";
-			var filter = DocumentCategoryExposers.Description.Contains(descriptionToTest, StringComparison.OrdinalIgnoreCase);
+			var filter = DocumentBucketExposers.Description.Contains(descriptionToTest, StringComparison.OrdinalIgnoreCase);
 
 			// Act
 			CreateAll(helper);
 
-			var retrieved = helper.DocumentCategories.Read(filter);
+			var retrieved = helper.DocumentBuckets.Read(filter);
 
 			// Assert
 			using (new AssertionScope())
@@ -90,12 +90,12 @@ namespace DevPack.Tests.SDM.DocumentCategory
 			// Arrange
 			var helper = Helper.GetHelper();
 			var extensionToTest = "pdf";
-			var filter = DocumentCategoryExposers.Extensions.Contains(extensionToTest, StringComparison.OrdinalIgnoreCase);
+			var filter = DocumentBucketExposers.Extensions.Contains(extensionToTest, StringComparison.OrdinalIgnoreCase);
 
 			// Act
 			CreateAll(helper);
 
-			var retrieved = helper.DocumentCategories.Read(filter);
+			var retrieved = helper.DocumentBuckets.Read(filter);
 
 			// Assert
 			using (new AssertionScope())
@@ -111,12 +111,12 @@ namespace DevPack.Tests.SDM.DocumentCategory
 			// Arrange
 			var helper = Helper.GetHelper();
 			var sizeLimitToTest = 10240;
-			var filter = DocumentCategoryExposers.SizeLimit.Equal(sizeLimitToTest);
+			var filter = DocumentBucketExposers.SizeLimit.Equal(sizeLimitToTest);
 
 			// Act
 			CreateAll(helper);
 
-			var retrieved = helper.DocumentCategories.Read(filter);
+			var retrieved = helper.DocumentBuckets.Read(filter);
 
 			// Assert
 			using (new AssertionScope())
@@ -131,14 +131,14 @@ namespace DevPack.Tests.SDM.DocumentCategory
 		{
 			// Arrange
 			var helper = Helper.GetHelper();
-			var filter = new ANDFilterElement<DocumentCategory>(
-				DocumentCategoryExposers.Extensions.Contains("pdf", StringComparison.OrdinalIgnoreCase),
-				DocumentCategoryExposers.SizeLimit.Equal(10240));
+			var filter = new ANDFilterElement<DocumentBucket>(
+				DocumentBucketExposers.Extensions.Contains("pdf", StringComparison.OrdinalIgnoreCase),
+				DocumentBucketExposers.SizeLimit.Equal(10240));
 
 			// Act
 			CreateAll(helper);
 
-			var retrieved = helper.DocumentCategories.Read(filter);
+			var retrieved = helper.DocumentBuckets.Read(filter);
 
 			// Assert
 			using (new AssertionScope())
@@ -153,14 +153,14 @@ namespace DevPack.Tests.SDM.DocumentCategory
 		{
 			// Arrange
 			var helper = Helper.GetHelper();
-			var filter = new ORFilterElement<DocumentCategory>(
-				DocumentCategoryExposers.Definition.Equal("ConfigBak"),
-				DocumentCategoryExposers.Definition.Equal("NetDiag"));
+			var filter = new ORFilterElement<DocumentBucket>(
+				DocumentBucketExposers.Definition.Equal("ConfigBak"),
+				DocumentBucketExposers.Definition.Equal("NetDiag"));
 
 			// Act
 			CreateAll(helper);
 
-			var retrieved = helper.DocumentCategories.Read(filter);
+			var retrieved = helper.DocumentBuckets.Read(filter);
 
 			// Assert
 			using (new AssertionScope())
@@ -175,12 +175,12 @@ namespace DevPack.Tests.SDM.DocumentCategory
 		{
 			// Arrange
 			var helper = Helper.GetHelper();
-			var filter = new TRUEFilterElement<DocumentCategory>();
+			var filter = new TRUEFilterElement<DocumentBucket>();
 
 			// Act
 			CreateAll(helper);
 
-			var retrieved = helper.DocumentCategories.Read(filter).ToArray();
+			var retrieved = helper.DocumentBuckets.Read(filter).ToArray();
 
 			// Assert
 			using (new AssertionScope())
@@ -192,9 +192,9 @@ namespace DevPack.Tests.SDM.DocumentCategory
 
 		private static void CreateAll(IDocumentHubApiHelper helper)
 		{
-			foreach (var item in DemoData.DocumentCategories)
+			foreach (var item in DemoData.DocumentBuckets)
 			{
-				helper.DocumentCategories.Create(item);
+				helper.DocumentBuckets.Create(item);
 			}
 		}
 	}

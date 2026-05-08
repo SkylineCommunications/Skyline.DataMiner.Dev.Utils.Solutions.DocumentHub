@@ -13,13 +13,13 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Models
     using System;
 
     [SdmDomMapper]
-    internal class DocumentCategoryDomMapper
+    internal class DocumentBucketDomMapper
     {
         internal const string ModuleId = "(slc)documenthub";
         internal static readonly DomDefinitionId DomDefinitionId = new DomDefinitionId(new Guid("c5a9829c-5ca1-4a29-87d0-88e4e4d13ace"))
         { ModuleId = ModuleId };
 
-        internal static class DocumentCategoryProperties
+        internal static class DocumentBucketProperties
         {
             internal static readonly SectionDefinitionID SectionDefinitionId = new SectionDefinitionID(new Guid("9dee7951-0ce8-42d1-8601-f1eb8c28a12c"))
             { ModuleId = ModuleId };

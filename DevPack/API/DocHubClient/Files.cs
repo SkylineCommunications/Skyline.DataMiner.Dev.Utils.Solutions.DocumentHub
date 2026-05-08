@@ -32,10 +32,10 @@
 		#region Upload
 
 		/// <summary>
-		/// Uploads a file to the storage location configured in the given document category.
+		/// Uploads a file to the storage location configured in the given document buckets.
 		/// </summary>
-		/// <param name="category">
-		/// The document category defining the storage type and upload path.
+		/// <param name="buckets">
+		/// The document bucket defining the storage type and upload path.
 		/// </param>
 		/// <param name="filePath">
 		/// The full local path of the file to upload.
@@ -45,7 +45,7 @@
 		/// If null, the original file name is used.
 		/// </param>
 		/// <exception cref="ArgumentNullException">
-		/// Thrown when <paramref name="category"/> or <paramref name="filePath"/> is null.
+		/// Thrown when <paramref name="buckets"/> or <paramref name="filePath"/> is null.
 		/// </exception>
 		/// <exception cref="InvalidOperationException">
 		/// Thrown when a file with the same name already exists in the target location.
@@ -53,11 +53,11 @@
 		/// <returns>
 		/// The path or identifier of the uploaded file.
 		/// </returns>
-		public string UploadFile(DocumentCategory category, string filePath, string name = null)
+		public string UploadFile(DocumentBucket buckets, string filePath, string name = null)
 		{
 			// Validate parameters
-			if (category == null)
-				throw new ArgumentNullException(nameof(category));
+			if (buckets == null)
+				throw new ArgumentNullException(nameof(buckets));
 			if (string.IsNullOrWhiteSpace(filePath))
 				throw new ArgumentNullException(nameof(filePath));
 
@@ -68,8 +68,8 @@
 			if (!File.Exists(filePath))
 				throw new FileNotFoundException($"Source file not found: '{filePath}'", filePath);
 
-			// Create appropriate storage handler based on category's storage type.
-			var storageHandler = StorageHandlerFactory.Create(category.StorageType, _connection);
+			// Create appropriate storage handler based on bucket's storage type.
+			var storageHandler = StorageHandlerFactory.Create(buckets.StorageType, _connection);
 
 			// Determine the file name to use
 			if (string.IsNullOrWhiteSpace(name))
@@ -89,7 +89,7 @@
 			// Check for existing file to prevent overwriting.
 			if (storageHandler.FileExists(new WebFileExistsData
 			{
-				Directory = category.UploadPath,
+				Directory = buckets.UploadPath,
 				Name = $"{name}{extension}",
 			}))
 			{
@@ -99,17 +99,17 @@
 			// Upload the file using the storage handler.
 			return storageHandler.UploadFile(new WebFileUploadData
 			{
-				Category = category,
+				Bucket = buckets,
 				FilePath = filePath,
 				Name = $"{name}{extension}",
 			});
 		}
 
 		/// <summary>
-		/// Uploads a file to the storage location configured in the given document category, linking it to a specific DOM instance.
+		/// Uploads a file to the storage location configured in the given document bucket, linking it to a specific DOM instance.
 		/// </summary>
-		/// <param name="category">
-		/// The document category defining the storage type and upload path.
+		/// <param name="bucket">
+		/// The document bucket defining the storage type and upload path.
 		/// </param>
 		/// <param name="filePath">
 		/// The full local path of the file to upload.
@@ -124,16 +124,16 @@
 		/// The path or identifier of the uploaded file.
 		/// </returns>
 		/// <exception cref="ArgumentNullException">
-		/// Thrown when <paramref name="category"/>, <paramref name="filePath"/>, or <paramref name="domInstanceId"/> is null or empty.
+		/// Thrown when <paramref name="bucket"/>, <paramref name="filePath"/>, or <paramref name="domInstanceId"/> is null or empty.
 		/// </exception>
 		/// <exception cref="InvalidOperationException">
 		/// Thrown when a file with the same name already exists in the target location.
 		/// </exception>
-		public string UploadFile(DocumentCategory category, string filePath, Guid domInstanceId, string name = null)
+		public string UploadFile(DocumentBucket bucket, string filePath, Guid domInstanceId, string name = null)
 		{
 			// Validate parameters
-			if (category == null)
-				throw new ArgumentNullException(nameof(category));
+			if (bucket == null)
+				throw new ArgumentNullException(nameof(bucket));
 			if (string.IsNullOrWhiteSpace(filePath))
 				throw new ArgumentNullException(nameof(filePath));
 			if (domInstanceId == Guid.Empty)
@@ -146,8 +146,8 @@
 			if (!File.Exists(filePath))
 				throw new FileNotFoundException($"Source file not found: '{filePath}'", filePath);
 
-			// Create appropriate storage handler based on category's storage type.
-			var storageHandler = StorageHandlerFactory.Create(category.StorageType, _connection);
+			// Create appropriate storage handler based on bucket's storage type.
+			var storageHandler = StorageHandlerFactory.Create(bucket.StorageType, _connection);
 
 			// Determine the file name to use
 			if (string.IsNullOrWhiteSpace(name))
@@ -167,7 +167,7 @@
 			// Check for existing file to prevent overwriting.
 			if (storageHandler.FileExists(new DomFileExistsData
 			{
-				Category = category,
+				Bucket = bucket,
 				DomInstanceId = domInstanceId,
 				Name = $"{name}{extension}",
 			}))
@@ -178,7 +178,7 @@
 			// Upload the file using the storage handler.
 			return storageHandler.UploadFile(new DomFileUploadData
 			{
-				Category = category,
+				Bucket = bucket,
 				DomInstanceId = domInstanceId,
 				FilePath = filePath,
 				Name = $"{name}{extension}",
@@ -186,19 +186,19 @@
 		}
 
 		/// <summary>
-		/// Uploads a file to the storage location configured in the given document category,
-		/// allowing the caller to further qualify the category's UploadPath with an additional relative segment.
-		/// Useful for adding a subfolder or logical qualifier without mutating the original category.
+		/// Uploads a file to the storage location configured in the given document bucket,
+		/// allowing the caller to further qualify the bucket's UploadPath with an additional relative segment.
+		/// Useful for adding a subfolder or logical qualifier without mutating the original bucket.
 		/// </summary>
-		/// <param name="category">
-		/// The document category defining the storage type and base upload path.
+		/// <param name="bucket">
+		/// The document bucket defining the storage type and base upload path.
 		/// </param>
 		/// <param name="filePath">
 		/// The full local path of the file to upload.
 		/// </param>
 		/// <param name="uploadPathQualifier">
-		/// Additional relative path segment to append to the category's UploadPath.
-		/// May be null or empty to behave the same as <see cref="UploadFile(DocumentCategory,string,string)"/>.
+		/// Additional relative path segment to append to the bucket's UploadPath.
+		/// May be null or empty to behave the same as <see cref="UploadFile(DocumentBucket,string,string)"/>.
 		/// </param>
 		/// <param name="name">
 		/// Optional custom file name without extension.
@@ -208,15 +208,15 @@
 		/// The path or identifier of the uploaded file.
 		/// </returns>
 		/// <exception cref="ArgumentNullException">
-		/// Thrown when <paramref name="category"/> or <paramref name="filePath"/> is null.
+		/// Thrown when <paramref name="bucket"/> or <paramref name="filePath"/> is null.
 		/// </exception>
 		/// <exception cref="InvalidOperationException">
 		/// Thrown when called for DOM storage (use the DOM overload) or when a file with the same name already exists.
 		/// </exception>
-		public string UploadFile(DocumentCategory category, string filePath, string uploadPathQualifier, string name = null)
+		public string UploadFile(DocumentBucket bucket, string filePath, string uploadPathQualifier, string name = null)
 		{
-			if (category == null)
-				throw new ArgumentNullException(nameof(category));
+			if (bucket == null)
+				throw new ArgumentNullException(nameof(bucket));
 			if (string.IsNullOrWhiteSpace(filePath))
 				throw new ArgumentNullException(nameof(filePath));
 
@@ -229,10 +229,10 @@
 
 			// This overload is intended for web-like storage backends that use UploadPath.
 			// DOM storage uses DOM instances instead; instruct caller to use the DOM overload.
-			if (category.StorageType == StorageType.DOM)
-				throw new InvalidOperationException("This overload is not supported for DOM storage. Use UploadFile(category, filePath, domInstanceId, name) instead.");
+			if (bucket.StorageType == StorageType.DOM)
+				throw new InvalidOperationException("This overload is not supported for DOM storage. Use UploadFile(bucket, filePath, domInstanceId, name) instead.");
 
-			var storageHandler = StorageHandlerFactory.Create(category.StorageType, _connection);
+			var storageHandler = StorageHandlerFactory.Create(bucket.StorageType, _connection);
 
 			// Determine the file name to use
 			if (string.IsNullOrWhiteSpace(name))
@@ -249,8 +249,8 @@
 			// Get extension from the source file
 			string extension = Path.GetExtension(filePath);
 
-			// Build effective upload path (do not mutate original category).
-			string basePath = category.UploadPath ?? string.Empty;
+			// Build effective upload path (do not mutate original bucket).
+			string basePath = bucket.UploadPath ?? string.Empty;
 			basePath = basePath.TrimEnd('\\', '/');
 
 			string qualifier = uploadPathQualifier ?? string.Empty;
@@ -274,24 +274,24 @@
 				throw new InvalidOperationException($"The file '{name}' already exists.");
 			}
 
-			// Create a shallow copy of the category with the adjusted UploadPath so storage handlers see the qualified path.
-			var effectiveCategory = new DocumentCategory
+			// Create a shallow copy of the bucket with the adjusted UploadPath so storage handlers see the qualified path.
+			var effectiveBucket = new DocumentBucket
 			{
-				Identifier = category.Identifier,
-				Name = category.Name,
-				Description = category.Description,
+				Identifier = bucket.Identifier,
+				Name = bucket.Name,
+				Description = bucket.Description,
 				UploadPath = effectiveUploadPath,
-				StorageType = category.StorageType,
-				Extensions = category.Extensions,
-				IsDefault = category.IsDefault,
-				DOMSource = category.DOMSource,
-				Definition = category.Definition,
+				StorageType = bucket.StorageType,
+				Extensions = bucket.Extensions,
+				IsDefault = bucket.IsDefault,
+				DOMSource = bucket.DOMSource,
+				Definition = bucket.Definition,
 			};
 
-			// Upload using the adjusted category
+			// Upload using the adjusted bucket
 			return storageHandler.UploadFile(new WebFileUploadData
 			{
-				Category = effectiveCategory,
+				Bucket = effectiveBucket,
 				FilePath = filePath,
 				Name = $"{name}{extension}",
 			});
@@ -338,10 +338,10 @@
 		}
 
 		/// <summary>
-		/// Reads files associated with the specified document category.
+		/// Reads files associated with the specified document bucket.
 		/// </summary>
-		/// <param name="category">
-		/// The document category defining the storage type and base path.
+		/// <param name="bucket">
+		/// The document bucket defining the storage type and base path.
 		/// </param>
 		/// <param name="context">
 		/// Optional paging context that maintains paging state between calls.
@@ -356,29 +356,29 @@
 		/// A list of files represented as <see cref="IDocHubFile"/>.
 		/// </returns>
 		/// <exception cref="ArgumentNullException">
-		/// Thrown if <paramref name="category"/> is null.
+		/// Thrown if <paramref name="bucket"/> is null.
 		/// </exception>
 		/// <remarks>
 		/// Named arguments allow callers to specify only the parameters they need:
 		/// <code>
-		/// ReadFiles(category, filter: "invoice");
-		/// ReadFiles(category, context: pageData);
+		/// ReadFiles(bucket, filter: "invoice");
+		/// ReadFiles(bucket, context: pageData);
 		/// </code>
 		/// </remarks>
-		public List<IDocHubFile> ReadFiles(DocumentCategory category, DocHubPageData context = null, string filter = null)
+		public List<IDocHubFile> ReadFiles(DocumentBucket bucket, DocHubPageData context = null, string filter = null)
 		{
-			if (category == null)
-				throw new ArgumentNullException(nameof(category));
+			if (bucket == null)
+				throw new ArgumentNullException(nameof(bucket));
 
-			ReadData data = category.StorageType == StorageType.DOM
+			ReadData data = bucket.StorageType == StorageType.DOM
 				? (ReadData)new DomFileReadData()
 				: new WebFileReadData();
 
-			data.Category = category;
+			data.Bucket = bucket;
 			data.Filter = filter;
 			data.Context = context;
 
-			return ReadFiles(category.StorageType, data);
+			return ReadFiles(bucket.StorageType, data);
 		}
 
 		/// <summary>

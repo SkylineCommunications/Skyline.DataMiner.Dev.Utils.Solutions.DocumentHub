@@ -8,7 +8,7 @@
 	using Skyline.DataMiner.Net.ManagerStore;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Net.Sections;
-	using Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM.DocumentCategory_Definition;
+	using Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM.DocumentBucket_Definition;
 	using Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM.DomSource_Definition;
 	using Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM.Sharepoint_Definition;
 	using Skyline.DataMiner.Solutions.DocumentHub.Installer.Module;
@@ -37,9 +37,9 @@
 
 			var moduleHelper = new ModuleSettingsHelper(_connection.HandleMessages);
 			var moduleComparer = new ModuleSettingsComparer();
-			var moduleSettings = moduleHelper.ModuleSettings.Read(ModuleSettingsExposers.ModuleId.Equal(DocumentCategoryDomMapper.ModuleId)).SingleOrDefault();
+			var moduleSettings = moduleHelper.ModuleSettings.Read(ModuleSettingsExposers.ModuleId.Equal(DocumentBucketDomMapper.ModuleId)).SingleOrDefault();
 			var module = new DomModuleBuilder()
-					.WithModuleId(DocumentCategoryDomMapper.ModuleId)
+					.WithModuleId(DocumentBucketDomMapper.ModuleId)
 					.WithInformationEvents(false)
 					.WithHistory(true)
 					.Build();
@@ -49,15 +49,15 @@
 			if (moduleSettings == null || moduleComparer.Equals(moduleSettings, module))
 			{
 				Log("Installing Module Settings...");
-				Import(moduleHelper.ModuleSettings, ModuleSettingsExposers.ModuleId.Equal(DocumentCategoryDomMapper.ModuleId), module);
+				Import(moduleHelper.ModuleSettings, ModuleSettingsExposers.ModuleId.Equal(DocumentBucketDomMapper.ModuleId), module);
 				Log("Installed Module Settings");
 			}
 
-			var documentCategoryInstaller = new DocumentCategoryInstaller(_connection, _logMethod);
+			var documentBucketInstaller = new DocumentBucketInstaller(_connection, _logMethod);
 			var sharepointInstaller = new SharepointInstaller(_connection, _logMethod);
 			var domSourceInstaller = new DomSourceInstaller(_connection, _logMethod);
 
-			documentCategoryInstaller.RunMigration(_versions[0]);
+			documentBucketInstaller.RunMigration(_versions[0]);
 			sharepointInstaller.RunMigration(_versions[0]);
 			domSourceInstaller.RunMigration(_versions[0]);
 		}

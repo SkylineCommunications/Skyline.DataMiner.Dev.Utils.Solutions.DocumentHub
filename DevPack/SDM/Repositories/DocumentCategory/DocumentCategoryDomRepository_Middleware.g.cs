@@ -5,7 +5,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DocumentCategory
+namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DocumentBucket
 {
     using System;
     using System.Collections.Generic;
@@ -23,20 +23,20 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DocumentCateg
     using SLDataGateway.API.Querying;
     using SLDataGateway.API.Types.Querying;
 
-    internal sealed partial class DocumentCategoryDomRepositoryMiddleware : Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory>
+    internal sealed partial class DocumentBucketDomRepositoryMiddleware : Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket>
     {
-        private readonly Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> _inner;
-        private readonly IMiddlewareMarker<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> _middleware;
+        private readonly Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> _inner;
+        private readonly IMiddlewareMarker<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> _middleware;
 
-        public DocumentCategoryDomRepositoryMiddleware(Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> inner, IMiddlewareMarker<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> middleware)
+        public DocumentBucketDomRepositoryMiddleware(Skyline.DataMiner.SDM.IBulkRepository<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> inner, IMiddlewareMarker<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> middleware)
         {
             _inner = inner ?? throw new ArgumentNullException(nameof(inner));
             _middleware = middleware;
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory>> ReadPaged(FilterElement<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> filter)
+        public IEnumerable<IPagedResult<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket>> ReadPaged(FilterElement<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> filter)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> middleware)
+            if (_middleware is IPageableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> middleware)
             {
                 return middleware.OnReadPaged(filter, _inner.ReadPaged);
             }
@@ -46,9 +46,9 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DocumentCateg
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory>> ReadPaged(IQuery<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> query)
+        public IEnumerable<IPagedResult<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket>> ReadPaged(IQuery<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> query)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> middleware)
+            if (_middleware is IPageableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> middleware)
             {
                 return middleware.OnReadPaged(query, _inner.ReadPaged);
             }
@@ -58,9 +58,9 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DocumentCateg
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory>> ReadPaged(FilterElement<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> filter, int pageSize)
+        public IEnumerable<IPagedResult<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket>> ReadPaged(FilterElement<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> filter, int pageSize)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> middleware)
+            if (_middleware is IPageableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> middleware)
             {
                 return middleware.OnReadPaged(filter, pageSize, _inner.ReadPaged);
             }
@@ -70,9 +70,9 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DocumentCateg
             }
         }
 
-        public IEnumerable<IPagedResult<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory>> ReadPaged(IQuery<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> query, int pageSize)
+        public IEnumerable<IPagedResult<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket>> ReadPaged(IQuery<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> query, int pageSize)
         {
-            if (_middleware is IPageableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> middleware)
+            if (_middleware is IPageableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> middleware)
             {
                 return middleware.OnReadPaged(query, pageSize, _inner.ReadPaged);
             }
@@ -82,9 +82,9 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DocumentCateg
             }
         }
 
-        public IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> Read(FilterElement<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> filter)
+        public IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> Read(FilterElement<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> filter)
         {
-            if (_middleware is IReadableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> middleware)
+            if (_middleware is IReadableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> middleware)
             {
                 return middleware.OnRead(filter, _inner.Read);
             }
@@ -94,9 +94,9 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DocumentCateg
             }
         }
 
-        public IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> Read(IQuery<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> query)
+        public IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> Read(IQuery<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> query)
         {
-            if (_middleware is IReadableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> middleware)
+            if (_middleware is IReadableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> middleware)
             {
                 return middleware.OnRead(query, _inner.Read);
             }
@@ -106,9 +106,9 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DocumentCateg
             }
         }
 
-        public long Count(FilterElement<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> filter)
+        public long Count(FilterElement<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> filter)
         {
-            if (_middleware is ICountableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> middleware)
+            if (_middleware is ICountableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> middleware)
             {
                 return middleware.OnCount(filter, _inner.Count);
             }
@@ -118,9 +118,9 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DocumentCateg
             }
         }
 
-        public long Count(IQuery<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> query)
+        public long Count(IQuery<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> query)
         {
-            if (_middleware is ICountableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> middleware)
+            if (_middleware is ICountableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> middleware)
             {
                 return middleware.OnCount(query, _inner.Count);
             }
@@ -130,9 +130,9 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DocumentCateg
             }
         }
 
-        public IReadOnlyCollection<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> Create(IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> oToCreate)
+        public IReadOnlyCollection<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> Create(IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> oToCreate)
         {
-            if (_middleware is IBulkCreatableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> middleware)
+            if (_middleware is IBulkCreatableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> middleware)
             {
                 return middleware.OnCreate(oToCreate, _inner.Create);
             }
@@ -142,9 +142,9 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DocumentCateg
             }
         }
 
-        public Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory Create(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory oToCreate)
+        public Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket Create(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket oToCreate)
         {
-            if (_middleware is ICreatableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> middleware)
+            if (_middleware is ICreatableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> middleware)
             {
                 return middleware.OnCreate(oToCreate, _inner.Create);
             }
@@ -154,9 +154,9 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DocumentCateg
             }
         }
 
-        public IReadOnlyCollection<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> Update(IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> oToUpdate)
+        public IReadOnlyCollection<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> Update(IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> oToUpdate)
         {
-            if (_middleware is IBulkUpdatableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> middleware)
+            if (_middleware is IBulkUpdatableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> middleware)
             {
                 return middleware.OnUpdate(oToUpdate, _inner.Update);
             }
@@ -166,9 +166,9 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DocumentCateg
             }
         }
 
-        public Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory Update(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory oToUpdate)
+        public Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket Update(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket oToUpdate)
         {
-            if (_middleware is IUpdatableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> middleware)
+            if (_middleware is IUpdatableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> middleware)
             {
                 return middleware.OnUpdate(oToUpdate, _inner.Update);
             }
@@ -178,9 +178,9 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DocumentCateg
             }
         }
 
-        public void Delete(IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> oToDelete)
+        public void Delete(IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> oToDelete)
         {
-            if (_middleware is IBulkDeletableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> middleware)
+            if (_middleware is IBulkDeletableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> middleware)
             {
                 middleware.OnDelete(oToDelete, _inner.Delete);
             }
@@ -190,9 +190,9 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DocumentCateg
             }
         }
 
-        public void Delete(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory oToDelete)
+        public void Delete(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket oToDelete)
         {
-            if (_middleware is IDeletableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> middleware)
+            if (_middleware is IDeletableMiddleware<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> middleware)
             {
                 middleware.OnDelete(oToDelete, _inner.Delete);
             }
@@ -201,7 +201,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DocumentCateg
                 _inner.Delete(oToDelete);
             }
         }
-        public System.Collections.Generic.IReadOnlyCollection<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> CreateOrUpdate(System.Collections.Generic.IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategory> oToCreateOrUpdate)
+        public System.Collections.Generic.IReadOnlyCollection<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> CreateOrUpdate(System.Collections.Generic.IEnumerable<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucket> oToCreateOrUpdate)
         {
             return _inner.CreateOrUpdate(oToCreateOrUpdate);
         }

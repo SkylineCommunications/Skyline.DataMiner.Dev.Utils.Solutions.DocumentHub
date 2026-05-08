@@ -4,7 +4,7 @@
 //     Changes to this file will be lost if the code is regenerated.
 // </auto-generated>
 //------------------------------------------------------------------------------
-namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
+namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentBucket
 {
     using Skyline.DataMiner.Net;
     using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
@@ -22,18 +22,18 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
     using System.Linq;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 
-	internal partial class DocumentCategoryDomRepository : IBulkRepository<DocumentCategory>
+	internal partial class DocumentBucketsDomRepository : IBulkRepository<DocumentBucket>
     {
         private readonly IConnection connection;
         private readonly DomHelper helper;
-        public DocumentCategoryDomRepository(IConnection connection)
+        public DocumentBucketsDomRepository(IConnection connection)
         {
             this.connection = connection;
-            this.helper = new DomHelper(connection.HandleMessages, DocumentCategoryDomMapper.ModuleId);
+            this.helper = new DomHelper(connection.HandleMessages, DocumentBucketDomMapper.ModuleId);
         }
 
-        // TODO: before creating the Category, check if the DOM Source reference is added, create it if necessary.
-        public DocumentCategory Create(DocumentCategory createObject)
+        // TODO: before creating the Bucket, check if the DOM Source reference is added, create it if necessary.
+        public DocumentBucket Create(DocumentBucket createObject)
         {
             if (createObject is null)
             {
@@ -45,22 +45,22 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
             return FromInstance(instance);
         }
 
-        public IReadOnlyCollection<DocumentCategory> Create(IEnumerable<DocumentCategory> createObjects)
+        public IReadOnlyCollection<DocumentBucket> Create(IEnumerable<DocumentBucket> createObjects)
         {
             if (createObjects is null || !createObjects.Any())
             {
-                return Array.Empty<DocumentCategory>();
+                return Array.Empty<DocumentBucket>();
             }
 
             // Check if some of the objects already exist
             var existing = new HashSet<string>();
             foreach (var batch in createObjects.Batch(500))
             {
-                existing.UnionWith(Read(new ORFilterElement<DocumentCategory>(batch.Select(obj => DocumentCategoryExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
+                existing.UnionWith(Read(new ORFilterElement<DocumentBucket>(batch.Select(obj => DocumentBucketExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
             }
 
             // Create the remainder
-            var SuccessfulItems = new List<DocumentCategory>();
+            var SuccessfulItems = new List<DocumentBucket>();
             var failures = new Dictionary<string, Exception>();
             var objects = createObjects.Where(obj => !existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
             foreach (var batch in createObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
@@ -84,12 +84,12 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
             }
 
             // Otherwise, build and throw an exception
-            var exceptionBuilder = new SdmBulkCrudException<DocumentCategory>.Builder();
+            var exceptionBuilder = new SdmBulkCrudException<DocumentBucket>.Builder();
             foreach (var obj in createObjects)
             {
                 if (existing.Contains(obj.Identifier))
                 {
-                    exceptionBuilder.AddFailed(obj, new SdmCrudException<DocumentCategory>(obj, $"Could not create DocumentCategory with guid: '{obj.Identifier}', it already exists."));
+                    exceptionBuilder.AddFailed(obj, new SdmCrudException<DocumentBucket>(obj, $"Could not create {nameof(DocumentBucket)} with guid: '{obj.Identifier}', it already exists."));
                     continue;
                 }
 
@@ -105,15 +105,15 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
             throw exceptionBuilder.Build();
         }
 
-        public IReadOnlyCollection<DocumentCategory> CreateOrUpdate(IEnumerable<DocumentCategory> items)
+        public IReadOnlyCollection<DocumentBucket> CreateOrUpdate(IEnumerable<DocumentBucket> items)
         {
             if (items is null || !items.Any())
             {
-                return Array.Empty<DocumentCategory>();
+                return Array.Empty<DocumentBucket>();
             }
 
-            var successful = new List<DocumentCategory>();
-            var exceptionBuilder = new SdmBulkCrudException<DocumentCategory>.Builder();
+            var successful = new List<DocumentBucket>();
+            var exceptionBuilder = new SdmBulkCrudException<DocumentBucket>.Builder();
             var objects = items.ToDictionary(obj => obj.Identifier);
             foreach (var batch in items.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
             {
@@ -139,7 +139,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
             return successful;
         }
 
-        public long Count(FilterElement<DocumentCategory> filter)
+        public long Count(FilterElement<DocumentBucket> filter)
         {
             if (filter is null)
             {
@@ -147,11 +147,11 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
             }
 
             var domFilter = TranslateFullFilter(filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(DocumentCategoryDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(DocumentBucketDomMapper.DomDefinitionId.Id));
             return helper.DomInstances.Count(domFilter);
         }
 
-        public long Count(IQuery<DocumentCategory> query)
+        public long Count(IQuery<DocumentBucket> query)
         {
             if (query is null)
             {
@@ -159,13 +159,13 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
             }
 
             var domFilter = TranslateFullFilter(query.Filter);
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(DocumentCategoryDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(DocumentBucketDomMapper.DomDefinitionId.Id));
             var domOrder = TranslateFullOrderBy(query.Order);
             var domQuery = query.WithFilter(domFilter).WithOrder(domOrder);
             return helper.DomInstances.Count(domQuery);
         }
 
-        public IEnumerable<DocumentCategory> Read(FilterElement<DocumentCategory> filter)
+        public IEnumerable<DocumentBucket> Read(FilterElement<DocumentBucket> filter)
         {
             if (filter is null)
             {
@@ -176,7 +176,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
             return Read(domFilter);
         }
 
-        public IEnumerable<DocumentCategory> Read(IQuery<DocumentCategory> query)
+        public IEnumerable<DocumentBucket> Read(IQuery<DocumentBucket> query)
         {
             if (query is null)
             {
@@ -189,12 +189,12 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
             return Read(domQuery);
         }
 
-        public IEnumerable<IPagedResult<DocumentCategory>> ReadPaged(FilterElement<DocumentCategory> filter)
+        public IEnumerable<IPagedResult<DocumentBucket>> ReadPaged(FilterElement<DocumentBucket> filter)
         {
             return ReadPaged(filter, 500);
         }
 
-        public IEnumerable<IPagedResult<DocumentCategory>> ReadPaged(FilterElement<DocumentCategory> filter, int pageSize)
+        public IEnumerable<IPagedResult<DocumentBucket>> ReadPaged(FilterElement<DocumentBucket> filter, int pageSize)
         {
             if (filter is null)
             {
@@ -214,18 +214,18 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
             {
                 var page = paging.Current.ToList();
                 moveNext = paging.MoveNext();
-                var result = new PagedResult<DocumentCategory>(page, i, pageSize, moveNext);
+                var result = new PagedResult<DocumentBucket>(page, i, pageSize, moveNext);
                 yield return result;
                 i++;
             }
         }
 
-        public IEnumerable<IPagedResult<DocumentCategory>> ReadPaged(IQuery<DocumentCategory> query)
+        public IEnumerable<IPagedResult<DocumentBucket>> ReadPaged(IQuery<DocumentBucket> query)
         {
             return ReadPaged(query, 500);
         }
 
-        public IEnumerable<IPagedResult<DocumentCategory>> ReadPaged(IQuery<DocumentCategory> query, int pageSize)
+        public IEnumerable<IPagedResult<DocumentBucket>> ReadPaged(IQuery<DocumentBucket> query, int pageSize)
         {
             if (query is null)
             {
@@ -247,13 +247,13 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
             {
                 var page = paging.Current.ToList();
                 moveNext = paging.MoveNext();
-                var result = new PagedResult<DocumentCategory>(page, i, pageSize, moveNext);
+                var result = new PagedResult<DocumentBucket>(page, i, pageSize, moveNext);
                 yield return result;
                 i++;
             }
         }
 
-        public DocumentCategory Update(DocumentCategory updateObject)
+        public DocumentBucket Update(DocumentBucket updateObject)
         {
             if (updateObject is null)
             {
@@ -265,22 +265,22 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
             return FromInstance(instance);
         }
 
-        public IReadOnlyCollection<DocumentCategory> Update(IEnumerable<DocumentCategory> updateObjects)
+        public IReadOnlyCollection<DocumentBucket> Update(IEnumerable<DocumentBucket> updateObjects)
         {
             if (updateObjects is null || !updateObjects.Any())
             {
-                return Array.Empty<DocumentCategory>();
+                return Array.Empty<DocumentBucket>();
             }
 
             // Check if which objects already exist
             var existing = new HashSet<string>();
             foreach (var batch in updateObjects.Batch(500))
             {
-                existing.UnionWith(Read(new ORFilterElement<DocumentCategory>(batch.Select(obj => DocumentCategoryExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
+                existing.UnionWith(Read(new ORFilterElement<DocumentBucket>(batch.Select(obj => DocumentBucketExposers.Identifier.Equal(obj.Identifier)).ToArray())).Select(obj => obj.Identifier));
             }
 
             // Update the existing objects
-            var successfulItems = new List<DocumentCategory>();
+            var successfulItems = new List<DocumentBucket>();
             var failures = new Dictionary<string, Exception>();
             var objects = updateObjects.Where(obj => existing.Contains(obj.Identifier)).ToDictionary(obj => obj.Identifier);
             foreach (var batch in updateObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
@@ -298,12 +298,12 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
             }
 
             // Check for failures and build exception if needed
-            var exceptionBuilder = new SdmBulkCrudException<DocumentCategory>.Builder();
+            var exceptionBuilder = new SdmBulkCrudException<DocumentBucket>.Builder();
             foreach (var obj in updateObjects)
             {
                 if (!existing.Contains(obj.Identifier))
                 {
-                    exceptionBuilder.AddFailed(obj, new SdmCrudException<DocumentCategory>(obj, "Could not update a non existing DocumentCategory"));
+                    exceptionBuilder.AddFailed(obj, new SdmCrudException<DocumentBucket>(obj, $"Could not update a non existing {nameof(DocumentBucket)}"));
                     continue;
                 }
 
@@ -324,7 +324,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
             return successfulItems;
         }
 
-        public void Delete(DocumentCategory deleteObject)
+        public void Delete(DocumentBucket deleteObject)
         {
             if (deleteObject is null)
             {
@@ -335,14 +335,14 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
             helper.DomInstances.Delete(instance);
         }
 
-        public void Delete(IEnumerable<DocumentCategory> deleteObjects)
+        public void Delete(IEnumerable<DocumentBucket> deleteObjects)
         {
             if (deleteObjects is null || !deleteObjects.Any())
             {
                 return;
             }
 
-            var exceptionBuilder = new SdmBulkCrudException<DocumentCategory>.Builder();
+            var exceptionBuilder = new SdmBulkCrudException<DocumentBucket>.Builder();
             var objects = deleteObjects.ToDictionary(obj => obj.Identifier);
             foreach (var batch in deleteObjects.Select(ToInstance).Batch(helper.DomInstances.MaxAmountBulkOperation))
             {
@@ -364,39 +364,39 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
             }
         }
 
-        private IEnumerable<DocumentCategory> Read(FilterElement<DomInstance> domFilter)
+        private IEnumerable<DocumentBucket> Read(FilterElement<DomInstance> domFilter)
         {
             if (domFilter is null)
             {
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(DocumentCategoryDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(DocumentBucketDomMapper.DomDefinitionId.Id));
             var domInstances = helper.DomInstances.Read(domFilter);
             return domInstances.Select(FromInstance);
         }
 
-        private IEnumerable<DocumentCategory> Read(IQuery<DomInstance> domQuery)
+        private IEnumerable<DocumentBucket> Read(IQuery<DomInstance> domQuery)
         {
             if (domQuery is null)
             {
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(DocumentCategoryDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(DocumentBucketDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var domInstances = helper.DomInstances.Read(domQuery);
             return domInstances.Select(FromInstance);
         }
 
-        private IEnumerable<IEnumerable<DocumentCategory>> ReadPaged(FilterElement<DomInstance> domFilter, int pageSize)
+        private IEnumerable<IEnumerable<DocumentBucket>> ReadPaged(FilterElement<DomInstance> domFilter, int pageSize)
         {
             if (domFilter is null)
             {
                 throw new ArgumentNullException(nameof(domFilter));
             }
 
-            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(DocumentCategoryDomMapper.DomDefinitionId.Id));
+            domFilter = domFilter.AND(DomInstanceExposers.DomDefinitionId.Equal(DocumentBucketDomMapper.DomDefinitionId.Id));
             var pagingHelper = helper.DomInstances.PreparePaging(domFilter, pageSize);
             while (pagingHelper.MoveToNextPage())
             {
@@ -404,14 +404,14 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
             }
         }
 
-        private IEnumerable<IEnumerable<DocumentCategory>> ReadPaged(IQuery<DomInstance> domQuery, int pageSize)
+        private IEnumerable<IEnumerable<DocumentBucket>> ReadPaged(IQuery<DomInstance> domQuery, int pageSize)
         {
             if (domQuery is null)
             {
                 throw new ArgumentNullException(nameof(domQuery));
             }
 
-            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(DocumentCategoryDomMapper.DomDefinitionId.Id));
+            var domFilter = domQuery.Filter.AND(DomInstanceExposers.DomDefinitionId.Equal(DocumentBucketDomMapper.DomDefinitionId.Id));
             domQuery = domQuery.WithFilter(domFilter);
             var pagingHelper = helper.DomInstances.PreparePaging(domQuery, pageSize);
             while (pagingHelper.MoveToNextPage())
@@ -420,7 +420,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
             }
         }
 
-        private FilterElement<DomInstance> TranslateFullFilter(FilterElement<DocumentCategory> filter)
+        private FilterElement<DomInstance> TranslateFullFilter(FilterElement<DocumentBucket> filter)
         {
             if (filter is null)
             {
@@ -428,23 +428,23 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
             }
 
             FilterElement<DomInstance> translated;
-            if (filter is ANDFilterElement<DocumentCategory> and)
+            if (filter is ANDFilterElement<DocumentBucket> and)
             {
                 translated = new ANDFilterElement<DomInstance>(and.subFilters.Select(TranslateFullFilter).ToArray());
             }
-            else if (filter is ORFilterElement<DocumentCategory> or)
+            else if (filter is ORFilterElement<DocumentBucket> or)
             {
                 translated = new ORFilterElement<DomInstance>(or.subFilters.Select(TranslateFullFilter).ToArray());
             }
-            else if (filter is NOTFilterElement<DocumentCategory> not)
+            else if (filter is NOTFilterElement<DocumentBucket> not)
             {
                 translated = new NOTFilterElement<DomInstance>(TranslateFullFilter(not));
             }
-            else if (filter is TRUEFilterElement<DocumentCategory>)
+            else if (filter is TRUEFilterElement<DocumentBucket>)
             {
                 translated = new TRUEFilterElement<DomInstance>();
             }
-            else if (filter is FALSEFilterElement<DocumentCategory>)
+            else if (filter is FALSEFilterElement<DocumentBucket>)
             {
                 translated = new FALSEFilterElement<DomInstance>();
             }
@@ -505,64 +505,64 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
             return translated;
         }
 
-        private DocumentCategory FromInstance(DomInstance instance)
+        private DocumentBucket FromInstance(DomInstance instance)
         {
-            var obj = new DocumentCategory
+            var obj = new DocumentBucket
             {
                 Identifier = instance.ID.Id.ToString()
             };
-            var _documentcategorypropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.SectionDefinitionId));
-            if (_documentcategorypropertiesSection != default)
+            var _documentbucketpropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.SectionDefinitionId));
+            if (_documentbucketpropertiesSection != default)
             {
-                var _name = _documentcategorypropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Name);
+                var _name = _documentbucketpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.Name);
                 if (_name != null)
                 {
                     obj.Name = _name.Value;
                 }
 
-                var _description = _documentcategorypropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Description);
+                var _description = _documentbucketpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.Description);
                 if (_description != null)
                 {
                     obj.Description = _description.Value;
                 }
 
-                var _uploadpath = _documentcategorypropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.UploadPath);
+                var _uploadpath = _documentbucketpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.UploadPath);
                 if (_uploadpath != null)
                 {
                     obj.UploadPath = _uploadpath.Value;
                 }
 
-                var _storagetype = _documentcategorypropertiesSection.GetValue<int>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.StorageType);
+                var _storagetype = _documentbucketpropertiesSection.GetValue<int>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.StorageType);
                 if (_storagetype != null)
                 {
                     obj.StorageType = (Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.StorageType)_storagetype.Value;
                 }
 
-                var _extensions = _documentcategorypropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Extensions);
+                var _extensions = _documentbucketpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.Extensions);
                 if (_extensions != null)
                 {
                     obj.Extensions = _extensions.Value;
                 }
 
-                var _isdefault = _documentcategorypropertiesSection.GetValue<bool>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.IsDefault);
+                var _isdefault = _documentbucketpropertiesSection.GetValue<bool>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.IsDefault);
                 if (_isdefault != null)
                 {
                     obj.IsDefault = _isdefault.Value;
                 }
 
-                var _domsource = _documentcategorypropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.DOMSource);
+                var _domsource = _documentbucketpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.DOMSource);
                 if (_domsource != null && !string.IsNullOrEmpty(_domsource.Value))
                 {
                     obj.DOMSource = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>(Convert.ToString(_domsource.Value));
                 }
 
-                var _definition = _documentcategorypropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Definition);
+                var _definition = _documentbucketpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.Definition);
                 if (_definition != null)
                 {
                     obj.Definition = _definition.Value;
                 }
 
-                var _sizelimit = _documentcategorypropertiesSection.GetValue<long>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.SizeLimit);
+                var _sizelimit = _documentbucketpropertiesSection.GetValue<long>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.SizeLimit);
                 if (_sizelimit != null)
                 {
                     obj.SizeLimit = _sizelimit.Value;
@@ -572,7 +572,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
             return obj;
         }
 
-        private DomInstance ToInstance(DocumentCategory obj)
+        private DomInstance ToInstance(DocumentBucket obj)
         {
             Guid id = default(Guid);
             if (!String.IsNullOrEmpty(obj.Identifier))
@@ -586,50 +586,50 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
 
             var instance = new DomInstance
             {
-                DomDefinitionId = Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DomDefinitionId,
+                DomDefinitionId = Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DomDefinitionId,
                 ID = new DomInstanceId(id)
                 {
-                    ModuleId = Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.ModuleId
+                    ModuleId = Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.ModuleId
                 }
             };
-            var _documentcategoryproperties = new Section(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.SectionDefinitionId);
+            var _documentbucketproperties = new Section(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.SectionDefinitionId);
             if (obj.Name != default)
             {
-                _documentcategoryproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Name, Convert.ToString(obj.Name));
+                _documentbucketproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.Name, Convert.ToString(obj.Name));
             }
 
             if (obj.Description != default)
             {
-                _documentcategoryproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Description, Convert.ToString(obj.Description));
+                _documentbucketproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.Description, Convert.ToString(obj.Description));
             }
 
             if (obj.UploadPath != default)
             {
-                _documentcategoryproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.UploadPath, Convert.ToString(obj.UploadPath));
+                _documentbucketproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.UploadPath, Convert.ToString(obj.UploadPath));
             }
 
-            _documentcategoryproperties.AddOrUpdateValue<int>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.StorageType, (int)obj.StorageType);
+            _documentbucketproperties.AddOrUpdateValue<int>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.StorageType, (int)obj.StorageType);
 
             if (obj.Extensions != default)
             {
-                _documentcategoryproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Extensions, Convert.ToString(obj.Extensions));
+                _documentbucketproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.Extensions, Convert.ToString(obj.Extensions));
             }
 
-            _documentcategoryproperties.AddOrUpdateValue<bool>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.IsDefault, (bool)obj.IsDefault);
+            _documentbucketproperties.AddOrUpdateValue<bool>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.IsDefault, (bool)obj.IsDefault);
 
             if (obj.DOMSource != default)
             {
-                _documentcategoryproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.DOMSource, obj.DOMSource.Identifier);
+                _documentbucketproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.DOMSource, obj.DOMSource.Identifier);
             }
 
             if (obj.Definition != default)
             {
-                _documentcategoryproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Definition, Convert.ToString(obj.Definition));
+                _documentbucketproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.Definition, Convert.ToString(obj.Definition));
             }
 
-            _documentcategoryproperties.AddOrUpdateValue<long>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.SizeLimit, obj.SizeLimit);
+            _documentbucketproperties.AddOrUpdateValue<long>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.SizeLimit, obj.SizeLimit);
 
-            instance.Sections.Add(_documentcategoryproperties);
+            instance.Sections.Add(_documentbucketproperties);
             return instance;
         }
 
@@ -640,23 +640,23 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
                 case "Identifier":
                     return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
                 case "Name":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Name), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.Name), comparer, (string)value);
                 case "Description":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Description), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.Description), comparer, (string)value);
                 case "UploadPath":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.UploadPath), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.UploadPath), comparer, (string)value);
                 case "StorageType":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.StorageType), comparer, (int)(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.StorageType)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.StorageType), comparer, (int)(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.StorageType)value);
                 case "Extensions":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Extensions), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.Extensions), comparer, (string)value);
                 case "IsDefault":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.IsDefault), comparer, (bool)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.IsDefault), comparer, (bool)value);
                 case "DOMSource":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.DOMSource), comparer, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>.Convert(value).Identifier);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.DOMSource), comparer, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>.Convert(value).Identifier);
                 case "Definition":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Definition), comparer, (string)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.Definition), comparer, (string)value);
                 case "SizeLimit":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.SizeLimit), comparer, (long)value);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.SizeLimit), comparer, (long)value);
                 default:
                     throw new NotImplementedException();
             }
@@ -669,23 +669,23 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory
                 case "Identifier":
                     return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
                 case "Name":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Name), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.Name), sortOrder, naturalSort);
                 case "Description":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Description), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.Description), sortOrder, naturalSort);
                 case "UploadPath":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.UploadPath), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.UploadPath), sortOrder, naturalSort);
                 case "StorageType":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.StorageType), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.StorageType), sortOrder, naturalSort);
                 case "Extensions":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Extensions), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.Extensions), sortOrder, naturalSort);
                 case "IsDefault":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.IsDefault), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.IsDefault), sortOrder, naturalSort);
                 case "DOMSource":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.DOMSource), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.DOMSource), sortOrder, naturalSort);
                 case "Definition":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.Definition), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.Definition), sortOrder, naturalSort);
                 case "SizeLimit":
-                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentCategoryDomMapper.DocumentCategoryProperties.SizeLimit), sortOrder, naturalSort);
+                    return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.SizeLimit), sortOrder, naturalSort);
                 default:
                     throw new NotImplementedException();
             }

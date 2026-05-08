@@ -15,9 +15,9 @@
         IConnection Connection { get; }
 
         /// <summary>
-        /// Gets the repository for <see cref="DocumentCategory"/> objects.
+        /// Gets the repository for <see cref="DocumentBucket"/> objects.
         /// </summary>
-        IBulkRepository<DocumentCategory> DocumentCategories { get; }
+        IBulkRepository<DocumentBucket> DocumentBuckets { get; }
 
         /// <summary>
         /// Gets the repository for <see cref="DomSource"/> objects.

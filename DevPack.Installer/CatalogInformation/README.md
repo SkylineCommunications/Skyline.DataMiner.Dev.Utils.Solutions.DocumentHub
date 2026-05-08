@@ -2,7 +2,7 @@
 
 ## About
 
-A .NET class library providing API access to the **DocumentHub** solution for DataMiner. It enables automation scripts and connectors to manage document categories, upload/read files, and interact with storage backends such as local storage and SharePoint.
+A .NET class library providing API access to the **DocumentHub** solution for DataMiner. It enables automation scripts and connectors to manage document buckets, upload/read files, and interact with storage backends such as local storage and SharePoint.
 
 ## Installation
 
@@ -24,11 +24,11 @@ using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient;
 // Create the client using an active DataMiner connection
 var client = new DocHubClient(connection);
 
-// Upload a file to a document category
-client.Files.UploadFile(category, @"C:\Documents\report.pdf");
+// Upload a file to a document bucket
+client.Files.UploadFile(bucket, @"C:\Documents\report.pdf");
 
-// Read files from a document category
-var files = client.Files.ReadFiles(category);
+// Read files from a document bucket
+var files = client.Files.ReadFiles(bucket);
 ```
 
 ## Features
@@ -37,8 +37,8 @@ var files = client.Files.ReadFiles(category);
 |-----------------------  |------------------------------------------------------------------------------------------------------|
 | **File Operations**     | Upload and read files across configured storage backends                                             |
 | **Storage Backends**    | Supports local DataMiner storage and SharePoint integration                                          |
-| **Document Categories** | Organize documents by category with configurable storage types                                       |
-| **DOM Repositories**    | Typed CRUD and filter operations for SharePoint configurations, DOM sources, and document categories |
+| **Document Buckets**    | Organize documents by bucket with configurable storage types                                         |
+| **DOM Repositories**    | Typed CRUD and filter operations for SharePoint configurations, DOM sources, and document buckets    |
 
 ## Requirements
 

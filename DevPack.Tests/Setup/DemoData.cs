@@ -45,9 +45,9 @@
 			},
 		};
 
-		public static List<DocumentCategory> DocumentCategories => new List<DocumentCategory>
+		public static List<DocumentBucket> DocumentBuckets => new List<DocumentBucket>
 		{
-			new DocumentCategory
+			new DocumentBucket
 			{
 				Name = "Technical Documentation",
 				Description = "Technical manuals and guides",
@@ -58,7 +58,7 @@
 				Definition = "TechDocs",
 				SizeLimit = 10240,
 			},
-			new DocumentCategory
+			new DocumentBucket
 			{
 				Name = "Network Diagrams",
 				Description = "Network topology and diagrams",
@@ -69,7 +69,7 @@
 				Definition = "NetDiag",
 				SizeLimit = 20480,
 			},
-			new DocumentCategory
+			new DocumentBucket
 			{
 				Name = "Maintenance Reports",
 				Description = "Scheduled maintenance reports",
@@ -80,7 +80,7 @@
 				Definition = "MaintRep",
 				SizeLimit = 10240,
 			},
-			new DocumentCategory
+			new DocumentBucket
 			{
 				Name = "Configuration Backups",
 				Description = "Device configuration backups",
@@ -91,7 +91,7 @@
 				Definition = "ConfigBak",
 				SizeLimit = 5120,
 			},
-			new DocumentCategory
+			new DocumentBucket
 			{
 				Name = "Service Level Agreements",
 				Description = "SLA documents and contracts",

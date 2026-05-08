@@ -41,10 +41,10 @@
 		string UploadFile(UploadData data);
 
 		/// <summary>
-		/// Reads files from the storage based on the specified category and filter.
+		/// Reads files from the storage based on the specified bucket and filter.
 		/// </summary>
 		/// <param name="data">
-		/// The storage handler data containing category and filter information.
+		/// The storage handler data containing bucket and filter information.
 		/// </param>
 		/// <returns>
 		/// A list of <see cref="IDocHubFile"/> objects representing the files read from storage.

@@ -10,21 +10,21 @@ namespace DevPack.Tests.API
     [TestClass]
     public class Files_ReadFiles_Tests
     {
-        #region ReadFiles by DocumentCategory - Validation
+        #region ReadFiles by DocumentBucket - Validation
 
         [TestMethod]
-        public void ReadFiles_ByCategory_WithNullCategory_ShouldThrowArgumentNullException()
+        public void ReadFiles_ByBucket_WithNullBucket_ShouldThrowArgumentNullException()
         {
             // Arrange
             var connection = ConnectionHelper.CreateConnection();
             var client = new DocHubClient(connection);
 
             // Act
-            Action act = () => client.Files.ReadFiles((DocumentCategory)null);
+            Action act = () => client.Files.ReadFiles((DocumentBucket)null);
 
             // Assert
             act.Should().Throw<ArgumentNullException>()
-                .WithParameterName("category");
+                .WithParameterName("bucket");
         }
 
         #endregion

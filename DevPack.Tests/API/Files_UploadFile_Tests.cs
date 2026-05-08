@@ -29,10 +29,10 @@ namespace DevPack.Tests.API
             }
         }
 
-        #region UploadFile - Null Category Validation
+		#region UploadFile - Null Bucket Validation
 
-        [TestMethod]
-        public void UploadFile_Web_WithNullCategory_ShouldThrowArgumentNullException()
+		[TestMethod]
+        public void UploadFile_Web_WithNullBucket_ShouldThrowArgumentNullException()
         {
             // Arrange
             var connection = ConnectionHelper.CreateConnection();
@@ -43,11 +43,11 @@ namespace DevPack.Tests.API
 
             // Assert
             act.Should().Throw<ArgumentNullException>()
-                .WithParameterName("category");
+                .WithParameterName("bucket");
         }
 
         [TestMethod]
-        public void UploadFile_DOM_WithNullCategory_ShouldThrowArgumentNullException()
+        public void UploadFile_DOM_WithNullBucket_ShouldThrowArgumentNullException()
         {
             // Arrange
             var connection = ConnectionHelper.CreateConnection();
@@ -59,11 +59,11 @@ namespace DevPack.Tests.API
 
             // Assert
             act.Should().Throw<ArgumentNullException>()
-                .WithParameterName("category");
+                .WithParameterName("bucket");
         }
 
         [TestMethod]
-        public void UploadFile_WithQualifier_NullCategory_ShouldThrowArgumentNullException()
+        public void UploadFile_WithQualifier_NullBucket_ShouldThrowArgumentNullException()
         {
             // Arrange
             var connection = ConnectionHelper.CreateConnection();
@@ -74,7 +74,7 @@ namespace DevPack.Tests.API
 
             // Assert
             act.Should().Throw<ArgumentNullException>()
-                .WithParameterName("category");
+                .WithParameterName("bucket");
         }
 
         #endregion
@@ -87,15 +87,15 @@ namespace DevPack.Tests.API
             // Arrange
             var connection = ConnectionHelper.CreateConnection();
             var client = new DocHubClient(connection);
-            var category = new DocumentCategory
+            var bucket = new DocumentBucket
             {
-                Name = "Test Category",
+                Name = "Test Bucket",
                 StorageType = StorageType.Local,
                 UploadPath = "TestFolder",
             };
 
             // Act
-            Action act = () => client.Files.UploadFile(category, null);
+            Action act = () => client.Files.UploadFile(bucket, null);
 
             // Assert
             act.Should().Throw<ArgumentNullException>()
@@ -108,15 +108,15 @@ namespace DevPack.Tests.API
             // Arrange
             var connection = ConnectionHelper.CreateConnection();
             var client = new DocHubClient(connection);
-            var category = new DocumentCategory
+            var bucket = new DocumentBucket
             {
-                Name = "Test Category",
+                Name = "Test Bucket",
                 StorageType = StorageType.DOM,
             };
             var domInstanceId = Guid.NewGuid();
 
             // Act
-            Action act = () => client.Files.UploadFile(category, null, domInstanceId);
+            Action act = () => client.Files.UploadFile(bucket, null, domInstanceId);
 
             // Assert
             act.Should().Throw<ArgumentNullException>()
@@ -129,15 +129,15 @@ namespace DevPack.Tests.API
             // Arrange
             var connection = ConnectionHelper.CreateConnection();
             var client = new DocHubClient(connection);
-            var category = new DocumentCategory
+            var bucket = new DocumentBucket
             {
-                Name = "Test Category",
+                Name = "Test Bucket",
                 StorageType = StorageType.Local,
                 UploadPath = "TestFolder",
             };
 
             // Act - use named parameter to call the qualifier overload
-            Action act = () => client.Files.UploadFile(category, null, uploadPathQualifier: "subfolder");
+            Action act = () => client.Files.UploadFile(bucket, null, uploadPathQualifier: "subfolder");
 
             // Assert
             act.Should().Throw<ArgumentNullException>()
@@ -154,14 +154,14 @@ namespace DevPack.Tests.API
             // Arrange
             var connection = ConnectionHelper.CreateConnection();
             var client = new DocHubClient(connection);
-            var category = new DocumentCategory
+            var bucket = new DocumentBucket
             {
-                Name = "Test Category",
+                Name = "Test Bucket",
                 StorageType = StorageType.DOM,
             };
 
             // Act
-            Action act = () => client.Files.UploadFile(category, _testFilePath, Guid.Empty);
+            Action act = () => client.Files.UploadFile(bucket, _testFilePath, Guid.Empty);
 
             // Assert
             act.Should().Throw<ArgumentNullException>()
@@ -178,14 +178,14 @@ namespace DevPack.Tests.API
             // Arrange
             var connection = ConnectionHelper.CreateConnection();
             var client = new DocHubClient(connection);
-            var category = new DocumentCategory
+            var bucket = new DocumentBucket
             {
-                Name = "DOM Category",
+                Name = "DOM Bucket",
                 StorageType = StorageType.DOM,
             };
 
             // Act - use named parameter to call the qualifier overload
-            Action act = () => client.Files.UploadFile(category, _testFilePath, uploadPathQualifier: "subfolder");
+            Action act = () => client.Files.UploadFile(bucket, _testFilePath, uploadPathQualifier: "subfolder");
 
             // Assert
             act.Should().Throw<InvalidOperationException>()

@@ -1,4 +1,4 @@
-namespace DevPack.Tests.SDM.DocumentCategory
+namespace DevPack.Tests.SDM.DocumentBucket
 {
 	using System.Linq;
 	using FluentAssertions;
@@ -10,7 +10,7 @@ namespace DevPack.Tests.SDM.DocumentCategory
 	using Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup;
 
 	[TestClass]
-	public class DocumentCategoryDomRepository_CRUD_Tests
+	public class DocumentBucketDomRepository_CRUD_Tests
 	{
 		[TestMethod]
 		public void EmptyDom_Create()
@@ -24,10 +24,10 @@ namespace DevPack.Tests.SDM.DocumentCategory
 			// Assert
 			using (new AssertionScope())
 			{
-				var all = helper.DocumentCategories.Read(new TRUEFilterElement<DocumentCategory>());
-				all.Count().Should().Be(DemoData.DocumentCategories.Count);
+				var all = helper.DocumentBuckets.Read(new TRUEFilterElement<DocumentBucket>());
+				all.Count().Should().Be(DemoData.DocumentBuckets.Count);
 
-				foreach (var demo in DemoData.DocumentCategories)
+				foreach (var demo in DemoData.DocumentBuckets)
 				{
 					var created = all.SingleOrDefault(c => c.Name == demo.Name);
 					created.Should().NotBeNull();
@@ -47,7 +47,7 @@ namespace DevPack.Tests.SDM.DocumentCategory
 		{
 			// Arrange
 			var helper = Helper.GetHelper();
-			var nameToFind = DemoData.DocumentCategories[0].Name;
+			var nameToFind = DemoData.DocumentBuckets[0].Name;
 			var newDescription = "Updated description";
 			var newUploadPath = "/docs/updated";
 			var newExtensions = "txt,csv";
@@ -56,18 +56,18 @@ namespace DevPack.Tests.SDM.DocumentCategory
 			// Act
 			CreateAll(helper);
 
-			var itemToUpdate = helper.DocumentCategories.Read(DocumentCategoryExposers.Name.Equal(nameToFind)).SingleOrDefault();
+			var itemToUpdate = helper.DocumentBuckets.Read(DocumentBucketExposers.Name.Equal(nameToFind)).SingleOrDefault();
 			itemToUpdate.Description = newDescription;
 			itemToUpdate.UploadPath = newUploadPath;
 			itemToUpdate.Extensions = newExtensions;
 			itemToUpdate.SizeLimit = newSizeLimit;
 
-			helper.DocumentCategories.Update(itemToUpdate);
+			helper.DocumentBuckets.Update(itemToUpdate);
 
 			// Assert
 			using (new AssertionScope())
 			{
-				var updated = helper.DocumentCategories.Read(DocumentCategoryExposers.Name.Equal(nameToFind)).SingleOrDefault();
+				var updated = helper.DocumentBuckets.Read(DocumentBucketExposers.Name.Equal(nameToFind)).SingleOrDefault();
 				updated.Should().NotBeNull();
 				updated.Description.Should().Be(newDescription);
 				updated.UploadPath.Should().Be(newUploadPath);
@@ -86,9 +86,9 @@ namespace DevPack.Tests.SDM.DocumentCategory
 			// Act
 			CreateAll(helper);
 
-			FilterElement<DocumentCategory> allFilter = new TRUEFilterElement<DocumentCategory>();
-			var pagedResult = helper.DocumentCategories.ReadPaged(allFilter, pageCount);
-			var count = helper.DocumentCategories.Count(allFilter);
+			FilterElement<DocumentBucket> allFilter = new TRUEFilterElement<DocumentBucket>();
+			var pagedResult = helper.DocumentBuckets.ReadPaged(allFilter, pageCount);
+			var count = helper.DocumentBuckets.Count(allFilter);
 
 			// Assert
 			using (new AssertionScope())
@@ -104,21 +104,21 @@ namespace DevPack.Tests.SDM.DocumentCategory
 		{
 			// Arrange
 			var helper = Helper.GetHelper();
-			var nameToDelete = DemoData.DocumentCategories[0].Name;
+			var nameToDelete = DemoData.DocumentBuckets[0].Name;
 
 			// Act
 			CreateAll(helper);
 
-			var filter = DocumentCategoryExposers.Name.Equal(nameToDelete);
-			var itemToDelete = helper.DocumentCategories.Read(filter).SingleOrDefault();
+			var filter = DocumentBucketExposers.Name.Equal(nameToDelete);
+			var itemToDelete = helper.DocumentBuckets.Read(filter).SingleOrDefault();
 
-			helper.DocumentCategories.Delete(itemToDelete);
+			helper.DocumentBuckets.Delete(itemToDelete);
 
 			// Assert
 			using (new AssertionScope())
 			{
-				helper.DocumentCategories.Count(new TRUEFilterElement<DocumentCategory>()).Should().Be(DemoData.DocumentCategories.Count - 1);
-				helper.DocumentCategories.Count(DocumentCategoryExposers.Name.Equal(nameToDelete)).Should().Be(0);
+				helper.DocumentBuckets.Count(new TRUEFilterElement<DocumentBucket>()).Should().Be(DemoData.DocumentBuckets.Count - 1);
+				helper.DocumentBuckets.Count(DocumentBucketExposers.Name.Equal(nameToDelete)).Should().Be(0);
 			}
 		}
 
@@ -132,24 +132,24 @@ namespace DevPack.Tests.SDM.DocumentCategory
 			// Act
 			CreateAll(helper);
 
-			var filter = DocumentCategoryExposers.Extensions.Contains(extensionToDelete, System.StringComparison.OrdinalIgnoreCase);
-			var itemsToDelete = helper.DocumentCategories.Read(filter);
+			var filter = DocumentBucketExposers.Extensions.Contains(extensionToDelete, System.StringComparison.OrdinalIgnoreCase);
+			var itemsToDelete = helper.DocumentBuckets.Read(filter);
 
-			helper.DocumentCategories.Delete(itemsToDelete);
+			helper.DocumentBuckets.Delete(itemsToDelete);
 
 			// Assert
 			using (new AssertionScope())
 			{
-				helper.DocumentCategories.Count(new TRUEFilterElement<DocumentCategory>()).Should().Be(DemoData.DocumentCategories.Count - 4);
-				helper.DocumentCategories.Count(DocumentCategoryExposers.Extensions.Contains(extensionToDelete, System.StringComparison.OrdinalIgnoreCase)).Should().Be(0);
+				helper.DocumentBuckets.Count(new TRUEFilterElement<DocumentBucket>()).Should().Be(DemoData.DocumentBuckets.Count - 4);
+				helper.DocumentBuckets.Count(DocumentBucketExposers.Extensions.Contains(extensionToDelete, System.StringComparison.OrdinalIgnoreCase)).Should().Be(0);
 			}
 		}
 
 		private static void CreateAll(IDocumentHubApiHelper helper)
 		{
-			foreach (var item in DemoData.DocumentCategories)
+			foreach (var item in DemoData.DocumentBuckets)
 			{
-				helper.DocumentCategories.Create(item);
+				helper.DocumentBuckets.Create(item);
 			}
 		}
 	}

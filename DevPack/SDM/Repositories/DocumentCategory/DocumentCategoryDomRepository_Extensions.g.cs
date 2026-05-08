@@ -5,7 +5,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DocumentCategory
+namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DocumentBucket
 {
     using Skyline.DataMiner.SDM;
     using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
@@ -13,7 +13,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DocumentCateg
     /// <summary>
     /// Provides extension methods for adding middleware to an <see cref="IBulkRepository{T}"/> instance.
     /// </summary>
-    public static class DocumentCategoryDomRepositoryExtensions
+    public static class DocumentBucketDomRepositoryExtensions
     {
         /// <summary>
         /// Wraps the specified repository with the provided middleware, enabling interception or augmentation of
@@ -23,13 +23,13 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DocumentCateg
         /// authorization to repository operations without modifying the repository implementation.</remarks>
         /// <param name="repository">The <see cref="IBulkRepository{T}"/> to be wrapped with middleware.</param>
         /// <param name="middleware">The middleware to apply to the repository.</param>
-        /// <returns>An <see cref="IBulkRepository{DocumentCategory}"/> instance that applies the specified middleware to all
+        /// <returns>An <see cref="IBulkRepository{DocumentBucket}"/> instance that applies the specified middleware to all
         /// operations.</returns>
-        public static IBulkRepository<DocumentCategory> WithMiddleware(
-            this IBulkRepository<DocumentCategory> repository,
-            IMiddlewareMarker<DocumentCategory> middleware)
+        public static IBulkRepository<DocumentBucket> WithMiddleware(
+            this IBulkRepository<DocumentBucket> repository,
+            IMiddlewareMarker<DocumentBucket> middleware)
         {
-            return new DocumentCategoryDomRepositoryMiddleware(repository, middleware);
+            return new DocumentBucketDomRepositoryMiddleware(repository, middleware);
         }
     }
 }

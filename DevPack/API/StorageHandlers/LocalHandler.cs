@@ -79,7 +79,7 @@
 				throw new ArgumentException("LocalHandler requires WebFileUploadData.", nameof(data));
 
 			// Extract parameters from data
-			var category = args.Category;
+			var bucket = args.Bucket;
 			var filePath = args.FilePath;
 			var name = args.Name;
 
@@ -91,7 +91,7 @@
 			var root = @"C:\Skyline DataMiner\Webpages\Public\WebFileManager";
 
 			// Remove leading slashes from relative path
-			var directory = category.UploadPath ?? string.Empty;
+			var directory = bucket.UploadPath ?? string.Empty;
 			directory = directory.TrimStart('/', '\\');
 
 			// Combine root and relative path to get full target directory
@@ -114,11 +114,11 @@
 		}
 
 		/// <summary>
-		/// Reads all files for the given category and filter by iterating
+		/// Reads all files for the given bucket and filter by iterating
 		/// through all available pages until no more results are returned.
 		/// </summary>
 		/// <param name="data">
-		/// The storage handler data containing category and filter information.
+		/// The storage handler data containing bucket and filter information.
 		/// </param>
 		/// <returns>
 		/// A list of all <see cref="IDocHubFile"/> matching the criteria.
@@ -156,10 +156,10 @@
 
 		/// <summary>
 		/// Reads files from the local file system using a paged enumerator.
-		/// Supports optional category-based paths and filename filtering.
+		/// Supports optional bucket-based paths and filename filtering.
 		/// </summary>
 		/// <param name="data">"
-		/// The storage handler data containing category, filter, and context.
+		/// The storage handler data containing bucket, filter, and context.
 		/// </param>
 		/// <returns>
 		/// A list of <see cref="IDocHubFile"/> representing the files in the current page.
@@ -171,7 +171,7 @@
 				throw new ArgumentException("LocalHandler requires WebFileReadData.", nameof(data));
 
 			// Extract parameters from data
-			var category = args.Category;
+			var bucket = args.Bucket;
 			var filter = args.Filter;
 			var context = args.Context;
 
@@ -183,10 +183,10 @@
 			if (!(context is LocalPageData localContext))
 				throw new ArgumentException("LocalHandler requires LocalPageContext.", nameof(context));
 
-			// Apply category upload path before enumeration starts
-			if (category != null && localContext.FileEnumerator == null)
+			// Apply bucket upload path before enumeration starts
+			if (bucket != null && localContext.FileEnumerator == null)
 			{
-				var uploadPath = category.UploadPath?.TrimStart('\\', '/') ?? string.Empty;
+				var uploadPath = bucket.UploadPath?.TrimStart('\\', '/') ?? string.Empty;
 				if (!string.IsNullOrEmpty(uploadPath))
 				{
 					localContext.CurrentRoot = Path.Combine(localContext.CurrentRoot, uploadPath);

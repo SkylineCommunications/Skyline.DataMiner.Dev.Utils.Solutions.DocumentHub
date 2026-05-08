@@ -2,7 +2,7 @@
 {
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.SDM;
-	using Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentCategory;
+	using Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentBucket;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DomSource;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointConfiguration;
@@ -11,12 +11,12 @@
 	/// Provides centralized access to Document Hub repositories and configuration data.
 	/// </summary>
 	/// <remarks>
-	/// This helper class centralizes access to document categories, DOM sources, and SharePoint
+	/// This helper class centralizes access to document buckets, DOM sources, and SharePoint
 	/// configuration repositories. It simplifies data access patterns for consumers of the Document Hub API.
 	/// </remarks>
 	public class DocumentHubApiHelper : IDocumentHubApiHelper
     {
-        private readonly IBulkRepository<DocumentCategory> _documentCategories;
+        private readonly IBulkRepository<DocumentBucket> _documentBuckets;
         private readonly IRepository<DomSource> _domSources;
         private readonly IRepository<SharePointConfiguration> _sharePointConfigurations;
 
@@ -27,7 +27,7 @@
         public DocumentHubApiHelper(IConnection connection)
         {
             Connection = connection;
-            _documentCategories = new DocumentCategoryDomRepository(connection);
+            _documentBuckets = new DocumentBucketsDomRepository(connection);
             _domSources = new DomSourceDomRepository(connection);
             _sharePointConfigurations = new SharePointConfigurationDomRepository(connection);
         }
@@ -36,11 +36,11 @@
         public IConnection Connection { get; }
 
         /// <inheritdoc/>
-        public IBulkRepository<DocumentCategory> DocumentCategories
+        public IBulkRepository<DocumentBucket> DocumentBuckets
         {
             get
             {
-                return _documentCategories;
+                return _documentBuckets;
             }
         }
 
