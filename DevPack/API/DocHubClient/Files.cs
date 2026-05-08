@@ -61,39 +61,32 @@
 			if (string.IsNullOrWhiteSpace(filePath))
 				throw new ArgumentNullException(nameof(filePath));
 
-			// Trim any whitespace that might have been included
-			filePath = filePath.Trim();
+			// Trim any whitespace and normalize to absolute path
+			filePath = Path.GetFullPath(filePath.Trim());
 
-			// Validate that the file exists before attempting to upload
+			// Validate that the file exists
 			if (!File.Exists(filePath))
 				throw new FileNotFoundException($"Source file not found: '{filePath}'", filePath);
-
-			// Normalize the file path to an absolute path to avoid issues with relative paths
-			filePath = Path.GetFullPath(filePath);
 
 			// Create appropriate storage handler based on category's storage type.
 			var storageHandler = StorageHandlerFactory.Create(category.StorageType, _connection);
 
-			// Rename file if necessary.
-			if (string.IsNullOrEmpty(name))
+			// Determine the file name to use
+			if (string.IsNullOrWhiteSpace(name))
 			{
 				name = Path.GetFileNameWithoutExtension(filePath);
 			}
 			else
 			{
-				// Sanitize the name to ensure it's just a filename, not a path
-				// Extract just the filename without any path components
+				// Sanitize name: extract just the filename without any directory parts
+				name = Path.GetFileName(name);
 				name = Path.GetFileNameWithoutExtension(name);
 			}
 
-			// Additional validation: ensure name doesn't contain path separators
-			if (name.Contains("\\") || name.Contains("/"))
-			{
-				throw new ArgumentException($"File name cannot contain path separators: '{name}'", nameof(name));
-			}
+			// Get extension from the source file
+			string extension = Path.GetExtension(filePath);
 
 			// Check for existing file to prevent overwriting.
-			string extension = Path.GetExtension(filePath);
 			if (storageHandler.FileExists(new WebFileExistsData
 			{
 				Directory = category.UploadPath,
@@ -146,39 +139,32 @@
 			if (domInstanceId == Guid.Empty)
 				throw new ArgumentNullException(nameof(domInstanceId));
 
-			// Trim any whitespace that might have been included
-			filePath = filePath.Trim();
+			// Trim any whitespace and normalize to absolute path
+			filePath = Path.GetFullPath(filePath.Trim());
 
-			// Validate that the file exists before attempting to upload
+			// Validate that the file exists
 			if (!File.Exists(filePath))
 				throw new FileNotFoundException($"Source file not found: '{filePath}'", filePath);
-
-			// Normalize the file path to an absolute path to avoid issues with relative paths
-			filePath = Path.GetFullPath(filePath);
 
 			// Create appropriate storage handler based on category's storage type.
 			var storageHandler = StorageHandlerFactory.Create(category.StorageType, _connection);
 
-			// Rename file if necessary.
-			if (string.IsNullOrEmpty(name))
+			// Determine the file name to use
+			if (string.IsNullOrWhiteSpace(name))
 			{
 				name = Path.GetFileNameWithoutExtension(filePath);
 			}
 			else
 			{
-				// Sanitize the name to ensure it's just a filename, not a path
-				// Extract just the filename without any path components
+				// Sanitize name: extract just the filename without any directory parts
+				name = Path.GetFileName(name);
 				name = Path.GetFileNameWithoutExtension(name);
 			}
 
-			// Additional validation: ensure name doesn't contain path separators
-			if (name.Contains("\\") || name.Contains("/"))
-			{
-				throw new ArgumentException($"File name cannot contain path separators: '{name}'", nameof(name));
-			}
+			// Get extension from the source file
+			string extension = Path.GetExtension(filePath);
 
 			// Check for existing file to prevent overwriting.
-			string extension = Path.GetExtension(filePath);
 			if (storageHandler.FileExists(new DomFileExistsData
 			{
 				Category = category,
@@ -234,15 +220,12 @@
 			if (string.IsNullOrWhiteSpace(filePath))
 				throw new ArgumentNullException(nameof(filePath));
 
-			// Trim any whitespace that might have been included
-			filePath = filePath.Trim();
+			// Trim any whitespace and normalize to absolute path
+			filePath = Path.GetFullPath(filePath.Trim());
 
-			// Validate that the file exists before attempting to upload
+			// Validate that the file exists
 			if (!File.Exists(filePath))
 				throw new FileNotFoundException($"Source file not found: '{filePath}'", filePath);
-
-			// Normalize the file path to an absolute path to avoid issues with relative paths
-			filePath = Path.GetFullPath(filePath);
 
 			// This overload is intended for web-like storage backends that use UploadPath.
 			// DOM storage uses DOM instances instead; instruct caller to use the DOM overload.
@@ -251,23 +234,19 @@
 
 			var storageHandler = StorageHandlerFactory.Create(category.StorageType, _connection);
 
-			if (string.IsNullOrEmpty(name))
+			// Determine the file name to use
+			if (string.IsNullOrWhiteSpace(name))
 			{
 				name = Path.GetFileNameWithoutExtension(filePath);
 			}
 			else
 			{
-				// Sanitize the name to ensure it's just a filename, not a path
-				// Extract just the filename without any path components
+				// Sanitize name: extract just the filename without any directory parts
+				name = Path.GetFileName(name);
 				name = Path.GetFileNameWithoutExtension(name);
 			}
 
-			// Additional validation: ensure name doesn't contain path separators
-			if (name.Contains("\\") || name.Contains("/"))
-			{
-				throw new ArgumentException($"File name cannot contain path separators: '{name}'", nameof(name));
-			}
-
+			// Get extension from the source file
 			string extension = Path.GetExtension(filePath);
 
 			// Build effective upload path (do not mutate original category).

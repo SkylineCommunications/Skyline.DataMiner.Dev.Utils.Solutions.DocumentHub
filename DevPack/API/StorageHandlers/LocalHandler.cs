@@ -8,7 +8,6 @@
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
-	using Skyline.DataMiner.Utils.SecureCoding.SecureIO;
 
 	/// <summary>
 	/// Handles file and image storage on the local filesystem.
@@ -43,7 +42,7 @@
 			var directory = args.Directory;
 			var name = args.Name;
 
-			string filePath = SecurePath.ConstructSecurePath(directory, $"{name}");
+			string filePath = Path.Combine(directory, name);
 			return File.Exists(filePath);
 		}
 
@@ -62,7 +61,7 @@
 			}
 
 			// Construct the full file path and save the image as JPEG
-			string filePath = SecurePath.ConstructSecurePath(directory, $"{name}.jpeg");
+			string filePath = Path.Combine(directory, $"{name}.jpeg");
 			image.Save(filePath);
 		}
 
@@ -92,11 +91,11 @@
 			var root = @"C:\Skyline DataMiner\Webpages\Public\WebFileManager";
 
 			// Remove leading slashes from relative path
-			var directory = category.UploadPath;
+			var directory = category.UploadPath ?? string.Empty;
 			directory = directory.TrimStart('/', '\\');
 
 			// Combine root and relative path to get full target directory
-			var targetDirectory = SecurePath.ConstructSecurePath(root, directory);
+			var targetDirectory = string.IsNullOrEmpty(directory) ? root : Path.Combine(root, directory);
 
 			// Ensure the target directory exists
 			if (!Directory.Exists(targetDirectory))
@@ -105,17 +104,7 @@
 			}
 
 			// Combine directory and target filename
-			string targetPath;
-			try
-			{
-				targetPath = SecurePath.ConstructSecurePath(targetDirectory, name);
-			}
-			catch (Exception ex)
-			{
-				throw new InvalidOperationException(
-					$"Failed to construct secure path. Target directory: '{targetDirectory}', File name: '{name}'. " +
-					$"Original file path: '{filePath}'. Error: {ex.Message}", ex);
-			}
+			string targetPath = Path.Combine(targetDirectory, name);
 
 			// Copy the file to the target location (overwrite if exists)
 			File.Copy(filePath, targetPath, overwrite: true);
@@ -197,7 +186,11 @@
 			// Apply category upload path before enumeration starts
 			if (category != null && localContext.FileEnumerator == null)
 			{
-				localContext.CurrentRoot = SecurePath.ConstructSecurePathWithSubDirectories(localContext.CurrentRoot, category.UploadPath.TrimStart('\\', '/'));
+				var uploadPath = category.UploadPath?.TrimStart('\\', '/') ?? string.Empty;
+				if (!string.IsNullOrEmpty(uploadPath))
+				{
+					localContext.CurrentRoot = Path.Combine(localContext.CurrentRoot, uploadPath);
+				}
 			}
 
 			// Initialize file enumeration if not already created
