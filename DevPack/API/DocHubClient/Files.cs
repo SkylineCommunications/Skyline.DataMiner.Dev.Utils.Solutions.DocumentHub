@@ -58,8 +58,15 @@
 			// Validate parameters
 			if (category == null)
 				throw new ArgumentNullException(nameof(category));
-			if (filePath == null)
+			if (string.IsNullOrWhiteSpace(filePath))
 				throw new ArgumentNullException(nameof(filePath));
+
+			// Trim any whitespace that might have been included
+			filePath = filePath.Trim();
+
+			// Validate that the file exists before attempting to upload
+			if (!File.Exists(filePath))
+				throw new FileNotFoundException($"Source file not found: '{filePath}'", filePath);
 
 			// Normalize the file path to an absolute path to avoid issues with relative paths
 			filePath = Path.GetFullPath(filePath);
@@ -71,6 +78,18 @@
 			if (string.IsNullOrEmpty(name))
 			{
 				name = Path.GetFileNameWithoutExtension(filePath);
+			}
+			else
+			{
+				// Sanitize the name to ensure it's just a filename, not a path
+				// Extract just the filename without any path components
+				name = Path.GetFileNameWithoutExtension(name);
+			}
+
+			// Additional validation: ensure name doesn't contain path separators
+			if (name.Contains("\\") || name.Contains("/"))
+			{
+				throw new ArgumentException($"File name cannot contain path separators: '{name}'", nameof(name));
 			}
 
 			// Check for existing file to prevent overwriting.
@@ -122,10 +141,17 @@
 			// Validate parameters
 			if (category == null)
 				throw new ArgumentNullException(nameof(category));
-			if (filePath == null)
+			if (string.IsNullOrWhiteSpace(filePath))
 				throw new ArgumentNullException(nameof(filePath));
 			if (domInstanceId == Guid.Empty)
 				throw new ArgumentNullException(nameof(domInstanceId));
+
+			// Trim any whitespace that might have been included
+			filePath = filePath.Trim();
+
+			// Validate that the file exists before attempting to upload
+			if (!File.Exists(filePath))
+				throw new FileNotFoundException($"Source file not found: '{filePath}'", filePath);
 
 			// Normalize the file path to an absolute path to avoid issues with relative paths
 			filePath = Path.GetFullPath(filePath);
@@ -137,6 +163,18 @@
 			if (string.IsNullOrEmpty(name))
 			{
 				name = Path.GetFileNameWithoutExtension(filePath);
+			}
+			else
+			{
+				// Sanitize the name to ensure it's just a filename, not a path
+				// Extract just the filename without any path components
+				name = Path.GetFileNameWithoutExtension(name);
+			}
+
+			// Additional validation: ensure name doesn't contain path separators
+			if (name.Contains("\\") || name.Contains("/"))
+			{
+				throw new ArgumentException($"File name cannot contain path separators: '{name}'", nameof(name));
 			}
 
 			// Check for existing file to prevent overwriting.
@@ -193,8 +231,15 @@
 		{
 			if (category == null)
 				throw new ArgumentNullException(nameof(category));
-			if (filePath == null)
+			if (string.IsNullOrWhiteSpace(filePath))
 				throw new ArgumentNullException(nameof(filePath));
+
+			// Trim any whitespace that might have been included
+			filePath = filePath.Trim();
+
+			// Validate that the file exists before attempting to upload
+			if (!File.Exists(filePath))
+				throw new FileNotFoundException($"Source file not found: '{filePath}'", filePath);
 
 			// Normalize the file path to an absolute path to avoid issues with relative paths
 			filePath = Path.GetFullPath(filePath);
@@ -209,6 +254,18 @@
 			if (string.IsNullOrEmpty(name))
 			{
 				name = Path.GetFileNameWithoutExtension(filePath);
+			}
+			else
+			{
+				// Sanitize the name to ensure it's just a filename, not a path
+				// Extract just the filename without any path components
+				name = Path.GetFileNameWithoutExtension(name);
+			}
+
+			// Additional validation: ensure name doesn't contain path separators
+			if (name.Contains("\\") || name.Contains("/"))
+			{
+				throw new ArgumentException($"File name cannot contain path separators: '{name}'", nameof(name));
 			}
 
 			string extension = Path.GetExtension(filePath);

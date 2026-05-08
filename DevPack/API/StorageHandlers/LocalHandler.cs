@@ -1,6 +1,4 @@
-﻿using Skyline.DataMiner.Utils.SecureCoding.SecureIO;
-
-namespace Skyline.DataMiner.Solutions.DocumentHub.API
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API
 {
 	using System;
 	using System.Collections.Generic;
@@ -10,6 +8,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
+	using Skyline.DataMiner.Utils.SecureCoding.SecureIO;
 
 	/// <summary>
 	/// Handles file and image storage on the local filesystem.
@@ -106,7 +105,17 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API
 			}
 
 			// Combine directory and target filename
-			string targetPath = SecurePath.ConstructSecurePath(targetDirectory, name);
+			string targetPath;
+			try
+			{
+				targetPath = SecurePath.ConstructSecurePath(targetDirectory, name);
+			}
+			catch (Exception ex)
+			{
+				throw new InvalidOperationException(
+					$"Failed to construct secure path. Target directory: '{targetDirectory}', File name: '{name}'. " +
+					$"Original file path: '{filePath}'. Error: {ex.Message}", ex);
+			}
 
 			// Copy the file to the target location (overwrite if exists)
 			File.Copy(filePath, targetPath, overwrite: true);
