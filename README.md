@@ -1,65 +1,34 @@
 # Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub
 
-## About
+This documentation describes how to use the public API exposed by `Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub`. The API is intended to be used when developing custom solutions based on the DocumentHub solution.
 
-NuGet Class Library API to interact with DocumentHub functionality. It provides repositories and helpers for managing document categories, SharePoint configurations, and DOM sources, as well as a high-level API for file upload and read operations across multiple storage backends.
+## Installation
 
-## Solution Structure
+Add the NuGet package to your solution:
 
-| Project             | Description                                                                                                 |
-|---------------------|-------------------------------------------------------------------------------------------------------------|
-| `DevPack`           | Core library containing models, repositories, exposers, `DocumentHubApiHelper`, and the `DocHubClient` API. |
-| `DevPack.Installer` | DOM installer that provisions module settings, section definitions, and DOM definitions.                    |
-| `DevPack.Tests`     | Unit tests covering CRUD operations, filter queries, and API validation for all components.                 |
-
-## Getting Started
-
-### Using the DocHubClient API
-
-The `DocHubClient` provides a simplified interface for file operations:
-
-```csharp
-using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient;
-
-var client = new DocHubClient(connection);
-
-// Upload a file to a document category
-client.Files.UploadFile(category, @"C:\Documents\report.pdf");
-
-// Upload with custom name
-client.Files.UploadFile(category, filePath, name: "CustomName");
-
-// Upload to DOM instance
-client.Files.UploadFile(category, filePath, domInstanceId);
-
-// Read files from a category
-var files = client.Files.ReadFiles(category);
-
-// Read files with filter
-var filtered = client.Files.ReadFiles(category, filter: "invoice");
+```
+dotnet add package Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub
 ```
 
-### Using the DocumentHubApiHelper
+Depending on your project type, one of the following additional packages is also required:
 
-For direct repository access and DOM operations:
+- Automation scripts: `Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub.Automation`
+- Protocols: `Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub.Protocol`
+- GQI Ad-hoc data sources and custom operators: `Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub.GQI`
 
-```csharp
-var helper = new DocumentHubApiHelper(connection);
+> **Note**
+> This library targets `.NET Framework 4.8`.
 
-// Create a SharePoint configuration
-helper.SharePointConfigurations.Create(new SharePointConfiguration
-{
-    TenantID = "your-tenant-id",
-    ClientID = "your-client-id",
-    ClientSecret = "your-client-secret",
-    SiteURL = "https://contoso.sharepoint.com/sites/MySite",
-    DocumentLibraryName = "Shared Documents",
-});
+## Documentation
 
-// Read with filters
-var results = helper.DocumentCategories.Read(
-    DocumentCategoryExposers.Name.Equal("Technical Documentation"));
-```
+| Document                                              | Description                                                                  |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------- |
+| [Getting Started](Documentation/Getting%20Started.md) | Installation, prerequisites, and basic usage                                 |
+| [Quick Reference](Documentation/Quick%20Reference.md) | Common code snippets for file operations, repositories, and storage backends |
+
+External resources:
+
+- [DataMiner Docs](https://docs.dataminer.services/) – Official DataMiner documentation
 
 ## Unit Tests
 
@@ -74,7 +43,7 @@ The `DevPack.Tests` project contains unit tests using an in-memory DOM mock (`Do
 | **API - Files Read**       | `Files_ReadFiles_Tests`                                                                       | 5     |
 | **SDM - SharePoint**       | `SharepointDomRepository_CRUD_Tests`, `SharepointDomRepository_FilterTests_Tests`             | 13    |
 | **SDM - DomSource**        | `DomSourceDomRepository_CRUD_Tests`, `DomSourceDomRepository_FilterTests_Tests`               | 12    |
-| **SDM - DocumentCategory** | `DocumentCategoryDomRepository_CRUD_Tests`, `DocumentCategoryDomRepository_FilterTests_Tests` | 12    |
+| **SDM - DocumentBucket**   | `DocumentBucketDomRepository_CRUD_Tests`, `DocumentBucketDomRepository_FilterTests_Tests`     | 12    |
 
 **Total: 53 tests**
 
