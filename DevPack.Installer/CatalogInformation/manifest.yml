@@ -59,9 +59,15 @@ documentation_url:
 #   The name is required; max 256 characters.
 #   The email and url are optional, and should be in valid email/URL formats.
 owners:
-  - name: 'JSL'
+  - name: 'José Silva'
+    email:
+    url:
+  - name: 'Benjamin Hodžić'
     email: 
-    url: 
+    url:
+  - name: 'Pulse'
+    email: squad.deploy-pulse@skyline.be
+    url:
 
 # [Optional]
 # Tags that allow you to categorize your Catalog items.
