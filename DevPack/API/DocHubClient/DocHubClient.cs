@@ -1,6 +1,6 @@
 ﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient
 {
-    using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net;
 
 	/// <summary>
 	/// Entry point for interacting with the DocumentHub API.
