@@ -9,7 +9,7 @@
     <Import_RootNamespace>SharedMappers</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Mappers\DocumentCategoryDomMapper.g.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Mappers\DocumentBucketDomMapper.g.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mappers\DomSourceDomMapper.g.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mappers\SharePointConfigurationDomMapper.g.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Version.cs" />
