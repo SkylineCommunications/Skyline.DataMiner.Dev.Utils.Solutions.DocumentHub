@@ -313,12 +313,12 @@
 		/// Microsoft Graph paginates children per folder, not across the entire drive.
 		/// This method bridges that gap by consuming the <see cref="SharePointPageData.FolderQueue"/>,
 		/// issuing per-folder requests, and collecting results until
-		/// <see cref="SharePointPageData.PageSize"/> items are gathered.
+		/// <see cref="DocHubPageData.PageSize"/> items are gathered.
 		/// Any surplus items are stored in <see cref="SharePointPageData.PageRemainderBuffer"/>
 		/// so they are returned on the next call rather than being lost.
 		/// </remarks>
 		/// <param name="filter">
-		/// Optional substring filter applied to <see cref="DriveItem.Name"/> (case-insensitive).
+		/// Optional substring filter applied to <see cref="BaseItem.Name"/> of the <see cref="DriveItem"/> object. (case-insensitive).
 		/// Pass <c>null</c> or empty to skip name filtering.
 		/// </param>
 		/// <param name="allowedExtensions">
@@ -331,7 +331,7 @@
 		/// </param>
 		/// <returns>
 		/// A list of <see cref="DriveItem"/> objects representing the next logical page of files.
-		/// The list size is at most <see cref="SharePointPageData.PageSize"/>.
+		/// The list size is at most <see cref="DocHubPageData.PageSize"/>.
 		/// </returns>
 		private IList<DriveItem> FetchNextPageInternal(string filter, HashSet<string> allowedExtensions, SharePointPageData context)
 		{
