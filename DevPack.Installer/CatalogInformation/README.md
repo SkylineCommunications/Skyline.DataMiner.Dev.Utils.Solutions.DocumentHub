@@ -1,7 +1,6 @@
 # DocumentHub Storage Installer
 
-This documentation describes how to use the public API exposed by `Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub`
-The API is intended to be used when developing custom solutions based on the DocumentHub solution.
+This documentation describes how to use the public API exposed by **Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub**. The API is intended to be used when developing custom solutions based on the DocumentHub solution.
 
 ## Installation
 
@@ -18,8 +17,7 @@ Depending on your project type, one of the following additional packages is also
 - GQI Ad-hoc data sources and custom operators: `Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub.GQI`
 
 > **Note**
->
-> This library targets `.NET Framework 4.8`
+> This library targets **.NET Framework 4.8**
 
 ## Documentation
 
