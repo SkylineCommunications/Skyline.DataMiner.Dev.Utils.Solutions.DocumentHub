@@ -34,7 +34,7 @@
 		/// <summary>
 		/// Uploads a file to the storage location configured in the given document buckets.
 		/// </summary>
-		/// <param name="buckets">
+		/// <param name="bucket">
 		/// The document bucket defining the storage type and upload path.
 		/// </param>
 		/// <param name="filePath">
@@ -45,7 +45,7 @@
 		/// If null, the original file name is used.
 		/// </param>
 		/// <exception cref="ArgumentNullException">
-		/// Thrown when <paramref name="buckets"/> or <paramref name="filePath"/> is null.
+		/// Thrown when <paramref name="bucket"/> or <paramref name="filePath"/> is null.
 		/// </exception>
 		/// <exception cref="InvalidOperationException">
 		/// Thrown when a file with the same name already exists in the target location.
@@ -53,11 +53,11 @@
 		/// <returns>
 		/// The path or identifier of the uploaded file.
 		/// </returns>
-		public string UploadFile(DocumentBucket buckets, string filePath, string name = null)
+		public string UploadFile(DocumentBucket bucket, string filePath, string name = null)
 		{
 			// Validate parameters
-			if (buckets == null)
-				throw new ArgumentNullException(nameof(buckets));
+			if (bucket == null)
+				throw new ArgumentNullException(nameof(bucket));
 			if (string.IsNullOrWhiteSpace(filePath))
 				throw new ArgumentNullException(nameof(filePath));
 
@@ -69,7 +69,7 @@
 				throw new FileNotFoundException($"Source file not found: '{filePath}'", filePath);
 
 			// Create appropriate storage handler based on bucket's storage type.
-			var storageHandler = StorageHandlerFactory.Create(buckets.StorageType, _connection);
+			var storageHandler = StorageHandlerFactory.Create(bucket.StorageType, _connection);
 
 			// Determine the file name to use
 			if (string.IsNullOrWhiteSpace(name))
@@ -89,7 +89,7 @@
 			// Check for existing file to prevent overwriting.
 			if (storageHandler.FileExists(new WebFileExistsData
 			{
-				Directory = buckets.UploadPath,
+				Directory = bucket.UploadPath,
 				Name = $"{name}{extension}",
 			}))
 			{
@@ -99,7 +99,7 @@
 			// Upload the file using the storage handler.
 			return storageHandler.UploadFile(new WebFileUploadData
 			{
-				Bucket = buckets,
+				Bucket = bucket,
 				FilePath = filePath,
 				Name = $"{name}{extension}",
 			});
