@@ -2,8 +2,11 @@
   "solution": {
     "path": "SLC-S-DocumentHub-API.sln",
     "projects": [
-      "SharedMappers\\SharedMappers.shproj",
-      "DevPack\\DevPack.csproj"
+      "DevPack.Automation\\DevPack.Automation.csproj",
+      "DevPack.GQI\\DevPack.GQI.csproj",
+      "DevPack.Protocol\\DevPack.Protocol.csproj",
+      "DevPack\\DevPack.csproj",
+      "SharedMappers\\SharedMappers.shproj"
     ]
   }
 }
