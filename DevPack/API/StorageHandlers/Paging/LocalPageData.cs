@@ -28,7 +28,7 @@
 		/// Gets the root directory currently being enumerated.
 		/// Used to detect changes in scope and reinitialize enumeration when needed.
 		/// </summary>
-		public string CurrentRoot { get; internal set; } = @"C:\Skyline DataMiner\Webpages\Public\WebFileManager";
+		public string CurrentRoot { get; internal set; } = LocalHandler.WebFileManagerRoot;
 
 		/// <summary>
 		/// Checks if theres more pages left.

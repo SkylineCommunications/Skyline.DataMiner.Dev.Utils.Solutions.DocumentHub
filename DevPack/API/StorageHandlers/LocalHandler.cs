@@ -19,10 +19,32 @@
 	internal class LocalHandler : IStorageHandler
 	{
 		/// <summary>
+		/// Root path for the DataMiner WebFileManager local storage.
+		/// </summary>
+		internal const string WebFileManagerRoot = @"C:\Skyline DataMiner\Webpages\Public\WebFileManager";
+
+		/// <summary>
+		/// Root path for the DataMiner Webpages folder, used to compute web-resolvable paths.
+		/// </summary>
+		internal const string WebpagesRoot = @"C:\Skyline DataMiner\Webpages";
+
+		/// <summary>
 		/// Initializes a new instance of the <see cref="LocalHandler"/> class.
 		/// </summary>
 		public LocalHandler()
 		{
+		}
+
+		/// <summary>
+		/// Resolves a relative upload path to the full local directory under <see cref="WebFileManagerRoot"/>.
+		/// </summary>
+		/// <param name="relativePath">A relative path (may be null, empty, or have leading slashes).</param>
+		/// <returns>The full local directory path.</returns>
+		internal static string ResolveLocalDirectory(string relativePath)
+		{
+			var directory = relativePath ?? string.Empty;
+			directory = directory.TrimStart('/', '\\');
+			return string.IsNullOrEmpty(directory) ? WebFileManagerRoot : Path.Combine(WebFileManagerRoot, directory);
 		}
 
 		/// <summary>
@@ -39,10 +61,7 @@
 			if (!(data is WebFileExistsData args))
 				throw new ArgumentException("LocalHandler requires WebFileFileExistsData.", nameof(data));
 
-			var directory = args.Directory;
-			var name = args.Name;
-
-			string filePath = Path.Combine(directory, name);
+			string filePath = Path.Combine(ResolveLocalDirectory(args.Directory), args.Name);
 			return File.Exists(filePath);
 		}
 
@@ -87,15 +106,8 @@
 			if (!File.Exists(filePath))
 				throw new FileNotFoundException($"Source file not found: '{filePath}'", filePath);
 
-			// Root path for DataMiner WebFileManager
-			var root = @"C:\Skyline DataMiner\Webpages\Public\WebFileManager";
-
-			// Remove leading slashes from relative path
-			var directory = bucket.UploadPath ?? string.Empty;
-			directory = directory.TrimStart('/', '\\');
-
-			// Combine root and relative path to get full target directory
-			var targetDirectory = string.IsNullOrEmpty(directory) ? root : Path.Combine(root, directory);
+			// Resolve the full target directory from the bucket's relative upload path
+			var targetDirectory = ResolveLocalDirectory(bucket.UploadPath);
 
 			// Ensure the target directory exists
 			if (!Directory.Exists(targetDirectory))
@@ -110,7 +122,7 @@
 			File.Copy(filePath, targetPath, overwrite: true);
 
 			// Return the web-resolvable path of the uploaded file.
-			return '/' + FileInfoAdapter.GetRelativePath(targetPath, @"C:\Skyline DataMiner\Webpages");
+			return '/' + FileInfoAdapter.GetRelativePath(targetPath, WebpagesRoot);
 		}
 
 		/// <summary>
@@ -186,11 +198,7 @@
 			// Apply bucket upload path before enumeration starts
 			if (bucket != null && localContext.FileEnumerator == null)
 			{
-				var uploadPath = bucket.UploadPath?.TrimStart('\\', '/') ?? string.Empty;
-				if (!string.IsNullOrEmpty(uploadPath))
-				{
-					localContext.CurrentRoot = Path.Combine(localContext.CurrentRoot, uploadPath);
-				}
+				localContext.CurrentRoot = ResolveLocalDirectory(bucket.UploadPath);
 			}
 
 			// Initialize file enumeration if not already created
