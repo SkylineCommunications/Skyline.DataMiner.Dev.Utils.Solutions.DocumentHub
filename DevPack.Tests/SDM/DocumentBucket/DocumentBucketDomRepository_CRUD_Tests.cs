@@ -150,6 +150,22 @@ namespace DevPack.Tests.SDM.DocumentBucket
 			}
 		}
 
+		[TestMethod]
+		public void Count_ReturnsAll()
+		{
+			// Arrange
+			var helper = Helper.GetHelper();
+			var filter = new TRUEFilterElement<DocumentBucket>();
+
+			// Act
+			CreateAll(helper);
+
+			var count = helper.DocumentBuckets.Count(filter);
+
+			// Assert
+			count.Should().Be(5);
+		}
+
 		private static void CreateAll(IDocumentHubApiHelper helper)
 		{
 			helper.DocumentBuckets.Create(DemoData.DocumentBuckets);

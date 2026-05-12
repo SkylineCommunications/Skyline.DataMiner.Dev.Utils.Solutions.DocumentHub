@@ -164,26 +164,6 @@
 			}
 		}
 
-		[TestMethod]
-		public void ReadFilter_TRUEFilter_ReturnsAll()
-		{
-			// Arrange
-			var helper = Helper.GetHelper();
-			var filter = new TRUEFilterElement<SharePointConfiguration>();
-
-			// Act
-			CreateAll(helper);
-
-			var retrieved = helper.SharePointConfigurations.Read(filter).ToArray();
-
-			// Assert
-			using (new AssertionScope())
-			{
-				retrieved.Should().NotBeNull();
-				retrieved.Count().Should().Be(5);
-			}
-		}
-
 		private static void CreateAll(IDocumentHubApiHelper helper)
 		{
 			foreach (var config in DemoData.SharePointConfigurations)

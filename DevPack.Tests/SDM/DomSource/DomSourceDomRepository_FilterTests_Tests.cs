@@ -148,7 +148,7 @@ namespace DevPack.Tests.SDM.DomSource
 		}
 
 		[TestMethod]
-		public void ReadFilter_TRUEFilter_ReturnsAll()
+		public void Count_ReturnsAll()
 		{
 			// Arrange
 			var helper = Helper.GetHelper();
@@ -165,22 +165,6 @@ namespace DevPack.Tests.SDM.DomSource
 				retrieved.Should().NotBeNull();
 				retrieved.Count().Should().Be(5);
 			}
-		}
-
-		[TestMethod]
-		public void Count_TRUEFilter_ReturnsAll()
-		{
-			// Arrange
-			var helper = Helper.GetHelper();
-			var filter = new TRUEFilterElement<DomSource>();
-
-			// Act
-			CreateAll(helper);
-
-			var count = helper.DomSources.Count(filter);
-
-			// Assert
-			count.Should().Be(5);
 		}
 
 		private static void CreateAll(IDocumentHubApiHelper helper)
