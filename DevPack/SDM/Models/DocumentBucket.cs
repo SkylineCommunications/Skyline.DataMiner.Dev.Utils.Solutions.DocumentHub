@@ -1,29 +1,29 @@
 ﻿namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Models
 {
-    using Skyline.DataMiner.SDM;
+	using Skyline.DataMiner.SDM;
 
-    /// <summary>
-    /// Represents a document classification that defines how and where files are stored.
-    /// </summary>
-    // [GenerateExposers]
-    // [SdmDomStorage("(slc)documenthub")]
-    public class DocumentBucket : SdmObject<DocumentBucket>
-    {
-        /// <summary>
-        /// Gets or sets human readable name of the bucket.
-        /// </summary>
-        public string Name { get; set; }
+	/// <summary>
+	/// Represents a document classification that defines how and where files are stored.
+	/// </summary>
+	// [GenerateExposers]
+	// [SdmDomStorage("(slc)documenthub")]
+	public class DocumentBucket : SdmObject<DocumentBucket>
+	{
+		/// <summary>
+		/// Gets or sets human readable name of the bucket.
+		/// </summary>
+		public string Name { get; set; }
 
 		/// <summary>
 		/// Gets or sets optional description explaining the purpose of the bucket.
 		/// </summary>
 		public string Description { get; set; }
 
-        /// <summary>
-        /// Gets or sets base upload path used by the storage handler.
-        /// This path is interpreted relative to the storage backend.
-        /// </summary>
-        public string UploadPath { get; set; }
+		/// <summary>
+		/// Gets or sets base upload path used by the storage handler.
+		/// This path is interpreted relative to the storage backend.
+		/// </summary>
+		public string UploadPath { get; set; }
 
 		/// <summary>
 		/// Gets or sets storage backend used by this bucket.
@@ -56,5 +56,5 @@
 		/// Gets or sets the maximum allowed file size for this bucket, in bytes.
 		/// </summary>
 		public long SizeLimit { get; set; }
-    }
+	}
 }
