@@ -10,6 +10,7 @@
 		{
 			new DomSource
 			{
+				Identifier = Guid.NewGuid().ToString(),
 				Name = "Inventory Attachments",
 				Module = "inventory",
 				NetworkSharePath = @"\\server01\inventory\attachments",
@@ -17,6 +18,7 @@
 			},
 			new DomSource
 			{
+				Identifier = Guid.NewGuid().ToString(),
 				Name = "Maintenance Logs",
 				Module = "maintenance",
 				NetworkSharePath = @"\\server01\maintenance\logs",
@@ -24,6 +26,7 @@
 			},
 			new DomSource
 			{
+				Identifier = Guid.NewGuid().ToString(),
 				Name = "Network Diagrams",
 				Module = "network",
 				NetworkSharePath = @"\\server02\network\diagrams",
@@ -31,6 +34,7 @@
 			},
 			new DomSource
 			{
+				Identifier = Guid.NewGuid().ToString(),
 				Name = "Service Reports",
 				Module = "inventory",
 				NetworkSharePath = @"\\server02\services\reports",
@@ -38,6 +42,7 @@
 			},
 			new DomSource
 			{
+				Identifier = Guid.NewGuid().ToString(),
 				Name = "Audit Trail",
 				Module = "audit",
 				NetworkSharePath = @"\\server03\audit\trail",
@@ -49,6 +54,7 @@
 		{
 			new DocumentBucket
 			{
+				Identifier = Guid.NewGuid().ToString(),
 				Name = "Technical Documentation",
 				Description = "Technical manuals and guides",
 				UploadPath = "/docs/technical",
@@ -60,6 +66,7 @@
 			},
 			new DocumentBucket
 			{
+				Identifier = Guid.NewGuid().ToString(),
 				Name = "Network Diagrams",
 				Description = "Network topology and diagrams",
 				UploadPath = "/docs/network",
@@ -71,6 +78,7 @@
 			},
 			new DocumentBucket
 			{
+				Identifier = Guid.NewGuid().ToString(),
 				Name = "Maintenance Reports",
 				Description = "Scheduled maintenance reports",
 				UploadPath = "/docs/maintenance",
@@ -82,6 +90,7 @@
 			},
 			new DocumentBucket
 			{
+				Identifier = Guid.NewGuid().ToString(),
 				Name = "Configuration Backups",
 				Description = "Device configuration backups",
 				UploadPath = "/docs/config",
@@ -93,6 +102,7 @@
 			},
 			new DocumentBucket
 			{
+				Identifier = Guid.NewGuid().ToString(),
 				Name = "Service Level Agreements",
 				Description = "SLA documents and contracts",
 				UploadPath = "/docs/sla",
@@ -108,6 +118,7 @@
 		{
 			new SharePointConfiguration
 			{
+				Identifier = Guid.NewGuid().ToString(),
 				TenantID = "tenant-aaa-111",
 				ClientID = "client-aaa-111",
 				ClientSecret = "secret-aaa-111",
@@ -117,6 +128,7 @@
 			},
 			new SharePointConfiguration
 			{
+				Identifier = Guid.NewGuid().ToString(),
 				TenantID = "tenant-bbb-222",
 				ClientID = "client-bbb-222",
 				ClientSecret = "secret-bbb-222",
@@ -126,6 +138,7 @@
 			},
 			new SharePointConfiguration
 			{
+				Identifier = Guid.NewGuid().ToString(),
 				TenantID = "tenant-ccc-333",
 				ClientID = "client-ccc-333",
 				ClientSecret = "secret-ccc-333",
@@ -135,6 +148,7 @@
 			},
 			new SharePointConfiguration
 			{
+				Identifier = Guid.NewGuid().ToString(),
 				TenantID = "tenant-ddd-444",
 				ClientID = "client-aaa-111",
 				ClientSecret = "secret-ddd-444",
@@ -144,6 +158,7 @@
 			},
 			new SharePointConfiguration
 			{
+				Identifier = Guid.NewGuid().ToString(),
 				TenantID = "tenant-eee-555",
 				ClientID = "client-eee-555",
 				ClientSecret = "secret-eee-555",

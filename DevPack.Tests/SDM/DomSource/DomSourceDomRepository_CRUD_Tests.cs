@@ -75,7 +75,7 @@ namespace DevPack.Tests.SDM.DomSource
 		public void EmptyDom_ReadPaged()
 		{
 			// Arrange
-			const int pageCount = 1;
+			const int pageCount = 3;
 			var helper = Helper.GetHelper();
 
 			// Act
@@ -85,12 +85,14 @@ namespace DevPack.Tests.SDM.DomSource
 			var pagedResult = helper.DomSources.ReadPaged(allFilter, pageCount);
 			var count = helper.DomSources.Count(allFilter);
 
+			var numberOfPages = (int)Math.Ceiling(count / (double)pageCount);
+
 			// Assert
 			using (new AssertionScope())
 			{
 				pagedResult.Should().NotBeNull();
-				pagedResult.Should().HaveCount((int)(count / pageCount));
-				pagedResult.Should().AllSatisfy(page => page.Should().HaveCount(pageCount));
+				pagedResult.Should().HaveCount(numberOfPages);
+				pagedResult.Should().AllSatisfy(page => page.Should().HaveCountLessThanOrEqualTo(pageCount));
 			}
 		}
 
@@ -141,6 +143,22 @@ namespace DevPack.Tests.SDM.DomSource
 				helper.DomSources.Count(new TRUEFilterElement<DomSource>()).Should().Be(DemoData.DomSources.Count - 2);
 				helper.DomSources.Count(DomSourceExposers.Module.Equal(moduleToDelete)).Should().Be(0);
 			}
+		}
+
+		[TestMethod]
+		public void Count_ReturnsAll()
+		{
+			// Arrange
+			var helper = Helper.GetHelper();
+			var filter = new TRUEFilterElement<DomSource>();
+
+			// Act
+			CreateAll(helper);
+
+			var count = helper.DomSources.Count(filter);
+
+			// Assert
+			count.Should().Be(5);
 		}
 
 		private static void CreateAll(IDocumentHubApiHelper helper)

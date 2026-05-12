@@ -76,7 +76,7 @@
 		public void EmptyDom_ReadPaged()
 		{
 			// Arrange
-			const int pageCount = 1;
+			const int pageCount = 2;
 			var helper = Helper.GetHelper();
 
 			// Act
@@ -86,12 +86,14 @@
 			var pagedResult = helper.SharePointConfigurations.ReadPaged(allFilter, pageCount);
 			var count = helper.SharePointConfigurations.Count(allFilter);
 
+			var numberOfPages = (int)Math.Ceiling(count / (double)pageCount);
+
 			// Assert
 			using (new AssertionScope())
 			{
 				pagedResult.Should().NotBeNull();
-				pagedResult.Should().HaveCount((int)(count / pageCount));
-				pagedResult.Should().AllSatisfy(page => page.Should().HaveCount(pageCount));
+				pagedResult.Should().HaveCount(numberOfPages);
+				pagedResult.Should().AllSatisfy(page => page.Should().HaveCountLessThanOrEqualTo(pageCount));
 			}
 		}
 
@@ -141,6 +143,26 @@
 			{
 				helper.SharePointConfigurations.Count(new TRUEFilterElement<SharePointConfiguration>()).Should().Be(DemoData.SharePointConfigurations.Count - 3);
 				helper.SharePointConfigurations.Count(SharePointConfigurationExposers.SiteURL.Equal(siteUrlToDelete)).Should().Be(0);
+			}
+		}
+
+		[TestMethod]
+		public void Count_ReturnsAll()
+		{
+			// Arrange
+			var helper = Helper.GetHelper();
+			var filter = new TRUEFilterElement<SharePointConfiguration>();
+
+			// Act
+			CreateAll(helper);
+
+			var retrieved = helper.SharePointConfigurations.Read(filter).ToArray();
+
+			// Assert
+			using (new AssertionScope())
+			{
+				retrieved.Should().NotBeNull();
+				retrieved.Count().Should().Be(5);
 			}
 		}
 

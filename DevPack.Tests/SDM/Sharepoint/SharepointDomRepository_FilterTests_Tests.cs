@@ -84,6 +84,22 @@
 		}
 
 		[TestMethod]
+		public void Count_TRUEFilter_ReturnsAll()
+		{
+			// Arrange
+			var helper = Helper.GetHelper();
+			var filter = new TRUEFilterElement<SharePointConfiguration>();
+
+			// Act
+			CreateAll(helper);
+
+			var count = helper.SharePointConfigurations.Count(filter);
+
+			// Assert
+			count.Should().Be(5);
+		}
+
+		[TestMethod]
 		public void ReadFilter_DocumentLibraryName_Contains()
 		{
 			// Arrange
@@ -145,26 +161,6 @@
 			{
 				retrieved.Should().NotBeNull();
 				retrieved.Count().Should().Be(2);
-			}
-		}
-
-		[TestMethod]
-		public void ReadFilter_TRUEFilter_ReturnsAll()
-		{
-			// Arrange
-			var helper = Helper.GetHelper();
-			var filter = new TRUEFilterElement<SharePointConfiguration>();
-
-			// Act
-			CreateAll(helper);
-
-			var retrieved = helper.SharePointConfigurations.Read(filter).ToArray();
-
-			// Assert
-			using (new AssertionScope())
-			{
-				retrieved.Should().NotBeNull();
-				retrieved.Count().Should().Be(5);
 			}
 		}
 

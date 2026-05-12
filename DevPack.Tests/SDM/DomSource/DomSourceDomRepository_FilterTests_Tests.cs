@@ -148,7 +148,7 @@ namespace DevPack.Tests.SDM.DomSource
 		}
 
 		[TestMethod]
-		public void ReadFilter_TRUEFilter_ReturnsAll()
+		public void Count_ReturnsAll()
 		{
 			// Arrange
 			var helper = Helper.GetHelper();

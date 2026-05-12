@@ -1,5 +1,6 @@
 namespace DevPack.Tests.SDM.DocumentBucket
 {
+	using System.Diagnostics;
 	using System.Linq;
 	using FluentAssertions;
 	using FluentAssertions.Execution;
@@ -80,22 +81,26 @@ namespace DevPack.Tests.SDM.DocumentBucket
 		public void EmptyDom_ReadPaged()
 		{
 			// Arrange
-			const int pageCount = 1;
+			const int pageCount = 4;
 			var helper = Helper.GetHelper();
 
 			// Act
 			CreateAll(helper);
 
-			FilterElement<DocumentBucket> allFilter = new TRUEFilterElement<DocumentBucket>();
+			var allFilter = new TRUEFilterElement<DocumentBucket>();
 			var pagedResult = helper.DocumentBuckets.ReadPaged(allFilter, pageCount);
 			var count = helper.DocumentBuckets.Count(allFilter);
+
+			var numberOfPages = (int)Math.Ceiling(count / (double)pageCount);
 
 			// Assert
 			using (new AssertionScope())
 			{
 				pagedResult.Should().NotBeNull();
-				pagedResult.Should().HaveCount((int)(count / pageCount));
-				pagedResult.Should().AllSatisfy(page => page.Should().HaveCount(pageCount));
+				pagedResult.Should().HaveCount(numberOfPages);
+
+				// some pages may have less items, but never more than the page count
+				pagedResult.Should().AllSatisfy(page => page.Should().HaveCountLessThanOrEqualTo(pageCount));
 			}
 		}
 
@@ -145,12 +150,25 @@ namespace DevPack.Tests.SDM.DocumentBucket
 			}
 		}
 
+		[TestMethod]
+		public void Count_ReturnsAll()
+		{
+			// Arrange
+			var helper = Helper.GetHelper();
+			var filter = new TRUEFilterElement<DocumentBucket>();
+
+			// Act
+			CreateAll(helper);
+
+			var count = helper.DocumentBuckets.Count(filter);
+
+			// Assert
+			count.Should().Be(5);
+		}
+
 		private static void CreateAll(IDocumentHubApiHelper helper)
 		{
-			foreach (var item in DemoData.DocumentBuckets)
-			{
-				helper.DocumentBuckets.Create(item);
-			}
+			helper.DocumentBuckets.Create(DemoData.DocumentBuckets);
 		}
 	}
 }
