@@ -167,6 +167,22 @@ namespace DevPack.Tests.SDM.DomSource
 			}
 		}
 
+		[TestMethod]
+		public void Count_TRUEFilter_ReturnsAll()
+		{
+			// Arrange
+			var helper = Helper.GetHelper();
+			var filter = new TRUEFilterElement<DomSource>();
+
+			// Act
+			CreateAll(helper);
+
+			var count = helper.DomSources.Count(filter);
+
+			// Assert
+			count.Should().Be(5);
+		}
+
 		private static void CreateAll(IDocumentHubApiHelper helper)
 		{
 			foreach (var item in DemoData.DomSources)

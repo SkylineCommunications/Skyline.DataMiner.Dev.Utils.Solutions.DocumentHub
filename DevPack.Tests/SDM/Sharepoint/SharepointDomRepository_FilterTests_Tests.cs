@@ -84,6 +84,22 @@
 		}
 
 		[TestMethod]
+		public void Count_TRUEFilter_ReturnsAll()
+		{
+			// Arrange
+			var helper = Helper.GetHelper();
+			var filter = new TRUEFilterElement<SharePointConfiguration>();
+
+			// Act
+			CreateAll(helper);
+
+			var count = helper.SharePointConfigurations.Count(filter);
+
+			// Assert
+			count.Should().Be(5);
+		}
+
+		[TestMethod]
 		public void ReadFilter_DocumentLibraryName_Contains()
 		{
 			// Arrange
