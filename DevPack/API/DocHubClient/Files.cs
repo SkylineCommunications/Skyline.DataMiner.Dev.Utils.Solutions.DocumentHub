@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.IO;
 	using System.Linq;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
@@ -24,9 +23,12 @@
 		/// </summary>
 		private readonly IConnection _connection;
 
+		private readonly FileValidator validator;
+
 		internal Files(IConnection connection)
 		{
-			_connection = connection;
+			_connection = connection ?? throw new ArgumentNullException(nameof(connection));
+			validator = new FileValidator(_connection);
 		}
 
 		#region Upload
@@ -55,54 +57,24 @@
 		/// </returns>
 		public string UploadFile(DocumentBucket bucket, string filePath, string name = null)
 		{
-			// Validate parameters
-			if (bucket == null)
-				throw new ArgumentNullException(nameof(bucket));
-			if (string.IsNullOrWhiteSpace(filePath))
-				throw new ArgumentNullException(nameof(filePath));
-
-			// Trim any whitespace and normalize to absolute path
-			filePath = Path.GetFullPath(filePath.Trim());
-
-			// Validate that the file exists
-			if (!File.Exists(filePath))
-				throw new FileNotFoundException($"Source file not found: '{filePath}'", filePath);
+			var uploadData = validator.ValidateAndSanitizeFile(bucket, filePath, name);
+			var validatedBucket = uploadData.Bucket;
 
 			// Create appropriate storage handler based on bucket's storage type.
-			var storageHandler = StorageHandlerFactory.Create(bucket.StorageType, _connection);
-
-			// Determine the file name to use
-			if (string.IsNullOrWhiteSpace(name))
-			{
-				name = Path.GetFileNameWithoutExtension(filePath);
-			}
-			else
-			{
-				// Sanitize name: extract just the filename without any directory parts
-				name = Path.GetFileName(name);
-				name = Path.GetFileNameWithoutExtension(name);
-			}
-
-			// Get extension from the source file
-			string extension = Path.GetExtension(filePath);
+			var storageHandler = StorageHandlerFactory.Create(validatedBucket.StorageType, _connection);
 
 			// Check for existing file to prevent overwriting.
 			if (storageHandler.FileExists(new WebFileExistsData
 			{
 				Directory = bucket.UploadPath,
-				Name = $"{name}{extension}",
+				Name = uploadData.Name,
 			}))
 			{
-				throw new InvalidOperationException($"The file '{name}' already exists.");
+				throw new InvalidOperationException($"The file '{uploadData.Name}' already exists.");
 			}
 
 			// Upload the file using the storage handler.
-			return storageHandler.UploadFile(new WebFileUploadData
-			{
-				Bucket = bucket,
-				FilePath = filePath,
-				Name = $"{name}{extension}",
-			});
+			return storageHandler.UploadFile(uploadData);
 		}
 
 		/// <summary>
@@ -132,56 +104,30 @@
 		public string UploadFile(DocumentBucket bucket, string filePath, Guid domInstanceId, string name = null)
 		{
 			// Validate parameters
-			if (bucket == null)
-				throw new ArgumentNullException(nameof(bucket));
-			if (string.IsNullOrWhiteSpace(filePath))
-				throw new ArgumentNullException(nameof(filePath));
 			if (domInstanceId == Guid.Empty)
 				throw new ArgumentNullException(nameof(domInstanceId));
 
-			// Trim any whitespace and normalize to absolute path
-			filePath = Path.GetFullPath(filePath.Trim());
-
-			// Validate that the file exists
-			if (!File.Exists(filePath))
-				throw new FileNotFoundException($"Source file not found: '{filePath}'", filePath);
+			var uploadData = validator.ValidateAndSanitizeFile(bucket, filePath, name);
+			var validatedBucket = uploadData.Bucket;
 
 			// Create appropriate storage handler based on bucket's storage type.
-			var storageHandler = StorageHandlerFactory.Create(bucket.StorageType, _connection);
-
-			// Determine the file name to use
-			if (string.IsNullOrWhiteSpace(name))
-			{
-				name = Path.GetFileNameWithoutExtension(filePath);
-			}
-			else
-			{
-				// Sanitize name: extract just the filename without any directory parts
-				name = Path.GetFileName(name);
-				name = Path.GetFileNameWithoutExtension(name);
-			}
-
-			// Get extension from the source file
-			string extension = Path.GetExtension(filePath);
+			var storageHandler = StorageHandlerFactory.Create(validatedBucket.StorageType, _connection);
 
 			// Check for existing file to prevent overwriting.
 			if (storageHandler.FileExists(new DomFileExistsData
 			{
-				Bucket = bucket,
+				Bucket = validatedBucket,
 				DomInstanceId = domInstanceId,
-				Name = $"{name}{extension}",
+				Name = uploadData.Name,
 			}))
 			{
-				throw new InvalidOperationException($"The file '{name}' already exists in this DOM instance.");
+				throw new InvalidOperationException($"The file '{uploadData.Name}' already exists in this DOM instance.");
 			}
 
 			// Upload the file using the storage handler.
-			return storageHandler.UploadFile(new DomFileUploadData
+			return storageHandler.UploadFile(new DomFileUploadData(uploadData)
 			{
-				Bucket = bucket,
 				DomInstanceId = domInstanceId,
-				FilePath = filePath,
-				Name = $"{name}{extension}",
 			});
 		}
 
@@ -215,17 +161,7 @@
 		/// </exception>
 		public string UploadFile(DocumentBucket bucket, string filePath, string uploadPathQualifier, string name = null)
 		{
-			if (bucket == null)
-				throw new ArgumentNullException(nameof(bucket));
-			if (string.IsNullOrWhiteSpace(filePath))
-				throw new ArgumentNullException(nameof(filePath));
-
-			// Trim any whitespace and normalize to absolute path
-			filePath = Path.GetFullPath(filePath.Trim());
-
-			// Validate that the file exists
-			if (!File.Exists(filePath))
-				throw new FileNotFoundException($"Source file not found: '{filePath}'", filePath);
+			var uploadData = validator.ValidateAndSanitizeFile(bucket, filePath, name);
 
 			// This overload is intended for web-like storage backends that use UploadPath.
 			// DOM storage uses DOM instances instead; instruct caller to use the DOM overload.
@@ -233,21 +169,6 @@
 				throw new InvalidOperationException("This overload is not supported for DOM storage. Use UploadFile(bucket, filePath, domInstanceId, name) instead.");
 
 			var storageHandler = StorageHandlerFactory.Create(bucket.StorageType, _connection);
-
-			// Determine the file name to use
-			if (string.IsNullOrWhiteSpace(name))
-			{
-				name = Path.GetFileNameWithoutExtension(filePath);
-			}
-			else
-			{
-				// Sanitize name: extract just the filename without any directory parts
-				name = Path.GetFileName(name);
-				name = Path.GetFileNameWithoutExtension(name);
-			}
-
-			// Get extension from the source file
-			string extension = Path.GetExtension(filePath);
 
 			// Build effective upload path (do not mutate original bucket).
 			string basePath = bucket.UploadPath ?? string.Empty;
@@ -268,34 +189,19 @@
 			if (storageHandler.FileExists(new WebFileExistsData
 			{
 				Directory = effectiveUploadPath,
-				Name = $"{name}{extension}",
+				Name = uploadData.Name,
 			}))
 			{
-				throw new InvalidOperationException($"The file '{name}' already exists.");
+				throw new InvalidOperationException($"The file '{uploadData.Name}' already exists.");
 			}
 
-			// Create a shallow copy of the bucket with the adjusted UploadPath so storage handlers see the qualified path.
-			var effectiveBucket = new DocumentBucket
-			{
-				Identifier = bucket.Identifier,
-				Name = bucket.Name,
-				Description = bucket.Description,
-				UploadPath = effectiveUploadPath,
-				StorageType = bucket.StorageType,
-				Extensions = bucket.Extensions,
-				IsDefault = bucket.IsDefault,
-				DOMSource = bucket.DOMSource,
-				Definition = bucket.Definition,
-			};
+			// Adjust the bucket's UploadPath so storage handlers see the qualified path
+			uploadData.Bucket.UploadPath = effectiveUploadPath;
 
 			// Upload using the adjusted bucket
-			return storageHandler.UploadFile(new WebFileUploadData
-			{
-				Bucket = effectiveBucket,
-				FilePath = filePath,
-				Name = $"{name}{extension}",
-			});
+			return storageHandler.UploadFile(uploadData);
 		}
+
 		#endregion
 
 		#region Read
@@ -367,8 +273,7 @@
 		/// </remarks>
 		public List<IDocHubFile> ReadFiles(DocumentBucket bucket, DocHubPageData context = null, string filter = null)
 		{
-			if (bucket == null)
-				throw new ArgumentNullException(nameof(bucket));
+			FileValidator.ValidateBaseParameters(bucket, "OK"); // Reusing the validation method for null check on bucket; filePath is irrelevant here so passing dummy value
 
 			ReadData data = bucket.StorageType == StorageType.DOM
 				? (ReadData)new DomFileReadData()
@@ -498,12 +403,14 @@
 		}
 		#endregion
 
-		#region Internal Methods
+		#region Internal and Private Methods
+
 		internal List<IDocHubFile> ReadFiles(StorageType storagetype, ReadData data)
 		{
 			var storageHandler = StorageHandlerFactory.Create(storagetype, _connection);
 			return storageHandler.ReadFiles(data);
 		}
+
 		#endregion
 	}
 }

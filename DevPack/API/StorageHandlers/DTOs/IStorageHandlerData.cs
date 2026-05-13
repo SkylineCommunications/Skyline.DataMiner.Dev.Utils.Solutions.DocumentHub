@@ -12,6 +12,17 @@
 	#region Upload
 	internal class UploadData : IStorageHandlerData
 	{
+		public UploadData()
+		{
+		}
+
+		internal UploadData(UploadData data)
+		{
+			Bucket = data.Bucket;
+			FilePath = data.FilePath;
+			Name = data.Name;
+		}
+
 		public DocumentBucket Bucket { get; set; }
 
 		public string FilePath { get; set; }
@@ -25,7 +36,13 @@
 
 	internal class DomFileUploadData : UploadData
 	{
+		internal DomFileUploadData(UploadData data)
+			: base(data)
+		{
+		}
+
 		public Guid DomInstanceId { get; set; }
+
 	}
 	#endregion
 
