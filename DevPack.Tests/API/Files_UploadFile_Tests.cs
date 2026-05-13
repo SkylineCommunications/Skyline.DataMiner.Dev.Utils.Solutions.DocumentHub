@@ -4,6 +4,7 @@ namespace DevPack.Tests.API
 	using System.IO;
 	using FluentAssertions;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Helpers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup;
 
@@ -180,9 +181,14 @@ namespace DevPack.Tests.API
 			var client = new DocHubClient(connection);
 			var bucket = new DocumentBucket
 			{
+				Identifier = Guid.NewGuid().ToString(),
 				Name = "DOM Bucket",
 				StorageType = StorageType.DOM,
 			};
+
+			// Create the bucket on the mocked IConnection so that the validation logic can find it
+			var apiHelper = new DocumentHubApiHelper(connection);
+			apiHelper.DocumentBuckets.Create(bucket);
 
 			// Act - use named parameter to call the qualifier overload
 			Action act = () => client.Files.UploadFile(bucket, _testFilePath, uploadPathQualifier: "subfolder");

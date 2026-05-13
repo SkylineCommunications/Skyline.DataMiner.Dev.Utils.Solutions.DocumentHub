@@ -28,7 +28,7 @@ namespace DevPack.Tests.API
             Action act = () => new DocHubClient(null);
 
             // Assert
-            act.Should().NotThrow();
+            act.Should().ThrowExactly<ArgumentNullException>();
         }
 
         [TestMethod]
