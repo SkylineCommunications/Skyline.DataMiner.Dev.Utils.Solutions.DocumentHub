@@ -45,5 +45,9 @@
 		<PackageReference Include="System.Drawing.Common" Version="10.0.1" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<InternalsVisibleTo Include="DevPack.Tests" />
+	</ItemGroup>
+
 	<Import Project="..\SharedMappers\SharedMappers.projitems" Label="Shared" />
 </Project>

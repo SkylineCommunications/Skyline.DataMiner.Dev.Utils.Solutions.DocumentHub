@@ -106,6 +106,12 @@
 			return name;
 		}
 
+		/// <summary>
+		/// Tries to retrieve the bucket from the storage to ensure it exists and to get the stored version of it. This is needed because the bucket provided as a parameter might not be up to date.
+		/// </summary>
+		/// <param name="bucket">The bucket to search for in the repository by the "Identifier" property.</param>
+		/// <returns>Stored <see cref="DocumentBucket"/>, if found.</returns>
+		/// <exception cref="InvalidOperationException">The operation is cancelled if the bucket is not stored.</exception>
 		private DocumentBucket TryGetStoredBucket(DocumentBucket bucket)
 		{
 			var storedBucket = apiHelper.DocumentBuckets.Read(DocumentBucketExposers.Identifier.Equal(bucket.Identifier)).SingleOrDefault()
