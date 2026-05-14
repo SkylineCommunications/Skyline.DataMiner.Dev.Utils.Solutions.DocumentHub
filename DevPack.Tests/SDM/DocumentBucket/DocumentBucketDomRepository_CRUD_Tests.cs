@@ -3,6 +3,7 @@ namespace DevPack.Tests.SDM.DocumentBucket
 	using System.Linq;
 	using FluentAssertions;
 	using FluentAssertions.Execution;
+	using Microsoft.VisualStudio.TestTools.UnitTesting;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Helpers;
@@ -67,6 +68,72 @@ namespace DevPack.Tests.SDM.DocumentBucket
 			// Assert
 			using (new AssertionScope())
 			{
+				var updated = helper.DocumentBuckets.Read(DocumentBucketExposers.Name.Equal(nameToFind)).SingleOrDefault();
+				updated.Should().NotBeNull();
+				updated.Description.Should().Be(newDescription);
+				updated.UploadPath.Should().Be(newUploadPath);
+				updated.Extensions.Should().Be(newExtensions);
+				updated.SizeLimit.Should().Be(newSizeLimit);
+			}
+		}
+
+		[TestMethod]
+		public void CreateOrUpdate_EmptyDom()
+		{
+			// Arrange
+			var helper = Helper.GetHelper();
+
+			helper.DocumentBuckets.CreateOrUpdate(DemoData.DocumentBuckets);
+
+			// Assert
+			using (new AssertionScope())
+			{
+				var all = helper.DocumentBuckets.Read(new TRUEFilterElement<DocumentBucket>());
+				all.Count().Should().Be(DemoData.DocumentBuckets.Count);
+
+				foreach (var demo in DemoData.DocumentBuckets)
+				{
+					var created = all.SingleOrDefault(c => c.Name == demo.Name);
+					created.Should().NotBeNull();
+					created.Description.Should().Be(demo.Description);
+					created.UploadPath.Should().Be(demo.UploadPath);
+					created.StorageType.Should().Be(demo.StorageType);
+					created.Extensions.Should().Be(demo.Extensions);
+					created.IsDefault.Should().Be(demo.IsDefault);
+					created.Definition.Should().Be(demo.Definition);
+					created.SizeLimit.Should().Be(demo.SizeLimit);
+				}
+			}
+		}
+
+		[TestMethod]
+		public void CreateOrUpdate_ExistingBucket()
+		{
+			// Arrange
+			var helper = Helper.GetHelper();
+			var nameToFind = DemoData.DocumentBuckets[0].Name;
+			var newDescription = "CreateOrUpdate updated description";
+			var newUploadPath = "/docs/createorupdate";
+			var newExtensions = "txt,xml";
+			var newSizeLimit = 99999;
+
+			// Act
+			CreateAll(helper);
+
+			var itemToUpdate = helper.DocumentBuckets.Read(DocumentBucketExposers.Name.Equal(nameToFind)).SingleOrDefault();
+			itemToUpdate.Description = newDescription;
+			itemToUpdate.UploadPath = newUploadPath;
+			itemToUpdate.Extensions = newExtensions;
+			itemToUpdate.SizeLimit = newSizeLimit;
+
+			helper.DocumentBuckets.CreateOrUpdate([itemToUpdate]);
+
+			// Assert
+			using (new AssertionScope())
+			{
+				var all = helper.DocumentBuckets.Read(new TRUEFilterElement<DocumentBucket>());
+				all.Count().Should().Be(DemoData.DocumentBuckets.Count);
+
 				var updated = helper.DocumentBuckets.Read(DocumentBucketExposers.Name.Equal(nameToFind)).SingleOrDefault();
 				updated.Should().NotBeNull();
 				updated.Description.Should().Be(newDescription);
