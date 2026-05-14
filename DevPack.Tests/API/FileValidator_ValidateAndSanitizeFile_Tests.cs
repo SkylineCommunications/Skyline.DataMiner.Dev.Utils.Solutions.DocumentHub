@@ -4,7 +4,6 @@ namespace DevPack.Tests.API
 	using System.IO;
 	using System.Security;
 	using FluentAssertions;
-	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Helpers;
@@ -14,14 +13,13 @@ namespace DevPack.Tests.API
 	[TestClass]
 	public class FileValidator_ValidateAndSanitizeFile_Tests
 	{
-		private IConnection connectionHelper;
 		private IDocumentHubApiHelper apiHelper;
 		private FileValidator sut;
 
 		[TestInitialize]
 		public void Setup()
 		{
-			connectionHelper = ConnectionHelper.CreateConnection();
+			var connectionHelper = ConnectionHelper.CreateConnection();
 			apiHelper = connectionHelper.GetMockedHelper();
 			sut = new FileValidator(connectionHelper);
 		}
