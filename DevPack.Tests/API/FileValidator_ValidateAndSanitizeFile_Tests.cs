@@ -4,23 +4,26 @@ namespace DevPack.Tests.API
 	using System.IO;
 	using System.Security;
 	using FluentAssertions;
-	using Moq;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Helpers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
+	using Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup;
 
 	[TestClass]
 	public class FileValidator_ValidateAndSanitizeFile_Tests
 	{
-		private Mock<IConnection> mockConnection;
+		private IConnection connectionHelper;
+		private IDocumentHubApiHelper apiHelper;
 		private FileValidator sut;
 
 		[TestInitialize]
 		public void Setup()
 		{
-			mockConnection = new Mock<IConnection>();
-			sut = new FileValidator(mockConnection.Object);
+			connectionHelper = ConnectionHelper.CreateConnection();
+			apiHelper = connectionHelper.GetMockedHelper();
+			sut = new FileValidator(connectionHelper);
 		}
 
 		[TestMethod]
@@ -128,7 +131,12 @@ namespace DevPack.Tests.API
 		public void ValidateAndSanitizeFile_ValidFile_ReturnsSanitizedFileName()
 		{
 			// Arrange
-			var bucket = new DocumentBucket { Name = "my-bucket" };
+			var bucket = new DocumentBucket
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				Name = "my-bucket",
+			};
+			apiHelper.DocumentBuckets.Create(bucket);
 			string tempFile = Path.Combine(Path.GetTempPath(), $"testfile_{Guid.NewGuid()}.txt");
 			File.WriteAllText(tempFile, "test content");
 
@@ -151,7 +159,12 @@ namespace DevPack.Tests.API
 		public void ValidateAndSanitizeFile_ValidFile_ReturnsSanitizedFilePath()
 		{
 			// Arrange
-			var bucket = new DocumentBucket { Name = "my-bucket" };
+			var bucket = new DocumentBucket
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				Name = "my-bucket",
+			};
+			apiHelper.DocumentBuckets.Create(bucket);
 			string tempFile = Path.Combine(Path.GetTempPath(), $"testfile_{Guid.NewGuid()}.txt");
 			File.WriteAllText(tempFile, "test content");
 
@@ -174,7 +187,12 @@ namespace DevPack.Tests.API
 		public void ValidateAndSanitizeFile_ValidFile_ReturnsBucketUnchanged()
 		{
 			// Arrange
-			var bucket = new DocumentBucket { Name = "my-bucket" };
+			var bucket = new DocumentBucket
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				Name = "my-bucket",
+			};
+			apiHelper.DocumentBuckets.Create(bucket);
 			string tempFile = Path.Combine(Path.GetTempPath(), $"testfile_{Guid.NewGuid()}.txt");
 			File.WriteAllText(tempFile, "test content");
 
@@ -201,7 +219,12 @@ namespace DevPack.Tests.API
 		public void ValidateAndSanitizeFile_AllowedExtension_DoesNotThrow(string extension)
 		{
 			// Arrange
-			var bucket = new DocumentBucket { Name = "my-bucket" };
+			var bucket = new DocumentBucket
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				Name = "my-bucket",
+			};
+			apiHelper.DocumentBuckets.Create(bucket);
 			string tempFile = Path.Combine(Path.GetTempPath(), $"testfile_{Guid.NewGuid()}.{extension}");
 			File.WriteAllText(tempFile, "test content");
 
