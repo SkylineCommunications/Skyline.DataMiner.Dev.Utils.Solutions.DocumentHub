@@ -74,7 +74,7 @@
 			}
 
 			// Upload the file using the storage handler.
-			return storageHandler.UploadFile(uploadData);
+			return storageHandler.UploadFile(new WebFileUploadData(uploadData));
 		}
 
 		/// <summary>
@@ -199,7 +199,7 @@
 			uploadData.Bucket.UploadPath = effectiveUploadPath;
 
 			// Upload using the adjusted bucket
-			return storageHandler.UploadFile(uploadData);
+			return storageHandler.UploadFile(new WebFileUploadData(uploadData));
 		}
 
 		#endregion
