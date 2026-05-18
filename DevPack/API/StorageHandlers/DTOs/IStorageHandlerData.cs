@@ -32,6 +32,13 @@
 
 	internal class WebFileUploadData : UploadData
 	{
+		public WebFileUploadData()
+		{
+		}
+
+		public WebFileUploadData(UploadData data) : base(data)
+		{
+		}
 	}
 
 	internal class DomFileUploadData : UploadData

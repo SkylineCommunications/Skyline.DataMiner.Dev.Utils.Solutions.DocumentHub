@@ -6,8 +6,8 @@
 		<AssemblyName>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub</AssemblyName>
 		<RootNamespace>Skyline.DataMiner.Solutions.DocumentHub</RootNamespace>
 		<PackageId>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub</PackageId>
-		<PackageVersion>0.0.3-prerelease</PackageVersion>
-		<Version>0.0.3</Version>
+		<PackageVersion>0.0.4-prerelease</PackageVersion>
+		<Version>0.0.4</Version>
 		<PackageTags>Skyline;DataMiner</PackageTags>
 		<PackageProjectUrl>https://skyline.be</PackageProjectUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
@@ -43,6 +43,10 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="System.Drawing.Common" Version="10.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<InternalsVisibleTo Include="DevPack.Tests" />
 	</ItemGroup>
 
 	<Import Project="..\SharedMappers\SharedMappers.projitems" Label="Shared" />

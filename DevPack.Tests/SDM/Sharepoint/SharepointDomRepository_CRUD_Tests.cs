@@ -4,6 +4,7 @@
 
 	using FluentAssertions;
 	using FluentAssertions.Execution;
+	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;

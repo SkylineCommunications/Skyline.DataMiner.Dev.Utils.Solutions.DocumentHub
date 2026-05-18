@@ -619,7 +619,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentBucket
 
             if (obj.DOMSource != default)
             {
-                _documentbucketproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.DOMSource, obj.DOMSource.Identifier);
+                _documentbucketproperties.AddOrUpdateValue<Guid>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.DOMSource, Guid.Parse(obj.DOMSource.Identifier));
             }
 
             if (obj.Definition != default)
