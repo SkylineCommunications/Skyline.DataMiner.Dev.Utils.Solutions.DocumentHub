@@ -31,6 +31,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Models
             internal static readonly FieldDescriptorID IsDefault = new FieldDescriptorID(new Guid("f0b2c67c-34f5-4aea-b869-68c134a7bdd8"));
             internal static readonly FieldDescriptorID Definition = new FieldDescriptorID(new Guid("239b1596-a92c-4552-8086-701270068fbf"));
             internal static readonly FieldDescriptorID DOMSource = new FieldDescriptorID(new Guid("375d860c-9b5d-424b-a1bf-88ceb3a9a280"));
+            internal static readonly FieldDescriptorID SharePointConfiguration = new FieldDescriptorID(new Guid("23c6a008-580d-4701-b250-324d51021bc0"));
             internal static readonly FieldDescriptorID SizeLimit = new FieldDescriptorID(new Guid("e7a3b1c2-5d4f-4e8a-9b6c-2f1d0e3a4b5c"));
         }
     }
