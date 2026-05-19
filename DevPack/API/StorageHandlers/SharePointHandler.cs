@@ -76,10 +76,16 @@
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SharePointHandler"/> class.
 		/// </summary>
+		/// <param name="connection">
+		/// An active DataMiner connection used to communicate with the system.
+		/// </param>
+		/// <param name="bucket">
+		/// The <see cref="DocumentBucket"/> containing the storage type and related configuration for which this handler is being created.
+		/// </param>
 		/// <exception cref="NullReferenceException">
 		/// Thrown when the configured SharePoint document library cannot be found.
 		/// </exception>
-		internal SharePointHandler(IConnection connection)
+		internal SharePointHandler(IConnection connection, DocumentBucket bucket)
 		{
 			_sharePointRepository = new SharePointConfigurationDomRepository(connection);
 

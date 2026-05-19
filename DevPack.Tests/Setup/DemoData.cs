@@ -1,7 +1,7 @@
 ﻿namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup
 {
 	using System.Collections.Generic;
-
+	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 
 	public static class DemoData
@@ -86,6 +86,7 @@
 				Extensions = "pdf,xlsx",
 				IsDefault = false,
 				Definition = "MaintRep",
+				DOMSource = new SdmObjectReference<DomSource>(DomSources[1].Identifier),
 				SizeLimit = 10240,
 			},
 			new DocumentBucket

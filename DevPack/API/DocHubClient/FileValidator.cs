@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
 	using System.Security;
@@ -63,6 +64,49 @@
 				FilePath = sanitizedFilePath,
 				Name = $"{sanitizedName}{extension}",
 			};
+		}
+
+		/// <summary>
+		/// Validates the <see cref="DocumentBucket"/> and it's related <see cref="DomSource"/>.
+		/// </summary>
+		/// <param name="bucket">The document bucket to validate.</param>
+		/// <param name="source">DOM source returned if the validation succeeded as an <see langword="out"/> parameter.</param>
+		/// <param name="errorMessage">Error message returned if the validation fails as an <see langword="out"/> parameter.</param>
+		/// <returns>
+		/// <see langword="false"/> if any either of the <paramref name="bucket"/>
+		/// or it's <see cref="DomSource"/> are null or missing. Returns <see langword="true"/> otherwise.
+		/// </returns>
+		internal bool ValidateAndGetDOMSourceBucket(DocumentBucket bucket, out DomSource source, out string errorMessage)
+		{
+			try
+			{
+				if (bucket == null)
+					throw new ArgumentNullException(nameof(bucket));
+
+				var bucketSource = bucket.DOMSource;
+				Debug.WriteLine(bucketSource);
+				if (string.IsNullOrWhiteSpace(bucketSource.Identifier))
+				{
+					throw new ArgumentException(
+						$"The bucket '{bucket.Name}' is not of source type DOM, but it is expected to be for this operation." +
+						$" Try using one of the other 'ReadFiles' method overloads.");
+				}
+
+				var domSource = apiHelper.DomSources.Read(DomSourceExposers.Identifier.Equal(bucketSource.Identifier)).FirstOrDefault()
+					?? throw new ArgumentException($"The DOM Source (ID: {bucketSource.Identifier}) tied to the bucket does not exist in the repository.");
+				if (string.IsNullOrEmpty(domSource.Module))
+					throw new ArgumentException("DOM Module of the specified DOM source cannot be null or empty.");
+
+				errorMessage = string.Empty;
+				source = domSource;
+				return true;
+			}
+			catch (Exception ex)
+			{
+				source = default;
+				errorMessage = ex.Message;
+				return false;
+			}
 		}
 
 		private string SanitizeFilePath(string filePath)
