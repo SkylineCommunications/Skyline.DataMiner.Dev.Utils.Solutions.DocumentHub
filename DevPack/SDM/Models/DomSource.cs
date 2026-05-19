@@ -20,12 +20,12 @@
 		public string Module { get; set; }
 
 		/// <summary>
-		/// Gets or sets the name of the DOM definition where the attachments are stored.
+		/// Gets or sets the network share path used for file storage.
 		/// </summary>
 		public string NetworkSharePath { get; set; }
 
 		/// <summary>
-		/// Gets or sets the name of the DOM field used to store the file attachments.
+		/// Gets or sets the credential used to authenticate against the network share.
 		/// </summary>
 		public string Credential { get; set; }
 	}
