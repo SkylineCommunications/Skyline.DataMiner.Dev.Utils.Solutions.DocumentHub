@@ -4,6 +4,7 @@
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentBucket;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DocumentBucket;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DomSource;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointConfiguration;
 
@@ -27,7 +28,7 @@
         public DocumentHubApiHelper(IConnection connection)
         {
             Connection = connection;
-            _documentBuckets = new DocumentBucketsDomRepository(connection);
+            _documentBuckets = new DocumentBucketsDomRepository(connection).WithMiddleware(new DocumentBucketPathMiddleware());
             _domSources = new DomSourceDomRepository(connection);
             _sharePointConfigurations = new SharePointConfigurationDomRepository(connection);
         }
