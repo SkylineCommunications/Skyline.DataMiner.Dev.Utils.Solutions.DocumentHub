@@ -6,8 +6,8 @@
     <AssemblyName>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub.Protocol</AssemblyName>
     <PackageId>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub.Protocol</PackageId>
     <RootNamespace>Skyline.DataMiner.Solutions.DocumentHub.Protocol</RootNamespace>
-    <PackageVersion>0.0.4-prerelease</PackageVersion>
-    <Version>0.0.4</Version>
+    <PackageVersion>0.0.5-prerelease</PackageVersion>
+    <Version>0.0.5</Version>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>

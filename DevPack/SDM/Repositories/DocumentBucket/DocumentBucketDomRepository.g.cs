@@ -550,8 +550,8 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentBucket
                     obj.IsDefault = _isdefault.Value;
                 }
 
-                var _domsource = _documentbucketpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.DOMSource);
-                if (_domsource != null && !string.IsNullOrEmpty(_domsource.Value))
+                var _domsource = _documentbucketpropertiesSection.GetValue<Guid>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.DOMSource);
+                if (_domsource != null)
                 {
                     obj.DOMSource = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>(Convert.ToString(_domsource.Value));
                 }
