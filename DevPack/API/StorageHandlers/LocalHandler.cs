@@ -13,10 +13,11 @@
 	/// Handles file and image storage on the local filesystem.
 	/// </summary>
 	/// <remarks>
-	/// Implements <see cref="IStorageHandler"/> to provide local storage operations.
+	/// Implements <see cref="IStorageHandler"/> and <see cref="IDeletableStorageHandler"/> to provide
+	/// local storage operations including upload, read, and delete.
 	/// Used for storing files and images under the DataMiner Webpages folder.
 	/// </remarks>
-	internal class LocalHandler : IStorageHandler
+	internal class LocalHandler : IStorageHandler, IDeletableStorageHandler
 	{
 		/// <summary>
 		/// Root path for the DataMiner WebFileManager local storage.
@@ -123,6 +124,32 @@
 
 			// Return the web-resolvable path of the uploaded file.
 			return '/' + FileInfoAdapter.GetRelativePath(targetPath, WebpagesRoot);
+		}
+
+		/// <summary>
+		/// Deletes a file from local DataMiner storage.
+		/// </summary>
+		/// <param name="data">
+		/// The delete data containing the bucket and file name.
+		/// </param>
+		/// <exception cref="FileNotFoundException">
+		/// Thrown when the file does not exist at the expected path.
+		/// </exception>
+		public void DeleteFile(DeleteData data)
+		{
+			if (data == null)
+				throw new ArgumentNullException(nameof(data));
+
+			if (string.IsNullOrWhiteSpace(data.Name))
+				throw new ArgumentException("File name cannot be null or empty.", nameof(data));
+
+			var directory = ResolveLocalDirectory(data.Bucket?.UploadPath);
+			var filePath = Path.Combine(directory, data.Name);
+
+			if (!File.Exists(filePath))
+				throw new FileNotFoundException($"The file '{data.Name}' was not found.", filePath);
+
+			File.Delete(filePath);
 		}
 
 		/// <summary>
