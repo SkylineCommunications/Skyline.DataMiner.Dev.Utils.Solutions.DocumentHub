@@ -662,9 +662,9 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentBucket
                 case "IsDefault":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.IsDefault), comparer, (bool)value);
                 case "DOMSource":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.DOMSource), comparer, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>.Convert(value).Identifier);
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.DOMSource), comparer, Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>.Convert(value).Identifier));
 				case "SharePointConfiguration":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.SharePointConfiguration), comparer, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration>.Convert(value).Identifier);
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.SharePointConfiguration), comparer, Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration>.Convert(value).Identifier));
 				case "Definition":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.Definition), comparer, (string)value);
                 case "SizeLimit":

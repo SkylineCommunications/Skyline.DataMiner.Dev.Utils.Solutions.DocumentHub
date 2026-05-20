@@ -6,7 +6,7 @@
 
 	public static class DemoData
 	{
-		public static List<DomSource> DomSources => new List<DomSource>
+		public static readonly List<DomSource> DomSources = new List<DomSource>
 		{
 			new DomSource
 			{
@@ -50,72 +50,7 @@
 			},
 		};
 
-		public static List<DocumentBucket> DocumentBuckets => new List<DocumentBucket>
-		{
-			new DocumentBucket
-			{
-				Identifier = Guid.NewGuid().ToString(),
-				Name = "Technical Documentation",
-				Description = "Technical manuals and guides",
-				UploadPath = "/docs/technical",
-				StorageType = StorageType.SharePoint,
-				Extensions = "pdf,docx",
-				IsDefault = true,
-				Definition = "TechDocs",
-				SizeLimit = 10240,
-			},
-			new DocumentBucket
-			{
-				Identifier = Guid.NewGuid().ToString(),
-				Name = "Network Diagrams",
-				Description = "Network topology and diagrams",
-				UploadPath = "/docs/network",
-				StorageType = StorageType.DOM,
-				Extensions = "png,vsdx,pdf",
-				IsDefault = false,
-				Definition = "NetDiag",
-				SizeLimit = 20480,
-			},
-			new DocumentBucket
-			{
-				Identifier = Guid.NewGuid().ToString(),
-				Name = "Maintenance Reports",
-				Description = "Scheduled maintenance reports",
-				UploadPath = "/docs/maintenance",
-				StorageType = StorageType.SharePoint,
-				Extensions = "pdf,xlsx",
-				IsDefault = false,
-				Definition = "MaintRep",
-				DOMSource = new SdmObjectReference<DomSource>(DomSources[1].Identifier),
-				SizeLimit = 10240,
-			},
-			new DocumentBucket
-			{
-				Identifier = Guid.NewGuid().ToString(),
-				Name = "Configuration Backups",
-				Description = "Device configuration backups",
-				UploadPath = "/docs/config",
-				StorageType = StorageType.Local,
-				Extensions = "xml,json,cfg",
-				IsDefault = false,
-				Definition = "ConfigBak",
-				SizeLimit = 5120,
-			},
-			new DocumentBucket
-			{
-				Identifier = Guid.NewGuid().ToString(),
-				Name = "Service Level Agreements",
-				Description = "SLA documents and contracts",
-				UploadPath = "/docs/sla",
-				StorageType = StorageType.SharePoint,
-				Extensions = "pdf,docx",
-				IsDefault = false,
-				Definition = "SLA",
-				SizeLimit = 10240,
-			},
-		};
-
-		public static List<SharePointConfiguration> SharePointConfigurations => new List<SharePointConfiguration>
+		public static readonly List<SharePointConfiguration> SharePointConfigurations = new List<SharePointConfiguration>
 		{
 			new SharePointConfiguration
 			{
@@ -166,6 +101,75 @@
 				SiteURL = "https://contoso.sharepoint.com/sites/Engineering",
 				DocumentLibraryName = "Design Documents",
 				Status = SharePointConfigurationStatus.Disconnected,
+			},
+		};
+
+		public static readonly List<DocumentBucket> DocumentBuckets = new List<DocumentBucket>
+		{
+			new DocumentBucket
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				Name = "Technical Documentation",
+				Description = "Technical manuals and guides",
+				UploadPath = "/docs/technical",
+				StorageType = StorageType.SharePoint,
+				SharePointConfiguration = new SdmObjectReference<SharePointConfiguration>(SharePointConfigurations[1].Identifier),
+				Extensions = "pdf,docx",
+				IsDefault = true,
+				Definition = "TechDocs",
+				SizeLimit = 10240,
+			},
+			new DocumentBucket
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				Name = "Network Diagrams",
+				Description = "Network topology and diagrams",
+				UploadPath = "/docs/network",
+				StorageType = StorageType.DOM,
+				DOMSource = new SdmObjectReference<DomSource>(DomSources[2].Identifier),
+				Extensions = "png,vsdx,pdf",
+				IsDefault = false,
+				Definition = "NetDiag",
+				SizeLimit = 20480,
+			},
+			new DocumentBucket
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				Name = "Maintenance Reports",
+				Description = "Scheduled maintenance reports",
+				UploadPath = "/docs/maintenance",
+				StorageType = StorageType.SharePoint,
+				SharePointConfiguration = new SdmObjectReference<SharePointConfiguration>(SharePointConfigurations[3].Identifier),
+				Extensions = "pdf,xlsx",
+				IsDefault = false,
+				Definition = "MaintRep",
+				DOMSource = new SdmObjectReference<DomSource>(DomSources[2].Identifier),
+				SizeLimit = 10240,
+			},
+			new DocumentBucket
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				Name = "Configuration Backups",
+				Description = "Device configuration backups",
+				UploadPath = "/docs/config",
+				StorageType = StorageType.Local,
+				Extensions = "xml,json,cfg",
+				IsDefault = false,
+				Definition = "ConfigBak",
+				SizeLimit = 5120,
+			},
+			new DocumentBucket
+			{
+				Identifier = Guid.NewGuid().ToString(),
+				Name = "Service Level Agreements",
+				Description = "SLA documents and contracts",
+				UploadPath = "/docs/sla",
+				StorageType = StorageType.SharePoint,
+				SharePointConfiguration = new SdmObjectReference<SharePointConfiguration>(SharePointConfigurations[1].Identifier),
+				Extensions = "pdf,docx",
+				IsDefault = false,
+				Definition = "SLA",
+				SizeLimit = 10240,
 			},
 		};
 	}

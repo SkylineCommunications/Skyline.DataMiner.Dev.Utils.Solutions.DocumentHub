@@ -15,6 +15,7 @@
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Security;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointConfiguration;
 	using Drive = Microsoft.Graph.Drive;
@@ -94,7 +95,9 @@
 				return;
 
 			// Retrieve SharePoint configuration from DOM
-			_sharePoint = _sharePointRepository.Read(new TRUEFilterElement<SharePointConfiguration>()).FirstOrDefault();
+			var sharePointFilter = SharePointConfigurationExposers.Identifier.Equal(bucket.SharePointConfiguration.Identifier);
+			_sharePoint = _sharePointRepository.Read(sharePointFilter).FirstOrDefault()
+				?? throw new ArgumentException("No SharePoint configuration tied to the provided bucket could be found.", nameof(bucket));
 
 			// Retrieve client secret
 			var clientSecret = RetrieveClientSecret();

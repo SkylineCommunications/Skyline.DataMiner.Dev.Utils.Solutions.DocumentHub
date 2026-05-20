@@ -28,7 +28,7 @@ namespace DevPack.Tests.API
 		}
 
 		[TestMethod]
-		public void ReadFiles_ByBucket_WithNullBucket_ShouldThrowArgumentNullException()
+		public void ReadFiles_ByDomSource_WithNullBucket_ShouldThrowArgumentNullException()
 		{
 			// Act
 			Action act = () => client.Files.ReadFiles((DocumentBucket)null, context: null, domInstanceIds: null);
@@ -101,7 +101,7 @@ namespace DevPack.Tests.API
 		}
 
 		[TestMethod]
-		public void ReadFiles_ByDomSource_WithNullDomInstanceIds_ShouldThrowArgumentNullException()
+		public void ReadFiles_ByBucket_WithNullBucket_ShouldThrowArgumentNullException()
 		{
 			// Arrange
 			var bucket = new DocumentBucket
@@ -111,11 +111,11 @@ namespace DevPack.Tests.API
 			};
 
 			// Act
-			Action act = () => client.Files.ReadFiles(bucket, null);
+			Action act = () => client.Files.ReadFiles(bucket: null, null, null);
 
 			// Assert
 			act.Should().Throw<ArgumentNullException>()
-				.WithParameterName("domInstanceIds");
+				.WithParameterName("bucket");
 		}
 
 		#endregion

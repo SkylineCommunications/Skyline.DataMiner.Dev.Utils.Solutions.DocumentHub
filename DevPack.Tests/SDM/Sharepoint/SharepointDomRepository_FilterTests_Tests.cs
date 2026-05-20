@@ -5,6 +5,7 @@
 
 	using FluentAssertions;
 	using FluentAssertions.Execution;
+	using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
@@ -164,7 +165,7 @@
 			}
 		}
 
-		private static void CreateAll(IDocumentHubApiHelper helper)
+		internal static void CreateAll(IDocumentHubApiHelper helper)
 		{
 			foreach (var config in DemoData.SharePointConfigurations)
 			{
