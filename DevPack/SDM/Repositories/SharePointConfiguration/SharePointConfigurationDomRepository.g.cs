@@ -440,7 +440,6 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointCon
 			}
 			else if (filter is NOTFilterElement<SharePointConfiguration> not)
 			{
-				Debug.WriteLine($"Passing the filter: {not}");
 				translated = new NOTFilterElement<DomInstance>(TranslateFullFilter(not));
 			}
 			else if (filter is TRUEFilterElement<SharePointConfiguration>)

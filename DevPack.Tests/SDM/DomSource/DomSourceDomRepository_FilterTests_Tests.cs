@@ -124,14 +124,6 @@ namespace DevPack.Tests.SDM.DomSource
 		public void ReadFilter_OR_Filter()
 		{
 			// Arrange
-			var ALLFILTER = new TRUEFilterElement<DomSource>();
-			var all = helper.DomSources.Read(ALLFILTER);
-
-			foreach (var item in all)
-			{
-				Debug.WriteLine(JsonConvert.SerializeObject(item));
-			}
-
 			var filter = new ORFilterElement<DomSource>(
 				DomSourceExposers.Module.Equal("network"),
 				DomSourceExposers.Module.Equal("audit"));

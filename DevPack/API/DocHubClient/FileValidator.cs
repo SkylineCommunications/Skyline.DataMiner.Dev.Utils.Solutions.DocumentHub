@@ -84,7 +84,6 @@
 					throw new ArgumentNullException(nameof(bucket));
 
 				var bucketSource = bucket.DOMSource;
-				Debug.WriteLine(bucketSource);
 				if (string.IsNullOrWhiteSpace(bucketSource.Identifier))
 				{
 					throw new ArgumentException(
