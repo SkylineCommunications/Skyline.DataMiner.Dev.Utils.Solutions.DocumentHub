@@ -50,7 +50,7 @@ namespace DevPack.Tests.SDM.DocumentBucket
 			var helper = Helper.GetHelper();
 			var nameToFind = DemoData.DocumentBuckets[0].Name;
 			var newDescription = "Updated description";
-			var newUploadPath = "/docs/updated";
+			var newUploadPath = "docs/updated";
 			var newExtensions = "txt,csv";
 			var newSizeLimit = 51200;
 
@@ -141,6 +141,57 @@ namespace DevPack.Tests.SDM.DocumentBucket
 				updated.Extensions.Should().Be(newExtensions);
 				updated.SizeLimit.Should().Be(newSizeLimit);
 			}
+		}
+
+		[DataTestMethod]
+		[DataRow("/ground_plans", "ground_plans")]
+		[DataRow("\\ground_plans", "ground_plans")]
+		[DataRow("///ground_plans", "ground_plans")]
+		[DataRow("ground_plans", "ground_plans")]
+		[DataRow("/docs/network", "docs/network")]
+		public void Create_SanitizesUploadPath(string input, string expected)
+		{
+			// Arrange
+			var helper = Helper.GetHelper();
+			var bucket = new DocumentBucket
+			{
+				Identifier = System.Guid.NewGuid().ToString(),
+				Name = "Path Sanitization Test",
+				UploadPath = input,
+				StorageType = StorageType.Local,
+			};
+
+			// Act
+			var created = helper.DocumentBuckets.Create(bucket);
+
+			// Assert
+			created.UploadPath.Should().Be(expected);
+		}
+
+		[DataTestMethod]
+		[DataRow("/updated/path", "updated/path")]
+		[DataRow("\\updated\\path", "updated\\path")]
+		[DataRow("updated/path", "updated/path")]
+		public void Update_SanitizesUploadPath(string input, string expected)
+		{
+			// Arrange
+			var helper = Helper.GetHelper();
+			var bucket = new DocumentBucket
+			{
+				Identifier = System.Guid.NewGuid().ToString(),
+				Name = "Path Sanitization Update Test",
+				UploadPath = "original/path",
+				StorageType = StorageType.Local,
+			};
+
+			helper.DocumentBuckets.Create(bucket);
+
+			// Act
+			bucket.UploadPath = input;
+			var updated = helper.DocumentBuckets.Update(bucket);
+
+			// Assert
+			updated.UploadPath.Should().Be(expected);
 		}
 
 		[TestMethod]
