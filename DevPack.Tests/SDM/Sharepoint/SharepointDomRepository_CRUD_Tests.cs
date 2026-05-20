@@ -32,9 +32,11 @@
 
 				foreach (var demoConfig in DemoData.SharePointConfigurations)
 				{
-					var created = all.SingleOrDefault(c => c.TenantID == demoConfig.TenantID);
+					var created = all.SingleOrDefault(c => c.Identifier == demoConfig.Identifier);
 					created.Should().NotBeNull();
+					created.Name.Should().Be(demoConfig.Name);
 					created.ClientID.Should().Be(demoConfig.ClientID);
+					created.TenantID.Should().Be(demoConfig.TenantID);
 					created.ClientSecret.Should().Be(demoConfig.ClientSecret);
 					created.SiteURL.Should().Be(demoConfig.SiteURL);
 					created.DocumentLibraryName.Should().Be(demoConfig.DocumentLibraryName);
@@ -49,6 +51,7 @@
 			var helper = Helper.GetHelper();
 			var tenantIdToFind = DemoData.SharePointConfigurations[0].TenantID;
 			var newClientID = "client-updated-999";
+			var newName = "Documentation";
 			var newSiteURL = "https://updated.sharepoint.com/sites/NewSite";
 			var newDocumentLibraryName = "Updated Library";
 
@@ -58,6 +61,7 @@
 			var configToUpdate = helper.SharePointConfigurations.Read(SharePointConfigurationExposers.TenantID.Equal(tenantIdToFind)).SingleOrDefault();
 			configToUpdate.ClientID = newClientID;
 			configToUpdate.SiteURL = newSiteURL;
+			configToUpdate.Name = newName;
 			configToUpdate.DocumentLibraryName = newDocumentLibraryName;
 
 			helper.SharePointConfigurations.Update(configToUpdate);
@@ -69,6 +73,7 @@
 				updated.Should().NotBeNull();
 				updated.ClientID.Should().Be(newClientID);
 				updated.SiteURL.Should().Be(newSiteURL);
+				updated.Name.Should().Be(newName);
 				updated.DocumentLibraryName.Should().Be(newDocumentLibraryName);
 			}
 		}

@@ -8,6 +8,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointCon
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
@@ -439,6 +440,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointCon
 			}
 			else if (filter is NOTFilterElement<SharePointConfiguration> not)
 			{
+				Debug.WriteLine($"Passing the filter: {not}");
 				translated = new NOTFilterElement<DomInstance>(TranslateFullFilter(not));
 			}
 			else if (filter is TRUEFilterElement<SharePointConfiguration>)
@@ -515,6 +517,12 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointCon
 			var _sharepointconfigurationpropertiesSection = instance.Sections.FirstOrDefault(s => s.SectionDefinitionID.Equals(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SectionDefinitionId));
 			if (_sharepointconfigurationpropertiesSection != default)
 			{
+				var _name = _sharepointconfigurationpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.Name);
+				if (_name != null)
+				{
+					obj.Name = _name.Value;
+				}
+
 				var _tenantid = _sharepointconfigurationpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.TenantID);
 				if (_tenantid != null)
 				{
@@ -576,6 +584,11 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointCon
 				}
 			};
 			var _sharepointconfigurationproperties = new Section(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SectionDefinitionId);
+			if (obj.Name != default)
+			{
+				_sharepointconfigurationproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.Name, Convert.ToString(obj.Name));
+			}
+
 			if (obj.TenantID != default)
 			{
 				_sharepointconfigurationproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.TenantID, Convert.ToString(obj.TenantID));
@@ -613,6 +626,8 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointCon
 			{
 				case "Identifier":
 					return FilterElementFactory.Create<DomInstance>(DomInstanceExposers.Id, comparer, Guid.Parse((string)value));
+				case "Name":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.Name), comparer, (string)value);
 				case "TenantID":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.TenantID), comparer, (string)value);
 				case "ClientID":
@@ -636,6 +651,8 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointCon
 			{
 				case "Identifier":
 					return OrderByElementFactory.Create(DomInstanceExposers.Id, sortOrder, naturalSort);
+				case "Name":
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.Name), sortOrder, naturalSort);
 				case "TenantID":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.TenantID), sortOrder, naturalSort);
 				case "ClientID":

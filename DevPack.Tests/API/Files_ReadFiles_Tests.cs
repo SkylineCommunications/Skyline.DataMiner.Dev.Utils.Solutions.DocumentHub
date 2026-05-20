@@ -2,7 +2,10 @@ namespace DevPack.Tests.API
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
+	using DevPack.Tests.SDM;
 	using FluentAssertions;
+	using Newtonsoft.Json;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient.Exceptions;
@@ -23,7 +26,7 @@ namespace DevPack.Tests.API
 		public void Initialize()
 		{
 			connection = ConnectionHelper.CreateConnection();
-			apiHelper = connection.GetMockedHelper();
+			apiHelper = Helper.GetHelper(connection);
 			client = new DocHubClient(connection);
 		}
 
@@ -45,12 +48,11 @@ namespace DevPack.Tests.API
 		public void ReadFiles_ByDomSource_WithNullSource_ShouldThrowArgumentNullException()
 		{
 			// Arrange
-			var testBucket = DemoData.DocumentBuckets[1];
-			apiHelper.DocumentBuckets.Create(testBucket);
+			apiHelper.DocumentBuckets.Create(DemoData.DocumentBuckets[4]);
 			var domInstanceIds = new List<Guid> { Guid.NewGuid() };
 
 			// Act
-			Action act = () => client.Files.ReadFiles(testBucket, domInstanceIds);
+			Action act = () => client.Files.ReadFiles(DemoData.DocumentBuckets[4], domInstanceIds);
 
 			// Assert
 			act.Should().Throw<ValidationException>().WithMessage("*source type DOM*");
@@ -60,8 +62,8 @@ namespace DevPack.Tests.API
 		public void ReadFiles_ByDomSource_WithNullModule_ShouldThrowArgumentException()
 		{
 			// Arrange
-			var testDomSource = DemoData.DomSources[1];
-			var testBucket = DemoData.DocumentBuckets[2];
+			var testDomSource = DemoData.DomSources[2].Clone(); // deep copy to avoid modifying the original demo data since it's static
+			var testBucket = DemoData.DocumentBuckets[1];
 
 			// setting the module to null
 			testDomSource.Module = null;
@@ -76,14 +78,17 @@ namespace DevPack.Tests.API
 
 			// Assert
 			act.Should().Throw<ValidationException>().WithMessage("*Module*");
+
+			// Cleanup: Reset the module to its original value for other tests
+			apiHelper.DomSources.Update(DemoData.DomSources[2]);
 		}
 
 		[TestMethod]
 		public void ReadFiles_ByDomSource_WithEmptyModule_ShouldThrowArgumentException()
 		{
 			// Arrange
-			var testDomSource = DemoData.DomSources[1];
-			var testBucket = DemoData.DocumentBuckets[2];
+			var testDomSource = DemoData.DomSources[2].Clone(); // deep copy to avoid modifying the original demo data since it's static
+			var testBucket = DemoData.DocumentBuckets[1];
 
 			// setting the module to empty string
 			testDomSource.Module = string.Empty;
@@ -98,6 +103,9 @@ namespace DevPack.Tests.API
 
 			// Assert
 			act.Should().Throw<ValidationException>().WithMessage("*Module*");
+
+			// Cleanup: Reset the module to its original value for other tests
+			apiHelper.DomSources.Update(DemoData.DomSources[2]);
 		}
 
 		[TestMethod]

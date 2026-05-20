@@ -55,6 +55,7 @@
 			new SharePointConfiguration
 			{
 				Identifier = Guid.NewGuid().ToString(),
+				Name = "Technical Documentation",
 				TenantID = "tenant-aaa-111",
 				ClientID = "client-aaa-111",
 				ClientSecret = "secret-aaa-111",
@@ -65,6 +66,7 @@
 			new SharePointConfiguration
 			{
 				Identifier = Guid.NewGuid().ToString(),
+				Name = "Engineering Technical Manuals",
 				TenantID = "tenant-bbb-222",
 				ClientID = "client-bbb-222",
 				ClientSecret = "secret-bbb-222",
@@ -75,6 +77,7 @@
 			new SharePointConfiguration
 			{
 				Identifier = Guid.NewGuid().ToString(),
+				Name = "Operations Shared Documents",
 				TenantID = "tenant-ccc-333",
 				ClientID = "client-ccc-333",
 				ClientSecret = "secret-ccc-333",
@@ -85,6 +88,7 @@
 			new SharePointConfiguration
 			{
 				Identifier = Guid.NewGuid().ToString(),
+				Name = "Sales Proposals",
 				TenantID = "tenant-ddd-444",
 				ClientID = "client-aaa-111",
 				ClientSecret = "secret-ddd-444",
@@ -95,6 +99,7 @@
 			new SharePointConfiguration
 			{
 				Identifier = Guid.NewGuid().ToString(),
+				Name = "Engineering Design Documents",
 				TenantID = "tenant-eee-555",
 				ClientID = "client-eee-555",
 				ClientSecret = "secret-eee-555",
@@ -143,7 +148,6 @@
 				Extensions = "pdf,xlsx",
 				IsDefault = false,
 				Definition = "MaintRep",
-				DOMSource = new SdmObjectReference<DomSource>(DomSources[2].Identifier),
 				SizeLimit = 10240,
 			},
 			new DocumentBucket
