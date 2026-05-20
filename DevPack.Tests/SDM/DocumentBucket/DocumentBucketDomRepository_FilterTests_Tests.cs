@@ -47,7 +47,7 @@ namespace DevPack.Tests.SDM.DocumentBucket
 		{
 			// Arrange
 			var helper = Helper.GetHelper();
-			var uploadPathToTest = "/docs/";
+			var uploadPathToTest = "docs/";
 			var filter = DocumentBucketExposers.UploadPath.Contains(uploadPathToTest, StringComparison.OrdinalIgnoreCase);
 
 			// Act
