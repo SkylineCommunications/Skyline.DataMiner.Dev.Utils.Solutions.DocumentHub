@@ -8,17 +8,13 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointCon
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.Linq;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Apps.Sections.Sections;
 	using Skyline.DataMiner.Net.Helper;
 	using Skyline.DataMiner.Net.ManagerStore;
-	using Skyline.DataMiner.Net.Messages;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Net.Sections;
-	using Skyline.DataMiner.Net.SubscriptionFilters;
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;

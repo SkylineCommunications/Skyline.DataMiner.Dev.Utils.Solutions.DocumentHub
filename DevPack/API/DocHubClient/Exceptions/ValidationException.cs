@@ -3,7 +3,7 @@
 	using System;
 	using System.Runtime.Serialization;
 
-	internal class ValidationException : Exception
+	public class ValidationException : Exception
 	{
 		public ValidationException()
 		{

@@ -2,13 +2,13 @@ namespace DevPack.Tests.API
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using DevPack.Tests.SDM;
 	using FluentAssertions;
-	using Newtonsoft.Json;
 	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient.Exceptions;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Helpers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup;
@@ -100,6 +100,8 @@ namespace DevPack.Tests.API
 			var testDomSource = DemoData.DomSources[2].Clone(); // deep copy to avoid modifying the original demo data since it's static
 			var testBucket = DemoData.DocumentBuckets[1];
 
+			var identifier = DemoData.DocumentBuckets[1].SharePointConfiguration.Identifier ?? Guid.Empty.ToString();
+			apiHelper.SharePointConfigurations.Read(SharePointConfigurationExposers.Identifier.Equal(identifier));
 			// setting the module to empty string
 			testDomSource.Module = string.Empty;
 

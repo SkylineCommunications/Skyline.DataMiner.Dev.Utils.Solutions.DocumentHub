@@ -18,6 +18,7 @@
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointConfiguration;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Validation;
 	using Drive = Microsoft.Graph.Drive;
 	using File = System.IO.File;
 
@@ -94,8 +95,13 @@
 			if (_graphClient != null && _drive != null)
 				return;
 
+			if (!bucket.SharePointConfiguration.IsValidReference(out Guid identifierGuid))
+			{
+				throw new ArgumentException($"The provided {nameof(bucket)} does not have a SharePoint reference.");
+			}
+
 			// Retrieve SharePoint configuration from DOM
-			var sharePointFilter = SharePointConfigurationExposers.Identifier.Equal(bucket.SharePointConfiguration.Identifier);
+			var sharePointFilter = SharePointConfigurationExposers.Identifier.Equal(identifierGuid.ToString());
 			_sharePoint = _sharePointRepository.Read(sharePointFilter).FirstOrDefault()
 				?? throw new ArgumentException("No SharePoint configuration tied to the provided bucket could be found.", nameof(bucket));
 

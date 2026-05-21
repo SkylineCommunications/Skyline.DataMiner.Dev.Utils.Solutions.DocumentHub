@@ -11,6 +11,7 @@
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Helpers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Validation;
 
 	/// <summary>
 	/// Before passing the file path to the correct <see cref="IStorageHandler"/>, files get validated by the <see cref="FileValidator"/>.
@@ -82,16 +83,15 @@
 				if (bucket == null)
 					throw new ArgumentNullException(nameof(bucket));
 
-				var bucketSource = bucket.DOMSource;
-				if (bucketSource == null || string.IsNullOrWhiteSpace(bucketSource.Identifier))
+				if (!bucket.DOMSource.IsValidReference(out Guid identifierGuid))
 				{
 					throw new ArgumentException(
 						$"The bucket '{bucket.Name}' is not of source type DOM, but it is expected to be for this operation." +
 						$" Try using one of the other 'ReadFiles' method overloads.");
 				}
 
-				var domSource = apiHelper.DomSources.Read(DomSourceExposers.Identifier.Equal(bucketSource.Identifier)).FirstOrDefault()
-					?? throw new ArgumentException($"The DOM Source (ID: {bucketSource.Identifier}) tied to the bucket does not exist in the repository.");
+				var domSource = apiHelper.DomSources.Read(DomSourceExposers.Identifier.Equal(identifierGuid.ToString())).FirstOrDefault()
+					?? throw new ArgumentException($"The DOM Source (ID: {identifierGuid}) tied to the bucket does not exist in the repository.");
 				if (string.IsNullOrEmpty(domSource.Module))
 					throw new ArgumentException("DOM Module of the specified DOM source cannot be null or empty.");
 

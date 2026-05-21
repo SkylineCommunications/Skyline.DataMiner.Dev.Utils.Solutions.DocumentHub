@@ -1,6 +1,5 @@
 ﻿namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Models
 {
-	using System;
 	using Skyline.DataMiner.SDM;
 
 	/// <summary>

@@ -84,7 +84,7 @@
 		internal static IStorageHandler Create(IConnection connection, DocumentBucket bucket)
 		{
 			// Select the appropriate storage handler based on the given storage type.
-			var storage = bucket.StorageType;
+			var storage = bucket?.StorageType;
 			switch (storage)
 			{
 				// TODO: if it's sharepoint, don't initialize each time. Instead, consider caching the handler instance or implementing a singleton pattern if appropriate.
