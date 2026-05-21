@@ -209,6 +209,36 @@
 
 		/// <summary>
 		/// Reads files associated with the specified document bucket.
+		/// When <see cref="ReadFilesConfiguration.DomInstanceIds"/> is provided, only files linked
+		/// to those DOM instances are returned and the bucket must be a valid DOM bucket.
+		/// </summary>
+		/// <param name="bucket">
+		/// The document bucket defining the storage type and base path.
+		/// </param>
+		/// <param name="config">
+		/// Optional configuration for paging, filtering, and DOM instance scoping.
+		/// </param>
+		/// <returns>
+		/// A list of files represented as <see cref="IDocHubFile"/>.
+		/// </returns>
+		/// <exception cref="ArgumentNullException">
+		/// Thrown if <paramref name="bucket"/> is null.
+		/// </exception>
+		/// <exception cref="ValidationException">
+		/// Thrown if <see cref="ReadFilesConfiguration.DomInstanceIds"/> is set but the bucket
+		/// is not a valid DOM bucket or the DOM source is missing.
+		/// </exception>
+		public List<IDocHubFile> ReadFiles(DocumentBucket bucket, ReadFilesConfiguration config = null)
+		{
+			config = config ?? new ReadFilesConfiguration();
+
+			return config.DomInstanceIds != null
+				? ReadDomFiles(bucket, config.DomInstanceIds, config.Context, config.Filter)
+				: ReadFiles(bucket, config.Context, config.Filter);
+		}
+
+		/// <summary>
+		/// Reads files associated with the specified document bucket.
 		/// </summary>
 		/// <param name="bucket">
 		/// The document bucket defining the storage type and base path.
@@ -235,7 +265,7 @@
 		/// ReadFiles(bucket, context: pageData);
 		/// </code>
 		/// </remarks>
-		public List<IDocHubFile> ReadFiles(DocumentBucket bucket, DocHubPageData context = null, string filter = null)
+		private List<IDocHubFile> ReadFiles(DocumentBucket bucket, DocHubPageData context = null, string filter = null)
 		{
 			// Reusing the validation method for null check on bucket; filePath is irrelevant here so passing dummy value
 			FileValidator.ValidateBaseParameters(bucket, "OK");
@@ -280,15 +310,15 @@
 		/// <exception cref="ValidationException">
 		/// Thrown if the provided <paramref name="bucket"/> is not compatible with this method, or if the DOM source is missing.
 		/// </exception>
-		public List<IDocHubFile> ReadFiles(DocumentBucket bucket, IEnumerable<Guid> domInstanceIds = null, DocHubPageData context = null, string filter = null)
+		private List<IDocHubFile> ReadDomFiles(DocumentBucket bucket, IEnumerable<Guid> domInstanceIds, DocHubPageData context = null, string filter = null)
 		{
+			if (domInstanceIds == null)
+				throw new ArgumentNullException(nameof(domInstanceIds));
+
 			if (!validator.ValidateAndGetDOMSourceBucket(bucket, out DomSource domSource, out string errorMessage))
 			{
 				throw new ValidationException($"Invalid parameters for reading DOM files: {errorMessage}");
 			}
-
-			if (domInstanceIds == null)
-				throw new ArgumentNullException(nameof(domInstanceIds));
 
 			ReadData data = new DomFileReadData
 			{

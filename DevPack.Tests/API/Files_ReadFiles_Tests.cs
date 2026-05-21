@@ -31,13 +31,23 @@ namespace DevPack.Tests.API
 		}
 
 		[TestMethod]
-		public void ReadFiles_ByDomSource_WithNullBucket_ShouldThrowArgumentNullException()
+		public void ReadFiles_ByDomSource_WithNullBucket_ShouldThrowValidationException()
 		{
 			// Act
-			Action act = () => client.Files.ReadFiles((DocumentBucket)null, context: null, domInstanceIds: null);
+			Action act = () => client.Files.ReadFiles((DocumentBucket)null, new ReadFilesConfiguration { Context = null, Filter = null, DomInstanceIds = [] });
 
 			// Assert
 			act.Should().Throw<ValidationException>().WithMessage("*bucket*");
+		}
+
+		[TestMethod]
+		public void ReadFiles_ByBucket_WithNullBucket_ShouldThrowArgumentNullException()
+		{
+			// Act
+			Action act = () => client.Files.ReadFiles((DocumentBucket)null, new ReadFilesConfiguration { Context = null, Filter = null });
+
+			// Assert
+			act.Should().Throw<ArgumentNullException>().WithParameterName("bucket");
 		}
 
 		#endregion
@@ -52,7 +62,7 @@ namespace DevPack.Tests.API
 			var domInstanceIds = new List<Guid> { Guid.NewGuid() };
 
 			// Act
-			Action act = () => client.Files.ReadFiles(DemoData.DocumentBuckets[4], domInstanceIds);
+			Action act = () => client.Files.ReadFiles(DemoData.DocumentBuckets[4], new ReadFilesConfiguration { DomInstanceIds = domInstanceIds});
 
 			// Assert
 			act.Should().Throw<ValidationException>().WithMessage("*source type DOM*");
@@ -74,7 +84,7 @@ namespace DevPack.Tests.API
 			var domInstanceIds = new List<Guid> { Guid.NewGuid() };
 
 			// Act
-			Action act = () => client.Files.ReadFiles(testBucket, domInstanceIds);
+			Action act = () => client.Files.ReadFiles(testBucket, new ReadFilesConfiguration { DomInstanceIds = domInstanceIds });
 
 			// Assert
 			act.Should().Throw<ValidationException>().WithMessage("*Module*");
@@ -99,31 +109,13 @@ namespace DevPack.Tests.API
 			var domInstanceIds = new List<Guid> { Guid.NewGuid() };
 
 			// Act
-			Action act = () => client.Files.ReadFiles(testBucket, domInstanceIds);
+			Action act = () => client.Files.ReadFiles(testBucket, new ReadFilesConfiguration { DomInstanceIds = domInstanceIds });
 
 			// Assert
 			act.Should().Throw<ValidationException>().WithMessage("*Module*");
 
 			// Cleanup: Reset the module to its original value for other tests
 			apiHelper.DomSources.Update(DemoData.DomSources[2]);
-		}
-
-		[TestMethod]
-		public void ReadFiles_ByBucket_WithNullBucket_ShouldThrowArgumentNullException()
-		{
-			// Arrange
-			var bucket = new DocumentBucket
-			{
-				Identifier = Guid.NewGuid().ToString(),
-				Name = "Test Source",
-			};
-
-			// Act
-			Action act = () => client.Files.ReadFiles(bucket: null, null, null);
-
-			// Assert
-			act.Should().Throw<ArgumentNullException>()
-				.WithParameterName("bucket");
 		}
 
 		#endregion

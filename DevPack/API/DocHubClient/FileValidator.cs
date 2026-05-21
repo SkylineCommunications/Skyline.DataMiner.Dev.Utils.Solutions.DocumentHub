@@ -2,7 +2,6 @@
 {
 	using System;
 	using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
 	using System.Security;
@@ -67,14 +66,14 @@
 		}
 
 		/// <summary>
-		/// Validates the <see cref="DocumentBucket"/> and it's related <see cref="DomSource"/>.
+		/// Validates the <see cref="DocumentBucket"/> and its related <see cref="DomSource"/>.
 		/// </summary>
 		/// <param name="bucket">The document bucket to validate.</param>
 		/// <param name="source">DOM source returned if the validation succeeded as an <see langword="out"/> parameter.</param>
 		/// <param name="errorMessage">Error message returned if the validation fails as an <see langword="out"/> parameter.</param>
 		/// <returns>
 		/// <see langword="false"/> if any either of the <paramref name="bucket"/>
-		/// or it's <see cref="DomSource"/> are null or missing. Returns <see langword="true"/> otherwise.
+		/// or its <see cref="DomSource"/> are null or missing. Returns <see langword="true"/> otherwise.
 		/// </returns>
 		internal bool ValidateAndGetDOMSourceBucket(DocumentBucket bucket, out DomSource source, out string errorMessage)
 		{
@@ -84,7 +83,7 @@
 					throw new ArgumentNullException(nameof(bucket));
 
 				var bucketSource = bucket.DOMSource;
-				if (string.IsNullOrWhiteSpace(bucketSource.Identifier))
+				if (bucketSource == null || string.IsNullOrWhiteSpace(bucketSource.Identifier))
 				{
 					throw new ArgumentException(
 						$"The bucket '{bucket.Name}' is not of source type DOM, but it is expected to be for this operation." +
