@@ -426,11 +426,7 @@
 		/// </exception>
 		public void DeleteFile(DocumentBucket bucket, string fileName)
 		{
-			if (bucket == null)
-				throw new ArgumentNullException(nameof(bucket));
-
-			if (string.IsNullOrWhiteSpace(fileName))
-				throw new ArgumentNullException(nameof(fileName));
+			FileValidator.ValidateBaseParameters(bucket, fileName);
 
 			var storageHandler = StorageHandlerFactory.Create(bucket.StorageType, _connection);
 
