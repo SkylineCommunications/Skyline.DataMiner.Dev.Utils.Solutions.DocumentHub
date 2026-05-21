@@ -11,14 +11,9 @@ on:
 jobs:
   CICD:
     name: CICD
-    uses: SkylineCommunications/_ReusableWorkflows/.github/workflows/Internal NuGet Solution Master Workflow.yml@main
+    uses: SkylineCommunications/_ReusableWorkflows/.github/workflows/Master Workflow.yml@main
     with:
-      referenceName: ${{ github.ref_name }}
-      runNumber: ${{ github.run_number }}
-      referenceType: ${{ github.ref_type }}
-      repository: ${{ github.repository }}
-      owner: ${{ github.repository_owner }}
-      sonarCloudProjectName: ${{ vars.SONAR_NAME }}
-      solutionFilterName: Nuget.slnf
+      sonarcloud-project-name: ${{ vars.SONAR_NAME }}
+      solution-filter-name: Nuget.slnf
     secrets:
-      nugetApiKey: ${{ secrets.NUGETAPIKEY_GITHUB  }}
+      NUGET_API_KEY: ${{ secrets.NUGETAPIKEY_GITHUB  }}
