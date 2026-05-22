@@ -45,7 +45,7 @@ namespace DevPack.Tests.API
 
 			// Act & Assert
 			act.Should().Throw<ArgumentNullException>()
-				.WithParameterName("filePath");
+				.WithParameterName("fileName");
 		}
 
 		[TestMethod]
@@ -58,7 +58,7 @@ namespace DevPack.Tests.API
 
 			// Act & Assert
 			act.Should().Throw<ArgumentNullException>()
-				.WithParameterName("filePath");
+				.WithParameterName("fileName");
 		}
 
 		[TestMethod]
