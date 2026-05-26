@@ -1,5 +1,6 @@
 ﻿namespace DevPack.Tests.SDM
 {
+	using System;
 	using Newtonsoft.Json;
 	using Skyline.DataMiner.SDM;
 
@@ -7,9 +8,10 @@
 	{
 		public static T Clone<T>(this T source) where T : SdmObject<T>
 		{
-			var serialized = JsonConvert.SerializeObject(source);
+			string serialized = JsonConvert.SerializeObject(source);
 
-			return JsonConvert.DeserializeObject<T>(serialized);
+			return JsonConvert.DeserializeObject<T>(serialized)
+				?? throw new InvalidOperationException("Cloning failed - deserialization returned null.");
 		}
 	}
 }
