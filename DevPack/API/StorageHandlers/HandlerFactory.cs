@@ -51,6 +51,24 @@
 		/// </returns>
 		List<IDocHubFile> ReadFiles(ReadData data);
 	}
+
+	/// <summary>
+	/// Defines the contract for storage handlers that support file deletion.
+	/// </summary>
+	/// <remarks>
+	/// Handlers that support deleting files from storage should implement this interface.
+	/// This allows deletion capability to be extended to new handlers without modifying <see cref="IStorageHandler"/>.
+	/// </remarks>
+	internal interface IDeletableStorageHandler
+	{
+		/// <summary>
+		/// Deletes a file from the storage.
+		/// </summary>
+		/// <param name="data">
+		/// The delete data containing the bucket and file name.
+		/// </param>
+		void DeleteFile(DeleteData data);
+	}
 	#endregion
 
 	#region Factory

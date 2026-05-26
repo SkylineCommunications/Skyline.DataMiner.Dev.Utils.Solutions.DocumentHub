@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.IO;
 	using System.Linq;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
@@ -390,6 +391,47 @@
 
 			return domHelper.DomInstances.Attachments.Get(instance.ID, filename);
 		}
+		#endregion
+
+		#region Delete
+
+		/// <summary>
+		/// Deletes a document from local DataMiner storage.
+		/// </summary>
+		/// <param name="bucket">
+		/// The document bucket that defines the upload path where the file is stored.
+		/// Must use <see cref="StorageType.Local"/> storage.
+		/// </param>
+		/// <param name="fileName">
+		/// The name of the file to delete (including extension).
+		/// </param>
+		/// <exception cref="ArgumentNullException">
+		/// Thrown when <paramref name="bucket"/> or <paramref name="fileName"/> is null.
+		/// </exception>
+		/// <exception cref="InvalidOperationException">
+		/// Thrown when the bucket's storage type is not <see cref="StorageType.Local"/>.
+		/// </exception>
+		/// <exception cref="FileNotFoundException">
+		/// Thrown when the file does not exist at the expected path.
+		/// </exception>
+		public void DeleteFile(DocumentBucket bucket, string fileName)
+		{
+			FileValidator.ValidateBaseParameters(bucket, fileName);
+
+			var storageHandler = StorageHandlerFactory.Create(bucket.StorageType, _connection);
+
+			if (!(storageHandler is IDeletableStorageHandler deletableHandler))
+				throw new InvalidOperationException($"Delete is not supported for storage type '{bucket.StorageType}'.");
+
+			var data = new DeleteData
+			{
+				Bucket = bucket,
+				Name = fileName,
+			};
+
+			deletableHandler.DeleteFile(data);
+		}
+
 		#endregion
 
 		#region Internal and Private Methods

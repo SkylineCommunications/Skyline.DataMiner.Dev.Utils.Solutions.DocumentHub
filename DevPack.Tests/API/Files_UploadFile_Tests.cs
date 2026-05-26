@@ -100,7 +100,7 @@ namespace DevPack.Tests.API
 
 			// Assert
 			act.Should().Throw<ArgumentNullException>()
-				.WithParameterName("filePath");
+				.WithParameterName("fileName");
 		}
 
 		[TestMethod]
@@ -121,7 +121,7 @@ namespace DevPack.Tests.API
 
 			// Assert
 			act.Should().Throw<ArgumentNullException>()
-				.WithParameterName("filePath");
+				.WithParameterName("fileName");
 		}
 
 		[TestMethod]
@@ -142,7 +142,7 @@ namespace DevPack.Tests.API
 
 			// Assert
 			act.Should().Throw<ArgumentNullException>()
-				.WithParameterName("filePath");
+				.WithParameterName("fileName");
 		}
 
 		#endregion

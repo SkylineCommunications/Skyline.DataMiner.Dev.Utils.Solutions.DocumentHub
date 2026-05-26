@@ -35,12 +35,12 @@
 			apiHelper = new DocumentHubApiHelper(connection);
 		}
 
-		internal static void ValidateBaseParameters(DocumentBucket bucket, string filePath)
+		internal static void ValidateBaseParameters(DocumentBucket bucket, string fileName)
 		{
 			if (bucket == null)
 				throw new ArgumentNullException(nameof(bucket));
-			if (string.IsNullOrWhiteSpace(filePath))
-				throw new ArgumentNullException(nameof(filePath));
+			if (string.IsNullOrWhiteSpace(fileName))
+				throw new ArgumentNullException(nameof(fileName));
 		}
 
 		internal UploadData ValidateAndSanitizeFile(DocumentBucket bucket, string filePath, string name = null)

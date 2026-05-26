@@ -94,4 +94,13 @@
 	}
 	#endregion
 
+	#region Delete
+	internal class DeleteData : IStorageHandlerData
+	{
+		public DocumentBucket Bucket { get; set; }
+
+		public string Name { get; set; }
+	}
+	#endregion
+
 }
