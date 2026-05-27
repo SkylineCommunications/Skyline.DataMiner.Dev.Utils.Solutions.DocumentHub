@@ -6,7 +6,7 @@ Common code snippets for the `Skyline.DataMiner.Solutions.DocumentHub` API.
 
 ### DocHubClient
 
-```
+```csharp
 // Automation scripts
 using Skyline.DataMiner.Solutions.DocumentHub.Automation;
 var client = engine.GetDocHubClient();
@@ -26,7 +26,7 @@ var client = connection.GetDocHubClient();
 
 ### IDocumentHubApiHelper
 
-```
+```csharp
 // Automation scripts
 using Skyline.DataMiner.Solutions.DocumentHub.Automation;
 var helper = engine.GetDocumentHubApiHelper();
@@ -48,7 +48,7 @@ var helper = connection.GetDocumentHubApiHelper();
 
 ### Document Buckets
 
-```
+```csharp
 // Create
 var bucket = helper.DocumentBuckets.Create(new DocumentBucket
 {
@@ -85,7 +85,7 @@ var result = helper.DocumentBuckets.CreateOrUpdate(new[] { bucket1, bucket2 });
 
 ### SharePoint Configurations
 
-```
+```csharp
 // Create
 var config = helper.SharePointConfigurations.Create(new SharePointConfiguration
 {
@@ -109,7 +109,7 @@ helper.SharePointConfigurations.Delete(config);
 
 ### DOM Sources
 
-```
+```csharp
 // Create
 var source = helper.DomSources.Create(new DomSource
 {
@@ -132,7 +132,7 @@ helper.DomSources.Delete(source);
 
 ### Upload
 
-```
+```csharp
 // Basic upload
 client.Files.UploadFile(bucket, @"C:\file.pdf");
 
@@ -145,49 +145,46 @@ client.Files.UploadFile(bucket, @"C:\file.pdf", domInstanceId);
 // Upload linked to a DOM instance with custom name
 client.Files.UploadFile(bucket, @"C:\file.pdf", domInstanceId, name: "custom_name");
 
-// Upload with path qualifier (subfolder)
-client.Files.UploadFile(bucket, @"C:\file.pdf", uploadPathQualifier: "2024/Q1");
+// Upload with path qualifier (subfolder — not supported for DOM storage)
+client.Files.UploadFile(bucket, @"C:\file.pdf", "2024/Q1");
 ```
 
 ### Read
 
-```
+```csharp
 // Read from a bucket
 var files = client.Files.ReadFiles(bucket);
 
 // Read from a bucket with filter
-var files = client.Files.ReadFiles(bucket, filter: "invoice");
-
-// Read by storage type
-var files = client.Files.ReadFiles(StorageType.Local);
-var files = client.Files.ReadFiles(StorageType.SharePoint);
-var files = client.Files.ReadFiles(StorageType.DOM);
-
-// Read by storage type with filter
-var files = client.Files.ReadFiles(StorageType.DOM, filter: "report");
+var files = client.Files.ReadFiles(bucket, new ReadFilesConfiguration { Filter = "invoice" });
 
 // Read DOM files for specific instances
-var files = client.Files.ReadFiles(domSource, new[] { instanceId1, instanceId2 });
+var files = client.Files.ReadFiles(domBucket, new ReadFilesConfiguration
+{
+    DomInstanceIds = new[] { instanceId1, instanceId2 },
+});
 
 // Read DOM files for specific instances with filter
-var files = client.Files.ReadFiles(domSource, new[] { instanceId }, filter: "invoice");
+var files = client.Files.ReadFiles(domBucket, new ReadFilesConfiguration
+{
+    DomInstanceIds = new[] { instanceId },
+    Filter = "invoice",
+});
 ```
 
 ### Pagination
 
-```
-// Read with pagination (context is created automatically on first call)
-DocHubPageData pageContext = null;
+```csharp
+// Read with pagination (reuse the same context instance between calls)
+var pageContext = new DocHubPageData { PageSize = 50 };
+var config = new ReadFilesConfiguration { Context = pageContext };
+
 do
 {
-    var files = client.Files.ReadFiles(bucket, context: pageContext);
+    var files = client.Files.ReadFiles(bucket, config);
     // Process files...
 }
-while (pageContext != null && pageContext.HasNextPage());
-
-// Read by storage type with pagination
-DocHubPageData pageContext = null;
-var files = client.Files.ReadFiles(StorageType.Local, context: pageContext);
+while (pageContext.HasNextPage());
 ```
 
 ### Get File Bytes (DOM)
@@ -204,26 +201,27 @@ byte[] bytes = client.Files.GetBytes("my_module", instanceId, "report.pdf");
 
 ## IDocHubFile Properties
 
-```
+```csharp
 IDocHubFile file = files.First();
 
-string path      = file.GetFilePath();    // Full path in the storage backend
-string name      = file.GetName();        // File name with extension
-string extension = file.GetExtension();   // e.g. ".pdf"
-string size      = file.GetSize();        // File size as string
-string type      = file.GetType();        // Item type, e.g. "File"
-string directory = file.GetDirectory();   // Parent directory
-string reference = file.GetFile();        // Full file reference
-DateTime created = file.GetCreatedAt();   // Creation timestamp (UTC)
-string createdBy = file.GetCreatedBy();   // Creator name or identifier
-string module    = file.GetModule();      // DOM module (DOM files only)
-string instance  = file.GetInstanceName();// DOM instance name (DOM files only)
-Guid instanceId  = file.GetInstanceId();  // DOM instance ID (DOM files only)
+string filePath   = file.GetFilePath();    // Full absolute path (local) or web URL (SharePoint); empty for DOM
+string webPath    = file.GetWebPath();     // Relative web path (local) or web URL (SharePoint); empty for DOM
+string fileName   = file.GetFile();        // File name with extension (e.g. "report.pdf")
+string name       = file.GetName();        // File name without extension (e.g. "report")
+string extension  = file.GetExtension();   // Extension without dot (e.g. "pdf")
+string size       = file.GetSize();        // Human-readable size (e.g. "1.5 MB")
+string type       = file.GetType();        // Parent directory name (local) or empty
+string directory  = file.GetDirectory();   // Relative directory path from storage root; empty for DOM
+DateTime created  = file.GetCreatedAt();   // Creation timestamp (UTC)
+string createdBy  = file.GetCreatedBy();   // Creator name or identifier
+string module     = file.GetModule();      // DOM module name (DOM files only; empty otherwise)
+string instance   = file.GetInstanceName();// DOM instance name (DOM files only; empty otherwise)
+Guid instanceId   = file.GetInstanceId();  // DOM instance ID (DOM files only; Guid.Empty otherwise)
 ```
 
 ## Filtering with Exposers
 
-```
+```csharp
 using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 
 // Filter by name
