@@ -18,14 +18,14 @@
 		<AssemblyTitle>Skyline.DataMiner.Solutions.DocumentHub.Installer</AssemblyTitle>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Skyline.DataMiner.CICD.CSharpAnalysis.Analyzer" Version="2.1.2">
+		<PackageReference Include="Skyline.DataMiner.CICD.CSharpAnalysis.Analyzer">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Skyline.DataMiner.Core.AppPackageInstaller" Version="4.0.0" />
-		<PackageReference Include="Skyline.DataMiner.Dev.Automation" Version="10.6.3.1" />
-		<PackageReference Include="Skyline.DataMiner.SDM.SourceGenerator.Runtime" Version="1.0.1" />
-		<PackageReference Include="Skyline.DataMiner.Utils.DOM" Version="10.5.2.6" />
-		<PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="2.2.3">
+		<PackageReference Include="Skyline.DataMiner.Core.AppPackageInstaller" />
+		<PackageReference Include="Skyline.DataMiner.Dev.Automation" />
+		<PackageReference Include="Skyline.DataMiner.SDM.SourceGenerator.Runtime" />
+		<PackageReference Include="Skyline.DataMiner.Utils.DOM" />
+		<PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers">
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 	</ItemGroup>

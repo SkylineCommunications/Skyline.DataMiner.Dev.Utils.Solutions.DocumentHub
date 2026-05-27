@@ -1,0 +1,26 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Azure.Identity" Version="1.16.0" />
+    <PackageVersion Include="FluentAssertions" Version="7.2.0" />
+    <PackageVersion Include="Microsoft.Graph" Version="4.36.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageVersion Include="Moq" Version="4.20.72" />
+    <PackageVersion Include="MSTest" Version="3.6.4" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageVersion Include="Skyline.DataMiner.CICD.CSharpAnalysis.Analyzer" Version="2.1.2" />
+    <PackageVersion Include="Skyline.DataMiner.Core.AppPackageInstaller" Version="4.0.0" />
+    <PackageVersion Include="Skyline.DataMiner.Dev.Automation" Version="10.6.3.1" />
+    <PackageVersion Include="Skyline.DataMiner.Dev.Common" Version="10.6.3.1" />
+    <PackageVersion Include="StyleCop.Analyzers" Version="1.1.118" />
+    <PackageVersion Include="Skyline.DataMiner.Dev.Protocol" Version="10.6.3.1" />
+    <PackageVersion Include="Skyline.DataMiner.SDM" Version="1.0.1" />
+    <PackageVersion Include="Skyline.DataMiner.SDM.SourceGenerator.Runtime" Version="1.0.1" />
+    <PackageVersion Include="Skyline.DataMiner.Utils.DOM" Version="10.5.2.6" />
+    <PackageVersion Include="Skyline.DataMiner.Utils.SecureCoding" Version="2.2.3" />
+    <PackageVersion Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="2.2.3" />
+    <PackageVersion Include="System.Drawing.Common" Version="10.0.1" />
+  </ItemGroup>
+</Project>

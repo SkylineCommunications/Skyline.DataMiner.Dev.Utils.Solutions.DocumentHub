@@ -6,8 +6,8 @@
 		<AssemblyName>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub</AssemblyName>
 		<RootNamespace>Skyline.DataMiner.Solutions.DocumentHub</RootNamespace>
 		<PackageId>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub</PackageId>
-		<PackageVersion>0.0.7</PackageVersion>
-		<Version>0.0.7</Version>
+		<PackageVersion>0.0.8</PackageVersion>
+		<Version>0.0.8</Version>
 		<PackageTags>Skyline;DataMiner</PackageTags>
 		<PackageProjectUrl>https://skyline.be</PackageProjectUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
@@ -30,19 +30,19 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Azure.Identity" Version="1.16.0" />
-		<PackageReference Include="Microsoft.Graph" Version="4.36.0" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-		<PackageReference Include="Skyline.DataMiner.Dev.Common" Version="10.6.3.1" />
-		<PackageReference Include="Skyline.DataMiner.SDM" Version="1.0.1" />
-		<PackageReference Include="Skyline.DataMiner.SDM.SourceGenerator.Runtime" Version="1.0.1" OutputItemType="Analyzer" ReferenceoutputAssembly="false" />
-		<PackageReference Include="Skyline.DataMiner.Utils.DOM" Version="10.5.2.6" />
-		<PackageReference Include="Skyline.DataMiner.Utils.SecureCoding" Version="2.2.3" />
-		<PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="2.2.3">
+		<PackageReference Include="Azure.Identity" />
+		<PackageReference Include="Microsoft.Graph" />
+		<PackageReference Include="Newtonsoft.Json" />
+		<PackageReference Include="Skyline.DataMiner.Dev.Common" />
+		<PackageReference Include="Skyline.DataMiner.SDM" />
+		<PackageReference Include="Skyline.DataMiner.SDM.SourceGenerator.Runtime" OutputItemType="Analyzer" ReferenceoutputAssembly="false" />
+		<PackageReference Include="Skyline.DataMiner.Utils.DOM" />
+		<PackageReference Include="Skyline.DataMiner.Utils.SecureCoding" />
+		<PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="System.Drawing.Common" Version="10.0.1" />
+		<PackageReference Include="System.Drawing.Common" />
 	</ItemGroup>
 
 	<ItemGroup>
