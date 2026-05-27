@@ -9,7 +9,7 @@
 	/// </summary>
 	/// <remarks>
 	/// This interface extends <see cref="IDocHubFile"/> to indicate that the file supports DOM-based
-	/// operations. 
+	/// operations.
 	/// Implementations may provide additional methods or properties for interacting with the document
 	/// structure.
 	/// </remarks>
@@ -51,6 +51,11 @@
 		}
 
 		public string GetFilePath()
+		{
+			return string.Empty;
+		}
+
+		public string GetWebPath()
 		{
 			return string.Empty;
 		}

@@ -11,6 +11,11 @@
 
 		public string GetFilePath()
 		{
+			return fileInfo.FullName;
+		}
+
+		public string GetWebPath()
+		{
 			return '/' + GetRelativePath(fileInfo.FullName, @"C:\Skyline DataMiner\Webpages");
 		}
 

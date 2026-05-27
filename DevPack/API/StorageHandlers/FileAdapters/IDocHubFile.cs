@@ -12,14 +12,24 @@
 	public interface IDocHubFile
 	{
 		/// <summary>
-		/// Gets the web-resolvable or storage-specific path to the file.
+		/// Gets the absolute filesystem path to the file.
+		/// </summary>
+		/// <returns>
+		/// For local storage: the full local path (e.g., "C:\Skyline DataMiner\Webpages\Public\WebFileManager\docs\report.pdf").
+		/// For SharePoint: the web URL of the file.
+		/// For DOM: an empty string.
+		/// </returns>
+		string GetFilePath();
+
+		/// <summary>
+		/// Gets the web-resolvable relative path to the file.
 		/// </summary>
 		/// <returns>
 		/// For local storage: a relative web path (e.g., "/Public/WebFileManager/docs/report.pdf").
 		/// For SharePoint: the web URL of the file.
 		/// For DOM: an empty string.
 		/// </returns>
-		string GetFilePath();
+		string GetWebPath();
 
 		/// <summary>
 		/// Gets the file name including extension.
