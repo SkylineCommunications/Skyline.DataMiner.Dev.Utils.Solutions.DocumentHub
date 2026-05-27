@@ -32,7 +32,6 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentBucket
             this.helper = new DomHelper(connection.HandleMessages, DocumentBucketDomMapper.ModuleId);
         }
 
-        // TODO: before creating the Bucket, check if the DOM Source reference is added, create it if necessary.
         public DocumentBucket Create(DocumentBucket createObject)
         {
             if (createObject is null)
@@ -556,7 +555,13 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentBucket
                     obj.DOMSource = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>(Convert.ToString(_domsource.Value));
                 }
 
-                var _definition = _documentbucketpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.Definition);
+				var _sharepointconfiguration = _documentbucketpropertiesSection.GetValue<Guid>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.SharePointConfiguration);
+				if (_sharepointconfiguration != null)
+				{
+					obj.SharePointConfiguration = new Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration>(Convert.ToString(_sharepointconfiguration.Value));
+				}
+
+				var _definition = _documentbucketpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.Definition);
                 if (_definition != null)
                 {
                     obj.Definition = _definition.Value;
@@ -622,7 +627,12 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentBucket
                 _documentbucketproperties.AddOrUpdateValue<Guid>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.DOMSource, Guid.Parse(obj.DOMSource.Identifier));
             }
 
-            if (obj.Definition != default)
+			if (obj.SharePointConfiguration != default)
+			{
+				_documentbucketproperties.AddOrUpdateValue<Guid>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.SharePointConfiguration, Guid.Parse(obj.SharePointConfiguration.Identifier));
+			}
+
+			if (obj.Definition != default)
             {
                 _documentbucketproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.Definition, Convert.ToString(obj.Definition));
             }
@@ -652,8 +662,10 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentBucket
                 case "IsDefault":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.IsDefault), comparer, (bool)value);
                 case "DOMSource":
-                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.DOMSource), comparer, Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>.Convert(value).Identifier);
-                case "Definition":
+                    return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.DOMSource), comparer, Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DomSource>.Convert(value).Identifier));
+				case "SharePointConfiguration":
+					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.SharePointConfiguration), comparer, Guid.Parse(Skyline.DataMiner.SDM.SdmObjectReference<Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfiguration>.Convert(value).Identifier));
+				case "Definition":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.Definition), comparer, (string)value);
                 case "SizeLimit":
                     return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.SizeLimit), comparer, (long)value);
@@ -682,7 +694,9 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.Repositories.DocumentBucket
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.IsDefault), sortOrder, naturalSort);
                 case "DOMSource":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.DOMSource), sortOrder, naturalSort);
-                case "Definition":
+				case "SharePointConfiguration":
+					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.SharePointConfiguration), sortOrder, naturalSort);
+				case "Definition":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.Definition), sortOrder, naturalSort);
                 case "SizeLimit":
                     return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.DocumentBucketDomMapper.DocumentBucketProperties.SizeLimit), sortOrder, naturalSort);

@@ -162,7 +162,7 @@ namespace DevPack.Tests.SDM.DomSource
 			count.Should().Be(5);
 		}
 
-		private static void CreateAll(IDocumentHubApiHelper helper)
+		internal static void CreateAll(IDocumentHubApiHelper helper)
 		{
 			foreach (var item in DemoData.DomSources)
 			{

@@ -78,20 +78,20 @@
 	/// </summary>
 	/// <remarks>
 	/// This factory is responsible for returning the correct implementation of <see cref="IStorageHandler"/>
-	/// based on the specified <see cref="Storage"/> type (e.g., Local or SharePoint).
-	/// It encapsulates the logic for constructing each handler, ensuring the rest of the system remains decoupled
+	/// based on the specified <see cref="DocumentBucket.StorageType"/> (e.g., Local or SharePoint) and
+	/// it encapsulates the logic for constructing each handler, ensuring the rest of the system remains decoupled
 	/// from concrete storage implementations.
 	/// </remarks>
 	internal static class StorageHandlerFactory
 	{
 		/// <summary>
-		/// Creates a new instance of a storage handler that matches the specified <see cref="Storage"/> type.
+		/// Creates a new instance of a storage handler that corresponds to the provided <see cref="DocumentBucket"/>.
 		/// </summary>
-		/// <param name="storage">
-		/// The type of storage for which to create a handler.
-		/// </param>
 		/// <param name="connection">
 		/// An active DataMiner connection used to communicate with the system.
+		/// </param>
+		/// <param name="bucket">
+		/// The <see cref="DocumentBucket"/> containing the storage type and related configuration for which a handler is to be created.
 		/// </param>
 		/// <returns>
 		/// An instance of <see cref="IStorageHandler"/> corresponding to the specified storage type.
@@ -99,15 +99,16 @@
 		/// <exception cref="ArgumentException">
 		/// Thrown if no handler is registered for the specified storage type.
 		/// </exception>
-		internal static IStorageHandler Create(StorageType storage, IConnection connection)
+		internal static IStorageHandler Create(IConnection connection, DocumentBucket bucket)
 		{
 			// Select the appropriate storage handler based on the given storage type.
+			var storage = bucket?.StorageType;
 			switch (storage)
 			{
 				// TODO: if it's sharepoint, don't initialize each time. Instead, consider caching the handler instance or implementing a singleton pattern if appropriate.
 				case StorageType.SharePoint:
 					// SharePoint-based storage implementation.
-					return new SharePointHandler(connection);
+					return new SharePointHandler(connection, bucket);
 
 				case StorageType.Local:
 					// Local file system storage implementation.

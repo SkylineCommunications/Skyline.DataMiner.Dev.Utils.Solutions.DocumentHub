@@ -6,8 +6,8 @@
     <AssemblyName>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub.Automation</AssemblyName>
     <RootNamespace>Skyline.DataMiner.Solutions.DocumentHub.Automation</RootNamespace>
     <PackageId>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub.Automation</PackageId>
-    <PackageVersion>0.0.6</PackageVersion>
-    <Version>0.0.6</Version>
+    <PackageVersion>0.0.8</PackageVersion>
+    <Version>0.0.8</Version>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -30,11 +30,11 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Skyline.DataMiner.CICD.CSharpAnalysis.Analyzer" Version="2.1.2">
+    <PackageReference Include="Skyline.DataMiner.CICD.CSharpAnalysis.Analyzer">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Skyline.DataMiner.Dev.Automation" Version="10.6.3.1" />
-    <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="2.2.3">
+    <PackageReference Include="Skyline.DataMiner.Dev.Automation" />
+    <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>

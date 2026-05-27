@@ -5,8 +5,8 @@
 	/// <summary>
 	/// Represents a document classification that defines how and where files are stored.
 	/// </summary>
-	// [GenerateExposers]
-	// [SdmDomStorage("(slc)documenthub")]
+	//[GenerateExposers]
+	//[SdmDomStorage("(slc)documenthub")]
 	public class DocumentBucket : SdmObject<DocumentBucket>
 	{
 		/// <summary>
@@ -46,6 +46,11 @@
 		/// Gets or sets a reference to the associated DOM Source with this bucket.
 		/// </summary>
 		public SdmObjectReference<DomSource> DOMSource { get; set; }
+
+		/// <summary>
+		/// Gets or sets a reference to the associated SharePoint configuration with this bucket.
+		/// </summary>
+		public SdmObjectReference<SharePointConfiguration> SharePointConfiguration { get; set; }
 
 		/// <summary>
 		/// Gets or sets a string value indicating the definition associated with this bucket.

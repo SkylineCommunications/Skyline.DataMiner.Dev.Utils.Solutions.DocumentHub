@@ -1,116 +1,125 @@
 namespace DevPack.Tests.API
 {
-    using System;
-    using System.Collections.Generic;
-    using FluentAssertions;
-    using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient;
-    using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
-    using Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup;
+	using System;
+	using System.Collections.Generic;
+	using DevPack.Tests.SDM;
+	using FluentAssertions;
+	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient.Exceptions;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Helpers;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
+	using Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup;
 
-    [TestClass]
-    public class Files_ReadFiles_Tests
-    {
-        #region ReadFiles by DocumentBucket - Validation
+	[TestClass]
+	public class Files_ReadFiles_Tests
+	{
+		#region ReadFiles by DocumentBucket - Validation
 
-        [TestMethod]
-        public void ReadFiles_ByBucket_WithNullBucket_ShouldThrowArgumentNullException()
-        {
-            // Arrange
-            var connection = ConnectionHelper.CreateConnection();
-            var client = new DocHubClient(connection);
+		private IConnection connection;
+		private IDocumentHubApiHelper apiHelper;
+		private DocHubClient client;
 
-            // Act
-            Action act = () => client.Files.ReadFiles((DocumentBucket)null);
+		[TestInitialize]
+		public void Initialize()
+		{
+			connection = ConnectionHelper.CreateConnection();
+			apiHelper = Helper.GetHelper(connection);
+			client = new DocHubClient(connection);
+		}
 
-            // Assert
-            act.Should().Throw<ArgumentNullException>()
-                .WithParameterName("bucket");
-        }
+		[TestMethod]
+		public void ReadFiles_ByDomSource_WithNullBucket_ShouldThrowValidationException()
+		{
+			// Act
+			Action act = () => client.Files.ReadFiles((DocumentBucket)null, new ReadFilesConfiguration { Context = null, Filter = null, DomInstanceIds = [] });
 
-        #endregion
+			// Assert
+			act.Should().Throw<ValidationException>().WithMessage("*bucket*");
+		}
 
-        #region ReadFiles by DomSource - Validation
+		[TestMethod]
+		public void ReadFiles_ByBucket_WithNullBucket_ShouldThrowArgumentNullException()
+		{
+			// Act
+			Action act = () => client.Files.ReadFiles((DocumentBucket)null, new ReadFilesConfiguration { Context = null, Filter = null });
 
-        [TestMethod]
-        public void ReadFiles_ByDomSource_WithNullSource_ShouldThrowArgumentNullException()
-        {
-            // Arrange
-            var connection = ConnectionHelper.CreateConnection();
-            var client = new DocHubClient(connection);
-            var domInstanceIds = new List<Guid> { Guid.NewGuid() };
+			// Assert
+			act.Should().Throw<ArgumentNullException>().WithParameterName("bucket");
+		}
 
-            // Act
-            Action act = () => client.Files.ReadFiles(null, domInstanceIds);
+		#endregion
 
-            // Assert
-            act.Should().Throw<ArgumentNullException>()
-                .WithParameterName("source");
-        }
+		#region ReadFiles by DomSource - Validation
 
-        [TestMethod]
-        public void ReadFiles_ByDomSource_WithNullModule_ShouldThrowArgumentException()
-        {
-            // Arrange
-            var connection = ConnectionHelper.CreateConnection();
-            var client = new DocHubClient(connection);
-            var source = new DomSource
-            {
-                Name = "Test Source",
-                Module = null,
-            };
-            var domInstanceIds = new List<Guid> { Guid.NewGuid() };
+		[TestMethod]
+		public void ReadFiles_ByDomSource_WithNullSource_ShouldThrowArgumentNullException()
+		{
+			// Arrange
+			apiHelper.DocumentBuckets.Create(DemoData.DocumentBuckets[4]);
+			var domInstanceIds = new List<Guid> { Guid.NewGuid() };
 
-            // Act
-            Action act = () => client.Files.ReadFiles(source, domInstanceIds);
+			// Act
+			Action act = () => client.Files.ReadFiles(DemoData.DocumentBuckets[4], new ReadFilesConfiguration { DomInstanceIds = domInstanceIds});
 
-            // Assert
-            act.Should().Throw<ArgumentException>()
-                .WithParameterName("source")
-                .WithMessage("*Module*");
-        }
+			// Assert
+			act.Should().Throw<ValidationException>().WithMessage("*source type DOM*");
+		}
 
-        [TestMethod]
-        public void ReadFiles_ByDomSource_WithEmptyModule_ShouldThrowArgumentException()
-        {
-            // Arrange
-            var connection = ConnectionHelper.CreateConnection();
-            var client = new DocHubClient(connection);
-            var source = new DomSource
-            {
-                Name = "Test Source",
-                Module = string.Empty,
-            };
-            var domInstanceIds = new List<Guid> { Guid.NewGuid() };
+		[TestMethod]
+		public void ReadFiles_ByDomSource_WithNullModule_ShouldThrowArgumentException()
+		{
+			// Arrange
+			var testDomSource = DemoData.DomSources[2].Clone(); // deep copy to avoid modifying the original demo data since it's static
+			var testBucket = DemoData.DocumentBuckets[1];
 
-            // Act
-            Action act = () => client.Files.ReadFiles(source, domInstanceIds);
+			// setting the module to null
+			testDomSource.Module = null;
 
-            // Assert
-            act.Should().Throw<ArgumentException>()
-                .WithParameterName("source")
-                .WithMessage("*Module*");
-        }
+			apiHelper.DomSources.Create(testDomSource);
+			apiHelper.DocumentBuckets.Create(testBucket);
 
-        [TestMethod]
-        public void ReadFiles_ByDomSource_WithNullDomInstanceIds_ShouldThrowArgumentNullException()
-        {
-            // Arrange
-            var connection = ConnectionHelper.CreateConnection();
-            var client = new DocHubClient(connection);
-            var source = new DomSource
-            {
-                Name = "Test Source",
-                Module = "test_module",
-            };
+			var domInstanceIds = new List<Guid> { Guid.NewGuid() };
 
-            // Act
-            Action act = () => client.Files.ReadFiles(source, null);
+			// Act
+			Action act = () => client.Files.ReadFiles(testBucket, new ReadFilesConfiguration { DomInstanceIds = domInstanceIds });
 
-            // Assert
-            act.Should().Throw<ArgumentNullException>()
-                .WithParameterName("domInstanceIds");
-        }
+			// Assert
+			act.Should().Throw<ValidationException>().WithMessage("*Module*");
 
-        #endregion
-    }
+			// Cleanup: Reset the module to its original value for other tests
+			apiHelper.DomSources.Update(DemoData.DomSources[2]);
+		}
+
+		[TestMethod]
+		public void ReadFiles_ByDomSource_WithEmptyModule_ShouldThrowArgumentException()
+		{
+			// Arrange
+			var testDomSource = DemoData.DomSources[2].Clone(); // deep copy to avoid modifying the original demo data since it's static
+			var testBucket = DemoData.DocumentBuckets[1];
+
+			var identifier = DemoData.DocumentBuckets[1].SharePointConfiguration.Identifier ?? Guid.Empty.ToString();
+			apiHelper.SharePointConfigurations.Read(SharePointConfigurationExposers.Identifier.Equal(identifier));
+			// setting the module to empty string
+			testDomSource.Module = string.Empty;
+
+			apiHelper.DomSources.Create(testDomSource);
+			apiHelper.DocumentBuckets.Create(testBucket);
+
+			var domInstanceIds = new List<Guid> { Guid.NewGuid() };
+
+			// Act
+			Action act = () => client.Files.ReadFiles(testBucket, new ReadFilesConfiguration { DomInstanceIds = domInstanceIds });
+
+			// Assert
+			act.Should().Throw<ValidationException>().WithMessage("*Module*");
+
+			// Cleanup: Reset the module to its original value for other tests
+			apiHelper.DomSources.Update(DemoData.DomSources[2]);
+		}
+
+		#endregion
+	}
 }

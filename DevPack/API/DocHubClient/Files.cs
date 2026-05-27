@@ -7,6 +7,7 @@
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient.Exceptions;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
@@ -62,7 +63,7 @@
 			var validatedBucket = uploadData.Bucket;
 
 			// Create appropriate storage handler based on bucket's storage type.
-			var storageHandler = StorageHandlerFactory.Create(validatedBucket.StorageType, _connection);
+			var storageHandler = StorageHandlerFactory.Create(_connection, validatedBucket);
 
 			// Check for existing file to prevent overwriting.
 			if (storageHandler.FileExists(new WebFileExistsData
@@ -112,7 +113,7 @@
 			var validatedBucket = uploadData.Bucket;
 
 			// Create appropriate storage handler based on bucket's storage type.
-			var storageHandler = StorageHandlerFactory.Create(validatedBucket.StorageType, _connection);
+			var storageHandler = StorageHandlerFactory.Create(_connection, validatedBucket);
 
 			// Check for existing file to prevent overwriting.
 			if (storageHandler.FileExists(new DomFileExistsData
@@ -169,7 +170,7 @@
 			if (bucket.StorageType == StorageType.DOM)
 				throw new InvalidOperationException("This overload is not supported for DOM storage. Use UploadFile(bucket, filePath, domInstanceId, name) instead.");
 
-			var storageHandler = StorageHandlerFactory.Create(bucket.StorageType, _connection);
+			var storageHandler = StorageHandlerFactory.Create(_connection, bucket);
 
 			// Build effective upload path (do not mutate original bucket).
 			string basePath = bucket.UploadPath ?? string.Empty;
@@ -208,40 +209,33 @@
 		#region Read
 
 		/// <summary>
-		/// Reads files from the specified storage type.
+		/// Reads files associated with the specified document bucket.
+		/// When <see cref="ReadFilesConfiguration.DomInstanceIds"/> is provided, only files linked
+		/// to those DOM instances are returned and the bucket must be a valid DOM bucket.
 		/// </summary>
-		/// <param name="storageType">
-		/// The storage backend to read from.
+		/// <param name="bucket">
+		/// The document bucket defining the storage type and base path.
 		/// </param>
-		/// <param name="context">
-		/// Optional paging context that maintains paging state between calls.
-		/// Pass the same instance to continue paging.
-		/// Use named arguments to skip this parameter if not needed.
-		/// </param>
-		/// <param name="filter">
-		/// Optional case-insensitive filter applied to file names.
-		/// Use named arguments to specify this parameter without passing a paging context.
+		/// <param name="config">
+		/// Optional configuration for paging, filtering, and DOM instance scoping.
 		/// </param>
 		/// <returns>
 		/// A list of files represented as <see cref="IDocHubFile"/>.
 		/// </returns>
-		/// <remarks>
-		/// Named arguments allow callers to specify only the parameters they need:
-		/// <code>
-		/// ReadFiles(<seealso cref="StorageType.DOM"/>, filter: "invoice");
-		/// ReadFiles(<seealso cref="StorageType.DOM"/>, context: pageData);
-		/// </code>
-		/// </remarks>
-		public List<IDocHubFile> ReadFiles(StorageType storageType, DocHubPageData context = null, string filter = null)
+		/// <exception cref="ArgumentNullException">
+		/// Thrown if <paramref name="bucket"/> is null.
+		/// </exception>
+		/// <exception cref="ValidationException">
+		/// Thrown if <see cref="ReadFilesConfiguration.DomInstanceIds"/> is set but the bucket
+		/// is not a valid DOM bucket or the DOM source is missing.
+		/// </exception>
+		public List<IDocHubFile> ReadFiles(DocumentBucket bucket, ReadFilesConfiguration config = null)
 		{
-			ReadData data = storageType == StorageType.DOM
-				? (ReadData)new DomFileReadData()
-				: new WebFileReadData();
+			config = config ?? new ReadFilesConfiguration();
 
-			data.Filter = filter;
-			data.Context = context;
-
-			return ReadFiles(storageType, data);
+			return config.DomInstanceIds != null
+				? ReadDomFiles(bucket, config.DomInstanceIds, config.Context, config.Filter)
+				: ReadFiles(bucket, config.Context, config.Filter);
 		}
 
 		/// <summary>
@@ -272,9 +266,10 @@
 		/// ReadFiles(bucket, context: pageData);
 		/// </code>
 		/// </remarks>
-		public List<IDocHubFile> ReadFiles(DocumentBucket bucket, DocHubPageData context = null, string filter = null)
+		private List<IDocHubFile> ReadFiles(DocumentBucket bucket, DocHubPageData context = null, string filter = null)
 		{
-			FileValidator.ValidateBaseParameters(bucket, "OK"); // Reusing the validation method for null check on bucket; filePath is irrelevant here so passing dummy value
+			// Reusing the validation method for null check on bucket; filePath is irrelevant here so passing dummy value
+			FileValidator.ValidateBaseParameters(bucket, "OK");
 
 			ReadData data = bucket.StorageType == StorageType.DOM
 				? (ReadData)new DomFileReadData()
@@ -284,14 +279,14 @@
 			data.Filter = filter;
 			data.Context = context;
 
-			return ReadFiles(bucket.StorageType, data);
+			return ReadFiles(bucket, data);
 		}
 
 		/// <summary>
 		/// Reads files from a DOM source for the specified DOM instance IDs.
 		/// </summary>
-		/// <param name="source">
-		/// The DOM source containing the module where the files are stored.
+		/// <param name="bucket">
+		/// The DOM bucket containing the <see cref="DomSource"/> module where the files are stored.
 		/// </param>
 		/// <param name="domInstanceIds">
 		/// The DOM instance identifiers whose attachments should be retrieved.
@@ -311,36 +306,30 @@
 		/// A list of files represented as <see cref="IDocHubFile"/>.
 		/// </returns>
 		/// <exception cref="ArgumentNullException">
-		/// Thrown if <paramref name="source"/> or <paramref name="domInstanceIds"/> is <c>null</c>.
+		/// Thrown if <paramref name="domInstanceIds"/> is <c>null</c>.
 		/// </exception>
-		/// <exception cref="ArgumentException">
-		/// Thrown if <paramref name="source.Module"/> is <c>null</c> or empty.
+		/// <exception cref="ValidationException">
+		/// Thrown if the provided <paramref name="bucket"/> is not compatible with this method, or if the DOM source is missing.
 		/// </exception>
-		/// <remarks>
-		/// Named arguments allow callers to specify only the parameters they need:
-		/// <code>
-		/// ReadFiles(source, ids, filter: "invoice");
-		/// ReadFiles(source, ids, context: pageData);
-		/// </code>
-		/// </remarks>
-		public List<IDocHubFile> ReadFiles(DomSource source, IEnumerable<Guid> domInstanceIds, DocHubPageData context = null, string filter = null)
+		private List<IDocHubFile> ReadDomFiles(DocumentBucket bucket, IEnumerable<Guid> domInstanceIds, DocHubPageData context = null, string filter = null)
 		{
-			if (source == null)
-				throw new ArgumentNullException(nameof(source));
-			if (string.IsNullOrEmpty(source.Module))
-				throw new ArgumentException("Module cannot be null or empty.", nameof(source));
 			if (domInstanceIds == null)
 				throw new ArgumentNullException(nameof(domInstanceIds));
 
+			if (!validator.ValidateAndGetDOMSourceBucket(bucket, out DomSource domSource, out string errorMessage))
+			{
+				throw new ValidationException($"Invalid parameters for reading DOM files: {errorMessage}");
+			}
+
 			ReadData data = new DomFileReadData
 			{
-				Module = source.Module,
+				Module = domSource.Module,
 				DomInstanceIds = domInstanceIds.ToList(),
 				Filter = filter,
 				Context = context,
 			};
 
-			return ReadFiles(StorageType.DOM, data);
+			return ReadFiles(bucket, data);
 		}
 
 		/// <summary>
@@ -429,7 +418,7 @@
 		{
 			FileValidator.ValidateBaseParameters(bucket, fileName);
 
-			var storageHandler = StorageHandlerFactory.Create(bucket.StorageType, _connection);
+			var storageHandler = StorageHandlerFactory.Create(_connection, bucket);
 
 			if (!(storageHandler is IDeletableStorageHandler deletableHandler))
 				throw new InvalidOperationException($"Delete is not supported for storage type '{bucket.StorageType}'.");
@@ -447,9 +436,9 @@
 
 		#region Internal and Private Methods
 
-		internal List<IDocHubFile> ReadFiles(StorageType storagetype, ReadData data)
+		internal List<IDocHubFile> ReadFiles(DocumentBucket bucket, ReadData data)
 		{
-			var storageHandler = StorageHandlerFactory.Create(storagetype, _connection);
+			var storageHandler = StorageHandlerFactory.Create(_connection, bucket);
 			return storageHandler.ReadFiles(data);
 		}
 

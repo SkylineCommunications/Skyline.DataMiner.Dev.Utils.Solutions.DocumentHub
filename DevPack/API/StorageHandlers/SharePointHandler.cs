@@ -15,8 +15,10 @@
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Security;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointConfiguration;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Validation;
 	using Drive = Microsoft.Graph.Drive;
 	using File = System.IO.File;
 
@@ -76,10 +78,16 @@
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SharePointHandler"/> class.
 		/// </summary>
+		/// <param name="connection">
+		/// An active DataMiner connection used to communicate with the system.
+		/// </param>
+		/// <param name="bucket">
+		/// The <see cref="DocumentBucket"/> containing the storage type and related configuration for which this handler is being created.
+		/// </param>
 		/// <exception cref="NullReferenceException">
 		/// Thrown when the configured SharePoint document library cannot be found.
 		/// </exception>
-		internal SharePointHandler(IConnection connection)
+		internal SharePointHandler(IConnection connection, DocumentBucket bucket)
 		{
 			_sharePointRepository = new SharePointConfigurationDomRepository(connection);
 
@@ -87,8 +95,15 @@
 			if (_graphClient != null && _drive != null)
 				return;
 
+			if (!bucket.SharePointConfiguration.IsValidReference(out Guid identifierGuid))
+			{
+				throw new ArgumentException($"The provided {nameof(bucket)} does not have a SharePoint reference.");
+			}
+
 			// Retrieve SharePoint configuration from DOM
-			_sharePoint = _sharePointRepository.Read(new TRUEFilterElement<SharePointConfiguration>()).FirstOrDefault();
+			var sharePointFilter = SharePointConfigurationExposers.Identifier.Equal(identifierGuid.ToString());
+			_sharePoint = _sharePointRepository.Read(sharePointFilter).FirstOrDefault()
+				?? throw new ArgumentException("No SharePoint configuration tied to the provided bucket could be found.", nameof(bucket));
 
 			// Retrieve client secret
 			var clientSecret = RetrieveClientSecret();

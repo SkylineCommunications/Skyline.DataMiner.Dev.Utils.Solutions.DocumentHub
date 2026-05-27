@@ -5,10 +5,15 @@
 	/// <summary>
 	/// Configuration required to connect to a SharePoint document library.
 	/// </summary>
-	// [GenerateExposers]
-	// [SdmDomStorage("(slc)documenthub")]
+	//[GenerateExposers]
+	//[SdmDomStorage("(slc)documenthub")]
 	public class SharePointConfiguration : SdmObject<SharePointConfiguration>
 	{
+		/// <summary>
+		/// Gets or sets the name associated with the configuration.
+		/// </summary>
+		public string Name { get; set; }
+
 		/// <summary>
 		/// Gets or sets azure Active Directory tenant identifier.
 		/// </summary>

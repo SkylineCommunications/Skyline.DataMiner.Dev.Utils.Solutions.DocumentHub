@@ -2,9 +2,12 @@ namespace DevPack.Tests.SDM.DocumentBucket
 {
 	using System;
 	using System.Linq;
+	using DevPack.Tests.SDM.DomSource;
+	using DevPack.Tests.SDM.Sharepoint;
 	using FluentAssertions;
 	using FluentAssertions.Execution;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Helpers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
@@ -124,6 +127,40 @@ namespace DevPack.Tests.SDM.DocumentBucket
 				retrieved.Should().NotBeNull();
 				retrieved.Count().Should().Be(3);
 			}
+		}
+
+		[TestMethod]
+		public void ReadFilter_SharePointConfigurationReference_Equal()
+		{
+			// Arrange
+			var helper = Helper.GetHelper();
+			SharepointDomRepository_FilterTests_Tests.CreateAll(helper);
+			CreateAll(helper);
+
+			// Act
+			var filter = DocumentBucketExposers.SharePointConfiguration.Equal(new SdmObjectReference<SharePointConfiguration>(DemoData.SharePointConfigurations[1].Identifier));
+			var control = DemoData.DocumentBuckets.Where(db => db.SharePointConfiguration != null && db.SharePointConfiguration.Identifier == DemoData.SharePointConfigurations[1].Identifier);
+			var retrieved = helper.DocumentBuckets.Read(filter).ToArray();
+
+			// Assert
+			control.Should().BeEquivalentTo(retrieved);
+		}
+
+		[TestMethod]
+		public void ReadFilter_DomSourceReference_Equal()
+		{
+			// Arrange
+			var helper = Helper.GetHelper();
+			DomSourceDomRepository_CRUD_Tests.CreateAll(helper);
+			CreateAll(helper);
+
+			// Act
+			var filter = DocumentBucketExposers.DOMSource.Equal(new SdmObjectReference<DomSource>(DemoData.DomSources[2].Identifier));
+			var control = DemoData.DocumentBuckets.Where(db => db.DOMSource != null && db.DOMSource.Identifier == DemoData.DomSources[2].Identifier);
+			var retrieved = helper.DocumentBuckets.Read(filter).ToArray();
+
+			// Assert
+			control.Should().BeEquivalentTo(retrieved);
 		}
 
 		[TestMethod]
