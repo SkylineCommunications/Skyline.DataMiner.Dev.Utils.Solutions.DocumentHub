@@ -20,10 +20,10 @@
 		string GetFilePath();
 
 		/// <summary>
-		/// Gets the full file reference used to access or download the file.
+		/// Gets the file name including extension.
 		/// </summary>
 		/// <returns>
-		/// A string representing the file reference.
+		/// The file name with extension (e.g., "report.pdf").
 		/// </returns>
 		string GetFile();
 
@@ -40,16 +40,15 @@
 		/// Gets the file extension.
 		/// </summary>
 		/// <returns>
-		/// The file extension including the leading dot.
-		/// Example. .pdf
+		/// The file extension without the leading dot (e.g., "pdf").
 		/// </returns>
 		string GetExtension();
 
 		/// <summary>
-		/// Gets the name of the file.
+		/// Gets the name of the file without extension.
 		/// </summary>
 		/// <returns>
-		/// The file name including extension.
+		/// The file name without extension (e.g., "report").
 		/// </returns>
 		string GetName();
 
