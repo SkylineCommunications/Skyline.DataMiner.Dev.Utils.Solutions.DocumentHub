@@ -86,25 +86,46 @@ var result = helper.DocumentBuckets.CreateOrUpdate(new[] { bucket1, bucket2 });
 ### SharePoint Configurations
 
 ```csharp
-// Create
-var config = helper.SharePointConfigurations.Create(new SharePointConfiguration
+// Create multiple configurations for different SharePoint sites
+var config1 = helper.SharePointConfigurations.Create(new SharePointConfiguration
 {
+    Name = "Marketing Site",
     TenantID = "tenant-id",
     ClientID = "client-id",
     ClientSecret = "client-secret",
-    SiteURL = "https://contoso.sharepoint.com/sites/MySite",
+    SiteURL = "https://contoso.sharepoint.com/sites/Marketing",
     DocumentLibraryName = "Shared Documents",
+});
+
+var config2 = helper.SharePointConfigurations.Create(new SharePointConfiguration
+{
+    Name = "Engineering Site",
+    TenantID = "tenant-id",
+    ClientID = "client-id",
+    ClientSecret = "client-secret",
+    SiteURL = "https://contoso.sharepoint.com/sites/Engineering",
+    DocumentLibraryName = "Technical Docs",
 });
 
 // Read all
 var configs = helper.SharePointConfigurations.ReadAll();
 
 // Update
-config.DocumentLibraryName = "Archive";
-helper.SharePointConfigurations.Update(config);
+config1.DocumentLibraryName = "Archive";
+helper.SharePointConfigurations.Update(config1);
 
 // Delete
-helper.SharePointConfigurations.Delete(config);
+helper.SharePointConfigurations.Delete(config2);
+
+// Link a SharePoint bucket to a specific configuration
+var bucket = helper.DocumentBuckets.Create(new DocumentBucket
+{
+    Name = "Marketing Docs",
+    StorageType = StorageType.SharePoint,
+    UploadPath = "/docs",
+    Extensions = "pdf,docx",
+    SharePointConfiguration = new SdmObjectReference<SharePointConfiguration>(config1),
+});
 ```
 
 ### DOM Sources

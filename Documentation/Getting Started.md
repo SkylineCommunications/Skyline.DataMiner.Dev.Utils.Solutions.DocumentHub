@@ -116,25 +116,51 @@ var bucket = helper.DocumentBuckets.Create(new DocumentBucket
 The DocumentHub solution supports three storage backends:
 
 - `StorageType.Local` – files stored on the DataMiner Agent's file system.
-- `StorageType.SharePoint` – integration with SharePoint Online via Microsoft Graph.
+- `StorageType.SharePoint` – integration with SharePoint Online via Microsoft Graph. Multiple SharePoint configurations are supported, allowing buckets to connect to different sites or document libraries.
 - `StorageType.DOM` – files attached directly to DOM instances.
 
 ### SharePoint Configurations
 
-SharePoint configurations hold the Azure AD credentials and site information needed to connect to a SharePoint document library.
+SharePoint configurations hold the Azure AD credentials and site information needed to connect to SharePoint Online document libraries. Multiple configurations are supported, allowing different document buckets to connect to different SharePoint sites or libraries.
 
 ```csharp
 using Skyline.DataMiner.Solutions.DocumentHub.SDM.Helpers;
 
 var helper = engine.GetDocumentHubApiHelper();
 
-var config = helper.SharePointConfigurations.Create(new SharePointConfiguration
+// Create a configuration for one SharePoint site
+var marketingConfig = helper.SharePointConfigurations.Create(new SharePointConfiguration
 {
+    Name = "Marketing Site",
     TenantID = "your-tenant-id",
     ClientID = "your-client-id",
     ClientSecret = "your-client-secret",
-    SiteURL = "https://contoso.sharepoint.com/sites/MySite",
+    SiteURL = "https://contoso.sharepoint.com/sites/Marketing",
     DocumentLibraryName = "Shared Documents",
+});
+
+// Create a configuration for another SharePoint site
+var engineeringConfig = helper.SharePointConfigurations.Create(new SharePointConfiguration
+{
+    Name = "Engineering Site",
+    TenantID = "your-tenant-id",
+    ClientID = "your-client-id",
+    ClientSecret = "your-client-secret",
+    SiteURL = "https://contoso.sharepoint.com/sites/Engineering",
+    DocumentLibraryName = "Technical Docs",
+});
+```
+
+Each SharePoint document bucket references a specific configuration via its `SharePointConfiguration` property:
+
+```csharp
+var bucket = helper.DocumentBuckets.Create(new DocumentBucket
+{
+    Name = "Marketing Reports",
+    StorageType = StorageType.SharePoint,
+    UploadPath = "/reports",
+    Extensions = "pdf,docx,xlsx",
+    SharePointConfiguration = new SdmObjectReference<SharePointConfiguration>(marketingConfig),
 });
 ```
 
