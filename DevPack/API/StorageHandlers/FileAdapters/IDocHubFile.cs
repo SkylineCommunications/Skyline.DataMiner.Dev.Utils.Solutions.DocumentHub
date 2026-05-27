@@ -12,10 +12,12 @@
 	public interface IDocHubFile
 	{
 		/// <summary>
-		/// Gets the full path to the file within the storage backend.
+		/// Gets the web-resolvable or storage-specific path to the file.
 		/// </summary>
 		/// <returns>
-		/// A storage specific path identifying the file location.
+		/// For local storage: a relative web path (e.g., "/Public/WebFileManager/docs/report.pdf").
+		/// For SharePoint: the web URL of the file.
+		/// For DOM: an empty string.
 		/// </returns>
 		string GetFilePath();
 
@@ -28,11 +30,11 @@
 		string GetFile();
 
 		/// <summary>
-		/// Gets the type of the item.
+		/// Gets the type or category of the item.
 		/// </summary>
 		/// <returns>
-		/// A string describing the file type.
-		/// Example. File
+		/// For local storage: the name of the parent directory (e.g., "technical").
+		/// For other storage types: an empty string.
 		/// </returns>
 		string GetType();
 
@@ -53,10 +55,10 @@
 		string GetName();
 
 		/// <summary>
-		/// Gets the size of the file.
+		/// Gets the size of the file in a human-readable format.
 		/// </summary>
 		/// <returns>
-		/// File size represented as a string.
+		/// A formatted string such as "1.5 MB" or "256 KB".
 		/// </returns>
 		string GetSize();
 
@@ -77,18 +79,20 @@
 		string GetCreatedBy();
 
 		/// <summary>
-		/// Gets the directory containing the file.
+		/// Gets the directory containing the file, relative to the storage root.
 		/// </summary>
 		/// <returns>
-		/// A path relative to the storage root.
+		/// For local storage: relative path from WebFileManager root (e.g., "docs/technical").
+		/// For SharePoint: relative path from the document library root.
+		/// For DOM: an empty string.
 		/// </returns>
 		string GetDirectory();
 
 		/// <summary>
-		/// Gets the module inside with the DOM instance to whom the file is attached.
+		/// Gets the DOM module in which the file's DOM instance resides.
 		/// </summary>
 		/// <returns>
-		/// The module name or identifier when available.
+		/// The module name when the file is stored as a DOM attachment; otherwise, an empty string.
 		/// </returns>
 		string GetModule();
 

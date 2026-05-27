@@ -418,7 +418,7 @@
 		{
 			FileValidator.ValidateBaseParameters(bucket, fileName);
 
-			var storageHandler = StorageHandlerFactory.Create(bucket.StorageType, _connection);
+			var storageHandler = StorageHandlerFactory.Create(_connection, bucket);
 
 			if (!(storageHandler is IDeletableStorageHandler deletableHandler))
 				throw new InvalidOperationException($"Delete is not supported for storage type '{bucket.StorageType}'.");
