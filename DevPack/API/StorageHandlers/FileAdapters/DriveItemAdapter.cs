@@ -112,10 +112,5 @@
 			// Return formatted size string.
 			return $"{len:0.##} {sizes[order]}";
 		}
-
-		public new string GetType()
-		{
-			return string.Empty;
-		}
 	}
 }

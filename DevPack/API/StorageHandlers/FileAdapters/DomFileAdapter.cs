@@ -84,10 +84,5 @@
 		{
 			return string.Empty;
 		}
-
-		string IDocHubFile.GetType()
-		{
-			return string.Empty;
-		}
 	}
 }

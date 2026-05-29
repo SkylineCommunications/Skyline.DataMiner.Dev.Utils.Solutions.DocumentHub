@@ -231,7 +231,6 @@ string fileName   = file.GetFile();        // File name with extension (e.g. "re
 string name       = file.GetName();        // File name without extension (e.g. "report")
 string extension  = file.GetExtension();   // Extension without dot (e.g. "pdf")
 string size       = file.GetSize();        // Human-readable size (e.g. "1.5 MB")
-string type       = file.GetType();        // Parent directory name (local) or empty
 string directory  = file.GetDirectory();   // Relative directory path from storage root; empty for DOM
 DateTime created  = file.GetCreatedAt();   // Creation timestamp (UTC)
 string createdBy  = file.GetCreatedBy();   // Creator name or identifier

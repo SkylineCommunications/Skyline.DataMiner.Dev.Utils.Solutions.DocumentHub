@@ -24,11 +24,6 @@
 			return fileInfo.Name;
 		}
 
-		public new string GetType()
-		{
-			return Path.GetFileName(fileInfo.DirectoryName);
-		}
-
 		public string GetExtension()
 		{
 			return fileInfo.Extension.TrimStart('.');

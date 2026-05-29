@@ -40,15 +40,6 @@
 		string GetFile();
 
 		/// <summary>
-		/// Gets the type or category of the item.
-		/// </summary>
-		/// <returns>
-		/// For local storage: the name of the parent directory (e.g., "technical").
-		/// For other storage types: an empty string.
-		/// </returns>
-		string GetType();
-
-		/// <summary>
 		/// Gets the file extension.
 		/// </summary>
 		/// <returns>
