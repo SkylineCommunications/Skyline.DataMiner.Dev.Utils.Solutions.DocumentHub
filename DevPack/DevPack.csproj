@@ -6,8 +6,8 @@
 		<AssemblyName>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub</AssemblyName>
 		<RootNamespace>Skyline.DataMiner.Solutions.DocumentHub</RootNamespace>
 		<PackageId>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub</PackageId>
-		<PackageVersion>0.0.8</PackageVersion>
-		<Version>0.0.8</Version>
+		<PackageVersion>0.0.10</PackageVersion>
+		<Version>0.0.10</Version>
 		<PackageTags>Skyline;DataMiner</PackageTags>
 		<PackageProjectUrl>https://skyline.be</PackageProjectUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
@@ -50,4 +50,12 @@
 	</ItemGroup>
 
 	<Import Project="..\SharedMappers\SharedMappers.projitems" Label="Shared" />
+
+	<!-- Can be used to set the location of your local nuget store to copy to -->
+	<Import Project="../Directory.Build.props.user" Condition="Exists('../Directory.Build.props.user')" />
+
+	<Target Name="CopyNuGetPackage" AfterTargets="Pack" Condition="'$(NuGetStorePath)' != '' and '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+		<Copy SourceFiles="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg" DestinationFolder="$(NuGetStorePath)\$(PackageId)" />
+	</Target>
+	
 </Project>

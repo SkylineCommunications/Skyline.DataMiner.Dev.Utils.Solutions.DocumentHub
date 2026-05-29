@@ -30,4 +30,5 @@
 		</PackageReference>
 	</ItemGroup>
 	<Import Project="..\SharedMappers\SharedMappers.projitems" Label="Shared" />
+	
 </Project>
