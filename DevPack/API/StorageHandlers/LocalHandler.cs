@@ -240,6 +240,17 @@
 					.EnumerateFiles(localContext.CurrentRoot, "*.*", SearchOption.AllDirectories)
 					.Select(f => new FileInfo(f));
 
+				// Apply allowed extensions filter from bucket
+				if (bucket != null && !string.IsNullOrEmpty(bucket.Extensions))
+				{
+					var allowedExtensions = new HashSet<string>(
+						bucket.Extensions.Split(','),
+						StringComparer.OrdinalIgnoreCase);
+
+					files = files.Where(fi =>
+						allowedExtensions.Contains(fi.Extension.TrimStart('.')));
+				}
+
 				// Apply optional filename filter
 				if (!string.IsNullOrEmpty(filter))
 				{
