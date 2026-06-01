@@ -11,8 +11,10 @@
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DomSource;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Validation;
 
 	/// <summary>
 	/// Storage handler for reading, paging, and uploading files from DOM instances.
@@ -54,15 +56,18 @@
 				throw new ArgumentException("DOMAttachmentsHandler requires DOMFileExistsData.", nameof(data));
 
 			var bucket = args.Bucket;
-			if (bucket == null || string.IsNullOrEmpty(bucket.DOMSource/*.Module*/ ))
-				throw new ArgumentException("Bucket and its module must be specified.", nameof(data));
+			if (bucket == null)
+				throw new ArgumentException("Bucket must be specified.", nameof(data));
+
+			var module = ResolveModule(bucket);
 
 			// Create DOM helper for the module
-			var domHelper = new DomHelper(_connection.HandleMessages, bucket.DOMSource/*.Module*/);
+			var domHelper = new DomHelper(_connection.HandleMessages, module);
 
 			// Retrieve the file names for the given instance and check for match
+			var domInstanceId = new DomInstanceId(args.DomInstanceId) { ModuleId = module };
 			return domHelper.DomInstances.Attachments
-				.GetFileNames(new DomInstanceId(args.DomInstanceId))
+				.GetFileNames(domInstanceId)
 				.Contains(args.Name, StringComparer.OrdinalIgnoreCase);
 		}
 
@@ -127,9 +132,13 @@
 			// Load file into memory
 			var fileBytes = File.ReadAllBytes(filePath);
 
+			// Resolve the actual module name from the bucket's DOMSource reference
+			var module = ResolveModule(args.Bucket);
+
 			// Add file as attachment to the DOM instance
-			var domHelper = new DomHelper(_connection.HandleMessages, args.Bucket.DOMSource/*.Module*/);
-			domHelper.DomInstances.Attachments.Add(new DomInstanceId(instanceId), newName, fileBytes);
+			var domHelper = new DomHelper(_connection.HandleMessages, module);
+			var domInstanceId = new DomInstanceId(instanceId) { ModuleId = module };
+			domHelper.DomInstances.Attachments.Add(domInstanceId, newName, fileBytes);
 
 			return instanceId.ToString();
 		}
@@ -337,6 +346,41 @@
 		private IEnumerable<string> GetAllSources(IRepository<DomSource> helper)
 		{
 			return helper.Read(new TRUEFilterElement<DomSource>()).Select(s => s.Module);
+		}
+
+		/// <summary>
+		/// Resolves the actual DOM module name from the bucket's DOMSource reference.
+		/// </summary>
+		/// <param name="bucket">The document bucket containing the DOMSource reference.</param>
+		/// <returns>The module name string.</returns>
+		/// <exception cref="ArgumentException">
+		/// Thrown if the bucket's DOMSource reference is invalid or the DomSource cannot be found.
+		/// </exception>
+		private string ResolveModule(DocumentBucket bucket)
+		{
+			if (!bucket.DOMSource.IsValidReference(out Guid domSourceId))
+			{
+				throw new ArgumentException(
+					$"The bucket '{bucket.Name}' does not have a valid DOM Source reference.");
+			}
+
+			var domSource = _domSourceRepository
+				.Read(DomSourceExposers.Identifier.Equal(domSourceId.ToString()))
+				.FirstOrDefault();
+
+			if (domSource == null)
+			{
+				throw new ArgumentException(
+					$"The DOM Source (ID: {domSourceId}) tied to the bucket '{bucket.Name}' does not exist in the repository.");
+			}
+
+			if (string.IsNullOrEmpty(domSource.Module))
+			{
+				throw new ArgumentException(
+					$"The DOM Source '{domSource.Name}' does not have a module configured.");
+			}
+
+			return domSource.Module;
 		}
 		#endregion
 	}
