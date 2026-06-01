@@ -1,8 +1,10 @@
 ﻿namespace Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM.DomSource_Definition
 {
 	using System;
+	using System.Collections.Generic;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel.Concatenation;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Net.Sections;
 	using Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM;
@@ -59,6 +61,23 @@
 					IsSoftDeleted = false,
 				})
 				.Build();
+
+			// Ensure ModuleSettingsOverrides is not null before setting NameDefinition
+			if (domSourceDefinition.ModuleSettingsOverrides == null)
+			{
+				domSourceDefinition.ModuleSettingsOverrides = new ModuleSettingsOverrides();
+			}
+
+			// Set instance naming definition on the DomDefinition level (takes priority over module level)
+			domSourceDefinition.ModuleSettingsOverrides.NameDefinition = new DomInstanceNameDefinition
+			{
+				ConcatenationItems = new List<IDomInstanceConcatenationItem>
+				{
+					new FieldValueConcatenationItem { FieldDescriptorId = DomSourceDomMapper.DomSourceProperties.Name },
+				},
+			};
+
+			Log($"Setting NameDefinition with {domSourceDefinition.ModuleSettingsOverrides.NameDefinition.ConcatenationItems.Count} concatenation items");
 
 			Import(DomDefinitionExposers.Id.Equal(DomSourceDomMapper.DomDefinitionId.Id), domSourceDefinition);
 		}
