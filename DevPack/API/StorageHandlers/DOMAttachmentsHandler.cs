@@ -64,10 +64,18 @@
 			// Create DOM helper for the module
 			var domHelper = new DomHelper(_connection.HandleMessages, module);
 
+			// Read the target DOM instance so we use its fully-qualified DomInstanceId
+			// (carrying the correct ModuleId) instead of constructing one manually.
+			var instance = domHelper.DomInstances
+				.Read(DomInstanceExposers.Id.Equal(args.DomInstanceId))
+				.FirstOrDefault();
+
+			if (instance == null)
+				return false;
+
 			// Retrieve the file names for the given instance and check for match
-			var domInstanceId = new DomInstanceId(args.DomInstanceId) { ModuleId = module };
 			return domHelper.DomInstances.Attachments
-				.GetFileNames(domInstanceId)
+				.GetFileNames(instance.ID)
 				.Contains(args.Name, StringComparer.OrdinalIgnoreCase);
 		}
 
@@ -135,10 +143,18 @@
 			// Resolve the actual module name from the bucket's DOMSource reference
 			var module = ResolveModule(args.Bucket);
 
-			// Add file as attachment to the DOM instance
+			// Create DOM helper for the module
 			var domHelper = new DomHelper(_connection.HandleMessages, module);
-			var domInstanceId = new DomInstanceId(instanceId) { ModuleId = module };
-			domHelper.DomInstances.Attachments.Add(domInstanceId, newName, fileBytes);
+
+			// Read the target DOM instance
+			var instance = domHelper.DomInstances
+									.Read(DomInstanceExposers.Id.Equal(instanceId))
+									.FirstOrDefault()
+									?? throw new InvalidOperationException(
+										$"Could not find DOM instance with id '{instanceId}' in module '{module}'.");
+
+			// Add file as attachment to the DOM instance
+			domHelper.DomInstances.Attachments.Add(instance.ID, newName, fileBytes);
 
 			return instanceId.ToString();
 		}
