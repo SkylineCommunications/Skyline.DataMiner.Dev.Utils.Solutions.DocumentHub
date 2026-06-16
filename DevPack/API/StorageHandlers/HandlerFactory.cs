@@ -105,7 +105,6 @@
 			var storage = bucket?.StorageType;
 			switch (storage)
 			{
-				// TODO: if it's sharepoint, don't initialize each time. Instead, consider caching the handler instance or implementing a singleton pattern if appropriate.
 				case StorageType.SharePoint:
 					// SharePoint-based storage implementation.
 					return new SharePointHandler(connection, bucket);

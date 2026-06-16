@@ -35,6 +35,7 @@
     </PackageReference>
     <PackageReference Include="Skyline.DataMiner.Dev.Protocol" />
     <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers">
+      <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
