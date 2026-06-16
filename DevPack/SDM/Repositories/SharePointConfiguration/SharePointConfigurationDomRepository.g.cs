@@ -530,12 +530,6 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointCon
 					obj.ClientID = _clientid.Value;
 				}
 
-				var _clientsecret = _sharepointconfigurationpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientSecret);
-				if (_clientsecret != null)
-				{
-					obj.ClientSecret = _clientsecret.Value;
-				}
-
 				var _siteurl = _sharepointconfigurationpropertiesSection.GetValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SiteURL);
 				if (_siteurl != null)
 				{
@@ -594,11 +588,6 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointCon
 				_sharepointconfigurationproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientID, Convert.ToString(obj.ClientID));
 			}
 
-			if (obj.ClientSecret != default)
-			{
-				_sharepointconfigurationproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientSecret, Convert.ToString(obj.ClientSecret));
-			}
-
 			if (obj.SiteURL != default)
 			{
 				_sharepointconfigurationproperties.AddOrUpdateValue<string>(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SiteURL, Convert.ToString(obj.SiteURL));
@@ -627,8 +616,6 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointCon
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.TenantID), comparer, (string)value);
 				case "ClientID":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientID), comparer, (string)value);
-				case "ClientSecret":
-					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientSecret), comparer, (string)value);
 				case "SiteURL":
 					return new DynamicManagedListFilter<DomInstance, object>(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SiteURL), comparer, (string)value);
 				case "DocumentLibraryName":
@@ -652,8 +639,6 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointCon
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.TenantID), sortOrder, naturalSort);
 				case "ClientID":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientID), sortOrder, naturalSort);
-				case "ClientSecret":
-					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.ClientSecret), sortOrder, naturalSort);
 				case "SiteURL":
 					return OrderByElementFactory.Create(DomInstanceExposers.FieldValues.DomInstanceField(Skyline.DataMiner.Solutions.DocumentHub.SDM.Models.SharePointConfigurationDomMapper.SharePointConfigurationProperties.SiteURL), sortOrder, naturalSort);
 				case "DocumentLibraryName":
