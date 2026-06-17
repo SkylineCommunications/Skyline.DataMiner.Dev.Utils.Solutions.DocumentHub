@@ -37,7 +37,6 @@
 					created.Name.Should().Be(demoConfig.Name);
 					created.ClientID.Should().Be(demoConfig.ClientID);
 					created.TenantID.Should().Be(demoConfig.TenantID);
-					created.ClientSecret.Should().Be(demoConfig.ClientSecret);
 					created.SiteURL.Should().Be(demoConfig.SiteURL);
 					created.DocumentLibraryName.Should().Be(demoConfig.DocumentLibraryName);
 				}

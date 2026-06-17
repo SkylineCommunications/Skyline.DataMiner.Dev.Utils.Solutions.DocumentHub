@@ -42,7 +42,6 @@
 				retrieved.Should().NotBeNull();
 				retrieved.TenantID.Should().Be(expected.TenantID);
 				retrieved.ClientID.Should().Be(expected.ClientID);
-				retrieved.ClientSecret.Should().Be(expected.ClientSecret);
 				retrieved.SiteURL.Should().Be(expected.SiteURL);
 				retrieved.DocumentLibraryName.Should().Be(expected.DocumentLibraryName);
 			}

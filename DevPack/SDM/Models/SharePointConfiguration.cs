@@ -25,11 +25,6 @@
 		public string ClientID { get; set; }
 
 		/// <summary>
-		/// Gets or sets client secret used for authentication against Microsoft Graph.
-		/// </summary>
-		public string ClientSecret { get; set; }
-
-		/// <summary>
 		/// Gets or sets base URL of the SharePoint site.
 		/// Example. https://contoso.sharepoint.com/sites/MySite.
 		/// </summary>

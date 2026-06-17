@@ -6,8 +6,8 @@
     <AssemblyName>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub.GQI</AssemblyName>
     <PackageId>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub.GQI</PackageId>
     <RootNamespace>Skyline.DataMiner.Solutions.DocumentHub.GQI</RootNamespace>
-    <PackageVersion>0.0.13</PackageVersion>
-    <Version>0.0.13</Version>
+    <PackageVersion>1.0.1</PackageVersion>
+    <Version>1.0.1</Version>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -36,6 +36,7 @@
     <PackageReference Include="Skyline.DataMiner.Dev.Automation" />
     <PackageReference Include="Skyline.DataMiner.Dev.Common" />
     <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers">
+      <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
