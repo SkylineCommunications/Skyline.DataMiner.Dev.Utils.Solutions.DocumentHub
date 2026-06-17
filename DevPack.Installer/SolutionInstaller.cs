@@ -1,10 +1,10 @@
 ﻿namespace DevPack.Installer
 {
 	using System;
+	using DevPack.Installer.DOM;
 	using Skyline.AppInstaller;
 	using Skyline.DataMiner.Automation;
 	using Skyline.DataMiner.Net.AppPackages;
-	using Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM;
 
 	public class SolutionInstaller
 	{
