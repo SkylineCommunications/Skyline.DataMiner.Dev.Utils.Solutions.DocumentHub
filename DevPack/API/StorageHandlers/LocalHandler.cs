@@ -1,10 +1,11 @@
-﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers
 {
 	using System;
 	using System.Collections.Generic;
 	using System.Drawing;
 	using System.IO;
 	using System.Linq;
+	using Skyline.DataMiner.Solutions.DocumentHub.API;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
@@ -212,11 +213,9 @@
 			// Extract parameters from data
 			var bucket = args.Bucket;
 			var filter = args.Filter;
-			var context = args.Context;
 
 			// Validate context
-			if (context == null)
-				throw new ArgumentNullException(nameof(data));
+			var context = args.Context ?? throw new ArgumentNullException(nameof(data));
 
 			// Ensure the context is local
 			if (!(context is LocalPageData localContext))

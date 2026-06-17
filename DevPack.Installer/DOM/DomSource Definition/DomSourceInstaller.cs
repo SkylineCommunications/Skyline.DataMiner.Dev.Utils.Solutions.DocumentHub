@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using DevPack.Installer.DOM;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 
