@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM.DocumentBucket_Definition
+﻿namespace DevPack.Installer.DOM.DocumentBucket_Definition
 {
 	using System;
 	using System.Collections.Generic;
