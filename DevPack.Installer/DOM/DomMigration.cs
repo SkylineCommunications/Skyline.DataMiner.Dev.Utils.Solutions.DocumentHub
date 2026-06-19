@@ -1,14 +1,13 @@
-﻿namespace Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM
+﻿namespace DevPack.Installer.DOM
 {
 	using System;
 	using System.Linq;
-
+	using DevPack.Installer.InstallerException;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.ManagerStore;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Net.Sections;
-	using Skyline.DataMiner.Solutions.DocumentHub.Installer.InstallerException;
 
 	public abstract class DomMigration
 	{

@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 

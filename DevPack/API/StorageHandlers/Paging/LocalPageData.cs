@@ -2,12 +2,13 @@
 {
     using System.Collections.Generic;
     using System.IO;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers;
 
-    /// <summary>
-    /// Paging context used when reading files from local file system storage.
-    /// This context maintains the file enumeration state across paging calls.
-    /// </summary>
-    public class LocalPageData : DocHubPageData
+	/// <summary>
+	/// Paging context used when reading files from local file system storage.
+	/// This context maintains the file enumeration state across paging calls.
+	/// </summary>
+	public class LocalPageData : DocHubPageData
 	{
 		/// <summary>
 		/// Initializes a new instance of the <see cref="LocalPageData"/> class.

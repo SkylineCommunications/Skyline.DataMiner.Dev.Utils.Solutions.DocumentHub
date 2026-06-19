@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Solutions.DocumentHub.Installer.InstallerException
+﻿namespace DevPack.Installer.InstallerException
 {
 	using System;
 	using System.Runtime.Serialization;

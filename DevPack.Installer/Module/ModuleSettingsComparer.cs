@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Solutions.DocumentHub.Installer.Module
+﻿namespace DevPack.Installer.Module
 {
 	using System.Collections.Generic;
 	using Skyline.DataMiner.Net.Apps.Modules;

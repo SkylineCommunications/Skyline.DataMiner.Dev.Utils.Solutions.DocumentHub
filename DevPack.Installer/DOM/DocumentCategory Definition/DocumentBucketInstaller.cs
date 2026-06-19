@@ -1,9 +1,9 @@
-﻿namespace Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM.DocumentBucket_Definition
+﻿namespace DevPack.Installer.DOM.DocumentBucket_Definition
 {
 	using System;
 	using System.Collections.Generic;
+	using DevPack.Installer.DOM;
 	using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 
 	internal class DocumentBucketInstaller : BaseMigrator

@@ -1,7 +1,8 @@
-﻿namespace Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM.DomSource_Definition
+﻿namespace DevPack.Installer.DOM.DomSource_Definition
 {
 	using System;
 	using System.Collections.Generic;
+	using DevPack.Installer.DOM;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 

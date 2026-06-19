@@ -1,17 +1,17 @@
-﻿namespace Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM
+﻿namespace DevPack.Installer.DOM
 {
 	using System;
 	using System.Linq;
+	using DevPack.Installer.DOM.DocumentBucket_Definition;
+	using DevPack.Installer.DOM.DomSource_Definition;
+	using DevPack.Installer.DOM.Sharepoint_Definition;
+	using DevPack.Installer.Module;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Apps.Modules;
 	using Skyline.DataMiner.Net.ManagerStore;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Net.Sections;
-	using Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM.DocumentBucket_Definition;
-	using Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM.DomSource_Definition;
-	using Skyline.DataMiner.Solutions.DocumentHub.Installer.DOM.Sharepoint_Definition;
-	using Skyline.DataMiner.Solutions.DocumentHub.Installer.Module;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Utils.DOM.Builders;
 
