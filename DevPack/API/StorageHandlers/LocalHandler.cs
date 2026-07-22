@@ -1,27 +1,26 @@
 ﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers
 {
 	using System;
-    using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
-    using Skyline.DataMiner.Utils.SecureCoding.SecureIO;
-    using System.Collections.Generic;
+	using System.Collections.Generic;
 	using System.Drawing;
 	using System.IO;
 	using System.Linq;
+	using System.Threading.Tasks;
 	using Skyline.DataMiner.Solutions.DocumentHub.API;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
-    using System.Threading.Tasks;
+	using Skyline.DataMiner.Utils.SecureCoding.SecureIO;
 
-    /// <summary>
-    /// Handles file and image storage on the local filesystem.
-    /// </summary>
-    /// <remarks>
-    /// Implements <see cref="IStorageHandler"/> and <see cref="IDeletableStorageHandler"/> to provide
-    /// local storage operations including upload, read, and delete.
-    /// Used for storing files and images under the DataMiner Webpages folder.
-    /// </remarks>
-    internal class LocalHandler : IStorageHandler, IDeletableStorageHandler
+	/// <summary>
+	/// Handles file and image storage on the local filesystem.
+	/// </summary>
+	/// <remarks>
+	/// Implements <see cref="IStorageHandler"/> and <see cref="IDeletableStorageHandler"/> to provide
+	/// local storage operations including upload, read, and delete.
+	/// Used for storing files and images under the DataMiner Webpages folder.
+	/// </remarks>
+	internal class LocalHandler : IStorageHandler, IDeletableStorageHandler
 	{
 		/// <summary>
 		/// Root path for the DataMiner WebFileManager local storage.
@@ -117,9 +116,6 @@
 			// Resolve the full target directory from the bucket's relative upload path
 			var targetDirectory = ResolveLocalDirectory(bucket.UploadPath);
 
-			// Combine root and relative path to get full target directory
-			var targetDirectory = SecurePath.ConstructSecurePath(root, directory);
-
 			// Ensure the target directory exists
 			if (!Directory.Exists(targetDirectory))
 			{
@@ -203,27 +199,27 @@
 			return files;
 		}
 
-        /// <summary>
-        /// Asynchronous version of <see cref="ReadFiles(ReadData)"/>.
-        /// </summary>
-        /// <param name="data">The storage handler data containing category and filter information.</param>
-        /// <returns>A list of all <see cref="IDocHubFile"/> matching the criteria.</returns>
-        public async Task<List<IDocHubFile>> ReadFilesAsync(ReadData data)
-        {
-            return await Task.FromResult(ReadFiles(data));
-        }
+		/// <summary>
+		/// Asynchronous version of <see cref="ReadFiles(ReadData)"/>.
+		/// </summary>
+		/// <param name="data">The storage handler data containing category and filter information.</param>
+		/// <returns>A list of all <see cref="IDocHubFile"/> matching the criteria.</returns>
+		public async Task<List<IDocHubFile>> ReadFilesAsync(ReadData data)
+		{
+			return await Task.FromResult(ReadFiles(data));
+		}
 
-        /// <summary>
-        /// Reads files from the local file system using a paged enumerator.
-        /// Supports optional bucket-based paths and filename filtering.
-        /// </summary>
-        /// <param name="data">"
-        /// The storage handler data containing bucket, filter, and context.
-        /// </param>
-        /// <returns>
-        /// A list of <see cref="IDocHubFile"/> representing the files in the current page.
-        /// </returns>
-        private List<IDocHubFile> ReadPage(ReadData data)
+		/// <summary>
+		/// Reads files from the local file system using a paged enumerator.
+		/// Supports optional bucket-based paths and filename filtering.
+		/// </summary>
+		/// <param name="data">"
+		/// The storage handler data containing bucket, filter, and context.
+		/// </param>
+		/// <returns>
+		/// A list of <see cref="IDocHubFile"/> representing the files in the current page.
+		/// </returns>
+		private List<IDocHubFile> ReadPage(ReadData data)
 		{
 			// Validate input data
 			if (!(data is WebFileReadData args))
@@ -296,5 +292,5 @@
 
 			return result;
 		}
-    }
+	}
 }

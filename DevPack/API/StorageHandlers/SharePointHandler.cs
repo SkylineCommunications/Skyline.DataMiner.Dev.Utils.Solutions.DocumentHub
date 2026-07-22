@@ -1,24 +1,5 @@
 ﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API
 {
-    using Azure.Identity;
-    using Microsoft.Graph;
-	using Microsoft.Graph.Models;
-    using Microsoft.Graph.Models.ODataErrors;
-    using Skyline.DataMiner.Net;
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
-    using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
-    using Skyline.DataMiner.Solutions.DocumentHub.API.Security;
-    using Skyline.DataMiner.Solutions.DocumentHub.SDM;
-    using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
-    using System;
-    using System.Collections.Generic;
-    using System.Drawing;
-    using System.Drawing.Imaging;
-    using System.IO;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using File = System.IO.File;
 	using System;
 	using System.Collections.Generic;
 	using System.Drawing;
@@ -27,6 +8,8 @@
 	using System.Linq;
 	using System.Threading.Tasks;
 	using Microsoft.Graph;
+	using Microsoft.Graph.Models;
+	using Microsoft.Graph.Models.ODataErrors;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM;
@@ -38,7 +21,6 @@
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointConfiguration;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Validation;
-	using Drive = Microsoft.Graph.Drive;
 	using File = System.IO.File;
 
 	/// <summary>
@@ -590,6 +572,9 @@
 		{
 			try
 			{
+				// Normalize directory path
+				var normalizedDirectory = NormalizeDirectoryPath(directory);
+
 				// TODO: directory is unused here. Will the upload work for non-root DriveItems?
 				MemoryStream jpegStream = new MemoryStream();
 
@@ -601,12 +586,12 @@
 				if (string.IsNullOrEmpty(normalizedDirectory))
 				{
 					// Upload to root directory
-					path = filename;
+					path = name;
 				}
 				else
 				{
 					// Upload to subdirectory
-					path = $"{normalizedDirectory}/{filename}";
+					path = $"{normalizedDirectory}/{name}";
 				}
 
 				var item = await _graphClient

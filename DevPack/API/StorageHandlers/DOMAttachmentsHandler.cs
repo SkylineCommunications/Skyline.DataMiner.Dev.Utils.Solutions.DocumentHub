@@ -1,18 +1,16 @@
 ﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using Skyline.DataMiner.Net;
-    using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-    using Skyline.DataMiner.Net.Messages.SLDataGateway;
-    using Skyline.DataMiner.SDM;
-    using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
-    using Skyline.DataMiner.Solutions.DocumentHub.SDM;
-    using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
+	using System;
+	using System.Collections.Generic;
+	using System.IO;
+	using System.Linq;
+	using System.Threading.Tasks;
+	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
