@@ -1,0 +1,12 @@
+{
+  "solution": {
+    "path": "SLC-S-DocumentHub-API.sln",
+    "projects": [
+      "DevPack.Automation\\DevPack.Automation.csproj",
+      "DevPack.GQI\\DevPack.GQI.csproj",
+      "DevPack.Protocol\\DevPack.Protocol.csproj",
+      "DevPack\\DevPack.csproj",
+      "SharedMappers\\SharedMappers.shproj"
+    ]
+  }
+}

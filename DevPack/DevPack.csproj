@@ -1,0 +1,61 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net48</TargetFramework>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>disable</Nullable>
+		<AssemblyName>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub</AssemblyName>
+		<RootNamespace>Skyline.DataMiner.Solutions.DocumentHub</RootNamespace>
+		<PackageId>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub</PackageId>
+		<PackageVersion>1.0.1</PackageVersion>
+		<Version>1.0.1</Version>
+		<PackageTags>Skyline;DataMiner</PackageTags>
+		<PackageProjectUrl>https://skyline.be</PackageProjectUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<PackageIcon>Icon.png</PackageIcon>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Authors>SkylineCommunications</Authors>
+		<Company>Skyline Communications</Company>
+		<Description>Provides an internal API for DocumentHub.</Description>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/SkylineCommunications/Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub</RepositoryUrl>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath="" />
+		<None Include="LICENSE.txt" Pack="true" PackagePath="" />
+		<None Include="nuget\Icon.png" Pack="true" PackagePath="" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Azure.Identity" />
+		<PackageReference Include="Microsoft.Graph" />
+		<PackageReference Include="Newtonsoft.Json" />
+		<PackageReference Include="Skyline.DataMiner.Dev.Common" />
+		<PackageReference Include="Skyline.DataMiner.SDM" />
+		<PackageReference Include="Skyline.DataMiner.SDM.SourceGenerator.Runtime" OutputItemType="Analyzer" ReferenceoutputAssembly="false" />
+		<PackageReference Include="Skyline.DataMiner.Utils.DOM" />
+		<PackageReference Include="Skyline.DataMiner.Utils.SecureCoding" />
+		<PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="System.Drawing.Common" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<InternalsVisibleTo Include="DevPack.Tests" />
+	</ItemGroup>
+
+	<Import Project="..\SharedMappers\SharedMappers.projitems" Label="Shared" />
+
+	<!-- Can be used to set the location of your local nuget store to copy to -->
+	<Import Project="../Directory.Build.props.user" Condition="Exists('../Directory.Build.props.user')" />
+
+	<Target Name="CopyNuGetPackage" AfterTargets="Pack" Condition="'$(NuGetStorePath)' != '' and '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+		<Copy SourceFiles="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg" DestinationFolder="$(NuGetStorePath)\$(PackageId)" />
+	</Target>
+	
+</Project>

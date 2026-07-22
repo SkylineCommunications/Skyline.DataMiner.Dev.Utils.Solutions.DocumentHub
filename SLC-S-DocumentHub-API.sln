@@ -1,0 +1,74 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.4.11620.152
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevPack", "DevPack\DevPack.csproj", "{19EFBB1B-FF5E-82DC-C5E6-DBD18A726A59}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevPack.Installer", "DevPack.Installer\DevPack.Installer.csproj", "{CBB917D1-B759-4965-86D2-79E99BBC1635}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Internal", "Internal", "{833FB715-4133-4B62-A7CD-6A01F7C4B95C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Code Analysis", "Code Analysis", "{101D8813-216C-442C-A2FF-A25ECACCC543}"
+	ProjectSection(SolutionItems) = preProject
+		Internal\Code Analysis\qaction-debug.ruleset = Internal\Code Analysis\qaction-debug.ruleset
+		Internal\Code Analysis\qaction-release.ruleset = Internal\Code Analysis\qaction-release.ruleset
+		Internal\Code Analysis\stylecop.json = Internal\Code Analysis\stylecop.json
+	EndProjectSection
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedMappers", "SharedMappers\SharedMappers.shproj", "{0C843C63-2D8E-40C3-9BA1-186C66F0C372}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevPack.Tests", "DevPack.Tests\DevPack.Tests.csproj", "{9C487DBA-A22C-4E07-AD05-A849A2E2E4DB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevPack.Automation", "DevPack.Automation\DevPack.Automation.csproj", "{6E59D74E-9A3E-4F64-AEF1-146BDF8C8AC0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevPack.Protocol", "DevPack.Protocol\DevPack.Protocol.csproj", "{AE8581D7-E993-4C69-8410-F0CC2AC22CEC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevPack.GQI", "DevPack.GQI\DevPack.GQI.csproj", "{37B1A166-566C-4F47-97E6-34D91A81D161}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{19EFBB1B-FF5E-82DC-C5E6-DBD18A726A59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19EFBB1B-FF5E-82DC-C5E6-DBD18A726A59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19EFBB1B-FF5E-82DC-C5E6-DBD18A726A59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19EFBB1B-FF5E-82DC-C5E6-DBD18A726A59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBB917D1-B759-4965-86D2-79E99BBC1635}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBB917D1-B759-4965-86D2-79E99BBC1635}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBB917D1-B759-4965-86D2-79E99BBC1635}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBB917D1-B759-4965-86D2-79E99BBC1635}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C487DBA-A22C-4E07-AD05-A849A2E2E4DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C487DBA-A22C-4E07-AD05-A849A2E2E4DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C487DBA-A22C-4E07-AD05-A849A2E2E4DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C487DBA-A22C-4E07-AD05-A849A2E2E4DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E59D74E-9A3E-4F64-AEF1-146BDF8C8AC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E59D74E-9A3E-4F64-AEF1-146BDF8C8AC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E59D74E-9A3E-4F64-AEF1-146BDF8C8AC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E59D74E-9A3E-4F64-AEF1-146BDF8C8AC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE8581D7-E993-4C69-8410-F0CC2AC22CEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE8581D7-E993-4C69-8410-F0CC2AC22CEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE8581D7-E993-4C69-8410-F0CC2AC22CEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE8581D7-E993-4C69-8410-F0CC2AC22CEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37B1A166-566C-4F47-97E6-34D91A81D161}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37B1A166-566C-4F47-97E6-34D91A81D161}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37B1A166-566C-4F47-97E6-34D91A81D161}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37B1A166-566C-4F47-97E6-34D91A81D161}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{101D8813-216C-442C-A2FF-A25ECACCC543} = {833FB715-4133-4B62-A7CD-6A01F7C4B95C}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3B1178BE-3FEE-4E9A-B892-F1AFC9AA0B40}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		SharedMappers\SharedMappers.projitems*{0c843c63-2d8e-40c3-9ba1-186c66f0c372}*SharedItemsImports = 13
+		SharedMappers\SharedMappers.projitems*{19efbb1b-ff5e-82dc-c5e6-dbd18a726a59}*SharedItemsImports = 5
+		SharedMappers\SharedMappers.projitems*{cbb917d1-b759-4965-86d2-79e99bbc1635}*SharedItemsImports = 5
+	EndGlobalSection
+EndGlobal

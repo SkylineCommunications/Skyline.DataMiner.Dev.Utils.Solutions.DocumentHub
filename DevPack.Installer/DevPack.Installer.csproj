@@ -1,0 +1,35 @@
+﻿<Project Sdk="Skyline.DataMiner.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net48</TargetFramework>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	</PropertyGroup>
+	<PropertyGroup>
+		<DataMinerType>Package</DataMinerType>
+		<GenerateDataMinerPackage>True</GenerateDataMinerPackage>
+		<MinimumRequiredDmVersion>10.4.0.0 - 14003</MinimumRequiredDmVersion>
+		<!-- <MinimumRequiredDmWebVersion>10.6.2 (CU0)</MinimumRequiredDmWebVersion> -->
+		<PackageVersion>1.0.1</PackageVersion>
+		<Version>1.0.1</Version>
+		<VersionComment>Initial Version</VersionComment>
+		<!-- Do NOT fill in the Organization Token here. This points to either an Environment Variable skyline__sdk__dataminertoken holding the organization token or a Visual Studio User Secret holding the token. -->
+		<CatalogPublishKeyName>skyline:sdk:dataminertoken</CatalogPublishKeyName>
+		<CatalogDefaultDownloadKeyName>skyline:sdk:dataminertoken</CatalogDefaultDownloadKeyName>
+		<AssemblyTitle>Skyline.DataMiner.Solutions.DocumentHub.Installer</AssemblyTitle>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Skyline.DataMiner.CICD.CSharpAnalysis.Analyzer">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Skyline.DataMiner.Core.AppPackageInstaller" />
+		<PackageReference Include="Skyline.DataMiner.Dev.Automation" />
+		<PackageReference Include="Skyline.DataMiner.SDM.SourceGenerator.Runtime" />
+		<PackageReference Include="Skyline.DataMiner.Utils.DOM" />
+		<PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+	<Import Project="..\SharedMappers\SharedMappers.projitems" Label="Shared" />
+	
+</Project>
