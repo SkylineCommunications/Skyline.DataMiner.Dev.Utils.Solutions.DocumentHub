@@ -160,49 +160,49 @@
 				.GetResult();
 		}
 
-        /// <summary>
-        /// Reads all files using recursive traversal with manual paging.
-        /// </summary>
-        /// <remarks>
-        /// ⚠ Microsoft Graph paginates per folder, so this method aggregates multiple folder pages
-        /// into a single logical page using <see cref="SharePointPageData"/>.
-        /// </remarks>
-        public async Task<List<IDocHubFile>> ReadFilesAsync(ReadData data)
-        {
-            if (!(data is WebFileReadData args))
-                throw new ArgumentException("SharePointHandler requires WebFileReadData.", nameof(data));
+		/// <summary>
+		/// Reads all files using recursive traversal with manual paging.
+		/// </summary>
+		/// <remarks>
+		/// ⚠ Microsoft Graph paginates per folder, so this method aggregates multiple folder pages
+		/// into a single logical page using <see cref="SharePointPageData"/>.
+		/// </remarks>
+		public async Task<List<IDocHubFile>> ReadFilesAsync(ReadData data)
+		{
+			if (!(data is WebFileReadData args))
+				throw new ArgumentException("SharePointHandler requires WebFileReadData.", nameof(data));
 
-            // If paging context exists, return next page only
-            if (args.Context != null)
-                return await ReadPage(args);
+			// If paging context exists, return next page only
+			if (args.Context != null)
+				return await ReadPage(args);
 
-            // Initialize paging context
-            var context = new SharePointPageData();
-            args.Context = context;
+			// Initialize paging context
+			var context = new SharePointPageData();
+			args.Context = context;
 
-            var files = new List<IDocHubFile>();
+			var files = new List<IDocHubFile>();
 
-            // Iterate until no more data is available
-            while (context.HasNextPage())
-            {
-                var page = await ReadPage(args);
+			// Iterate until no more data is available
+			while (context.HasNextPage())
+			{
+				var page = await ReadPage(args);
 
-                // Safety break if no results and no further pages
-                if (page.Count == 0 && !context.HasNextPage())
-                {
-                    break;
-                }
+				// Safety break if no results and no further pages
+				if (page.Count == 0 && !context.HasNextPage())
+				{
+					break;
+				}
 
 				files.AddRange(page);
 			}
 
-            return files;
-        }
+			return files;
+		}
 
-        /// <summary>
-        /// Checks whether a file exists in SharePoint.
-        /// </summary>
-        public bool FileExists(FileExistsData data)
+		/// <summary>
+		/// Checks whether a file exists in SharePoint.
+		/// </summary>
+		public bool FileExists(FileExistsData data)
 		{
 			if (!(data is WebFileExistsData args))
 				throw new ArgumentException("SharePointHandler requires WebFileExistsData.", nameof(data));
@@ -242,36 +242,34 @@
 				.GetResult();
 		}
 
-        #endregion
+		#endregion
 
-        #region Private
+		#region Private
 
-        /// <summary>
-        /// Enqueues subfolders discovered in the current Graph page.
-        /// </summary>
-        private static void EnqueueSubFolders(SharePointPageData context, DriveItemCollectionResponse page)
-        {
-            if (page?.Value == null) return;
+		/// <summary>
+		/// Enqueues subfolders discovered in the current Graph page.
+		/// </summary>
+		private static void EnqueueSubFolders(SharePointPageData context, DriveItemCollectionResponse page)
+		{
+			if (page?.Value == null) return;
 
-            foreach (var folder in page.Value)
-            {
-                if (folder.Folder != null)
-                    context.FolderQueue.Enqueue(folder.Id);
-            }
-        }
+			foreach (var folder in page.Value)
+			{
+				if (folder.Folder != null)
+					context.FolderQueue.Enqueue(folder.Id);
+			}
+		}
 
-        /// <summary>
-        /// Reads a single logical page of SharePoint files.
-        /// </summary>
-        private async Task<List<IDocHubFile>> ReadPage(ReadData data)
+		/// <summary>
+		/// Reads a single logical page of SharePoint files.
+		/// </summary>
+		private async Task<List<IDocHubFile>> ReadPage(ReadData data)
 		{
 			// Validate and cast input
-			var args = data as WebFileReadData;
-			if (args == null)
+			if (!(data is WebFileReadData args))
 				throw new ArgumentException("SharePointHandler requires WebFileReadData.", nameof(data));
 
-			var spContext = args.Context as SharePointPageData;
-			if (spContext == null)
+			if (!(args.Context is SharePointPageData spContext))
 				throw new ArgumentException("SharePointHandler requires SharePointPageContext.", nameof(args.Context));
 
 			var bucket = args.Bucket;
@@ -280,7 +278,7 @@
 			// Initialize bucket root exactly once (replace initial "root" sentinel)
 			if (bucket != null
 				&& spContext.FolderQueue.Count == 1
-				&& spContext.FolderQueue.Peek() == "root"
+				&& (spContext.FolderQueue.TryPeek(out string first) && first == "root")
 				&& spContext.NextPageLink == null)
 			{
 				var trimmedPath = (bucket.UploadPath ?? string.Empty).Trim('/', '\\');
@@ -307,7 +305,7 @@
 					throw new InvalidOperationException("Could not find folder with path /" + bucket.UploadPath);
 
 				// Do NOT replace the queue instance (other code may hold references)
-				spContext.FolderQueue.Clear();
+				spContext.FolderQueue.TryDequeue(out _);
 				spContext.FolderQueue.Enqueue(folder.Id);
 			}
 
@@ -340,26 +338,29 @@
 			return result;
 		}
 
-        /// <summary>
-        /// Executes the next Graph page request and updates the continuation link.
-        /// </summary>
-        private async Task<DriveItemCollectionResponse> ExecuteGraphPageRequest(SharePointPageData context)
-        {
-            DriveItemCollectionResponse response;
+		/// <summary>
+		/// Executes the next Graph page request and updates the continuation link.
+		/// </summary>
+		private async Task<DriveItemCollectionResponse> ExecuteGraphPageRequest(SharePointPageData context)
+		{
+			DriveItemCollectionResponse response;
 
-            if (context.NextPageLink == null)
-            {
-                // First page for this folder
-                context.CurrentFolderId = context.FolderQueue.Dequeue();
+			if (context.NextPageLink == null)
+			{
+				// First page for this folder
+				if (!context.FolderQueue.TryDequeue(out var folderId))
+					return null;
+
+				context.CurrentFolderId = folderId;
 
 				response = await _graphClient
 					.Drives[_drive.Id]
 					.Items[context.CurrentFolderId]
 					.Children
 					.GetAsync(cfg => cfg.QueryParameters.Top = context.PageSize);
-            }
-            else
-            {
+			}
+			else
+			{
 				// Resume paging via @odata.nextLink
 				response = await _graphClient
 					.Drives[_drive.Id]
@@ -367,42 +368,42 @@
 					.Children
 					.WithUrl(context.NextPageLink)
 					.GetAsync();
-            }
+			}
 
-            context.NextPageLink = response?.OdataNextLink;
-            return response;
-        }
+			context.NextPageLink = response?.OdataNextLink;
+			return response;
+		}
 
-        /// <summary>
-        /// Retrieves the next logical page of <see cref="DriveItem"/> objects by recursively
-        /// traversing the folder queue, applying name and extension filters, and merging
-        /// multiple Graph API responses into a single page of the configured size.
-        /// </summary>
-        /// <remarks>
-        /// Microsoft Graph paginates children per folder, not across the entire drive.
-        /// This method bridges that gap by consuming the <see cref="SharePointPageData.FolderQueue"/>,
-        /// issuing per-folder requests, and collecting results until
-        /// <see cref="DocHubPageData.PageSize"/> items are gathered.
-        /// Any surplus items are stored in <see cref="SharePointPageData.PageRemainderBuffer"/>
-        /// so they are returned on the next call rather than being lost.
-        /// </remarks>
-        /// <param name="filter">
-        /// Optional substring filter applied to <see cref="BaseItem.Name"/> of the <see cref="DriveItem"/> object. (case-insensitive).
-        /// Pass <c>null</c> or empty to skip name filtering.
-        /// </param>
-        /// <param name="allowedExtensions">
-        /// Optional set of file extensions (without leading dot) to include.
-        /// Pass <c>null</c> to accept all extensions.
-        /// </param>
-        /// <param name="context">
-        /// Paging state that tracks the folder queue, the current Graph continuation token,
-        /// and any buffered overflow items from previous calls.
-        /// </param>
-        /// <returns>
-        /// A list of <see cref="DriveItem"/> objects representing the next logical page of files.
-        /// The list size is at most <see cref="DocHubPageData.PageSize"/>.
-        /// </returns>
-        private async Task<IList<DriveItem>> FetchNextPageInternal(string filter, HashSet<string> allowedExtensions, SharePointPageData context)
+		/// <summary>
+		/// Retrieves the next logical page of <see cref="DriveItem"/> objects by recursively
+		/// traversing the folder queue, applying name and extension filters, and merging
+		/// multiple Graph API responses into a single page of the configured size.
+		/// </summary>
+		/// <remarks>
+		/// Microsoft Graph paginates children per folder, not across the entire drive.
+		/// This method bridges that gap by consuming the <see cref="SharePointPageData.FolderQueue"/>,
+		/// issuing per-folder requests, and collecting results until
+		/// <see cref="DocHubPageData.PageSize"/> items are gathered.
+		/// Any surplus items are stored in <see cref="SharePointPageData.PageRemainderBuffer"/>
+		/// so they are returned on the next call rather than being lost.
+		/// </remarks>
+		/// <param name="filter">
+		/// Optional substring filter applied to <see cref="BaseItem.Name"/> of the <see cref="DriveItem"/> object. (case-insensitive).
+		/// Pass <c>null</c> or empty to skip name filtering.
+		/// </param>
+		/// <param name="allowedExtensions">
+		/// Optional set of file extensions (without leading dot) to include.
+		/// Pass <c>null</c> to accept all extensions.
+		/// </param>
+		/// <param name="context">
+		/// Paging state that tracks the folder queue, the current Graph continuation token,
+		/// and any buffered overflow items from previous calls.
+		/// </param>
+		/// <returns>
+		/// A list of <see cref="DriveItem"/> objects representing the next logical page of files.
+		/// The list size is at most <see cref="DocHubPageData.PageSize"/>.
+		/// </returns>
+		private async Task<IList<DriveItem>> FetchNextPageInternal(string filter, HashSet<string> allowedExtensions, SharePointPageData context)
 		{
 			var collected = new List<DriveItem>(context.PageSize);
 
@@ -430,28 +431,36 @@
 		{
 			while (collected.Count < context.PageSize && context.PageRemainderBuffer.Count > 0)
 			{
-				collected.Add(context.PageRemainderBuffer.Dequeue());
+				if (context.PageRemainderBuffer.TryDequeue(out DriveItem dequeued))
+				{
+					collected.Add(dequeued);
+				}
 			}
 		}
 
-        /// <summary>
-        /// Determines whether paging should continue.
-        /// </summary>
-        private static bool ShouldContinuePaging(SharePointPageData context, ICollection<DriveItem> collected)
-        {
-            return collected.Count < context.PageSize &&
-                   (context.FolderQueue.Count > 0 || context.NextPageLink != null);
-        }
+		/// <summary>
+		/// Determines whether paging should continue.
+		/// </summary>
+		private static bool ShouldContinuePaging(SharePointPageData context, ICollection<DriveItem> collected)
+		{
+			return collected.Count < context.PageSize &&
+				   (context.FolderQueue.Count > 0 || context.NextPageLink != null);
+		}
 
-        /// <summary>
-        /// Ensures a Graph paging request exists for the current folder.
-        /// </summary>
-        private void EnsureNextPageRequest(SharePointPageData context)
-        {
-            if (context.NextPageLink != null)
-                return;
+		/// <summary>
+		/// Ensures a Graph paging request exists for the current folder.
+		/// </summary>
+		private void EnsureNextPageRequest(SharePointPageData context)
+		{
+			if (context.NextPageLink != null)
+				return;
 
-			var folderId = context.FolderQueue.Dequeue();
+			if (!context.FolderQueue.TryDequeue(out var dequeued))
+			{
+				return;
+			}
+
+			var folderId = dequeued;
 
 			context.NextPageLink = _graphClient
 				.Drives[_drive.Id]
@@ -460,7 +469,7 @@
 				.GetAsync(conf => { conf.QueryParameters.Top = context.PageSize; })
 				.Result
 				.OdataNextLink;
-        }
+		}
 
 		/// <summary>
 		/// Collects file items into the logical page and buffers overflow items.
@@ -508,7 +517,7 @@
 					.GetAsync();
 
 				return searchResponse != null && searchResponse.File != null;
-            }
+			}
 			catch (ODataError ex)
 			{
 				if (ex.ResponseStatusCode == (int)System.Net.HttpStatusCode.NotFound)
@@ -545,18 +554,18 @@
 					}
 					else
 					{
-                        // Upload to subdirectory
+						// Upload to subdirectory
 						pathPart = $"{normalizedDirectory}/{name}";						
 					}
 
-                    item = await _graphClient
-                            .Drives[_drive.Id]
-                            .Root
-                            .ItemWithPath(pathPart)
-                            .Content
-                            .PutAsync(stream);
+					item = await _graphClient
+							.Drives[_drive.Id]
+							.Root
+							.ItemWithPath(pathPart)
+							.Content
+							.PutAsync(stream);
 
-                    return item?.WebUrl;
+					return item?.WebUrl;
 				}
 			}
 			catch (Exception e)
@@ -664,7 +673,7 @@
 					{
 						await _graphClient
 							.Drives[_drive.Id]
-                            .Root
+							.Root
 							.ItemWithPath(parentPath)
 							.Children
 							.PostAsync(folder);
@@ -744,6 +753,6 @@
 			return lastMessage;
 		}
 
-        #endregion
-    }
+		#endregion
+	}
 }
