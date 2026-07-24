@@ -413,9 +413,9 @@
 			// Continue folder traversal until logical page is full or no data remains
 			while (ShouldContinuePaging(context, collected))
 			{
-				EnsureNextPageRequest(context);
-
 				var page = await ExecuteGraphPageRequest(context);
+				if (page == null)
+					break;
 
 				EnqueueSubFolders(context, page);
 				CollectFiles(filter, allowedExtensions, context, collected, page);
@@ -448,39 +448,17 @@
 		}
 
 		/// <summary>
-		/// Ensures a Graph paging request exists for the current folder.
-		/// </summary>
-		private void EnsureNextPageRequest(SharePointPageData context)
-		{
-			if (context.NextPageLink != null)
-				return;
-
-			if (!context.FolderQueue.TryDequeue(out var dequeued))
-			{
-				return;
-			}
-
-			var folderId = dequeued;
-
-			context.NextPageLink = _graphClient
-				.Drives[_drive.Id]
-				.Items[folderId]
-				.Children
-				.GetAsync(conf => { conf.QueryParameters.Top = context.PageSize; })
-				.Result
-				.OdataNextLink;
-		}
-
-		/// <summary>
 		/// Collects file items into the logical page and buffers overflow items.
 		/// </summary>
 		private static void CollectFiles(
-			string filter, 
-			HashSet<string> allowedExtensions, 
-			SharePointPageData context, 
-			ICollection<DriveItem> collected, 
+			string filter,
+			HashSet<string> allowedExtensions,
+			SharePointPageData context,
+			ICollection<DriveItem> collected,
 			DriveItemCollectionResponse page)
 		{
+			if (page?.Value == null) return;
+
 			var files = page.Value
 				.Where(i => i.File != null &&
 							(string.IsNullOrEmpty(filter) ||
