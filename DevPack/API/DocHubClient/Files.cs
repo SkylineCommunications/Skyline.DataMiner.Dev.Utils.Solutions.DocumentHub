@@ -393,6 +393,60 @@
 		}
 		#endregion
 
+		#region Search
+
+		/// <summary>
+		/// Executes a search query against the storage backend of the specified bucket and returns the matching files.
+		/// </summary>
+		/// <param name="bucket">
+		/// The document bucket defining the storage type and target library.
+		/// Only buckets configured for <see cref="StorageType.SharePoint"/> support search today.
+		/// </param>
+		/// <param name="query">
+		/// The search query. For SharePoint, this is a KQL query passed straight through to
+		/// Microsoft Graph (e.g. <c>filetype:pdf title:"design doc"</c>).
+		/// </param>
+		/// <param name="config">
+		/// Optional configuration for paging.
+		/// </param>
+		/// <returns>
+		/// A list of files represented as <see cref="IDocHubFile"/>.
+		/// </returns>
+		/// <exception cref="ArgumentNullException">
+		/// Thrown if <paramref name="bucket"/> is null.
+		/// </exception>
+		/// <exception cref="ArgumentException">
+		/// Thrown if <paramref name="query"/> is null, empty, or whitespace.
+		/// </exception>
+		/// <exception cref="NotSupportedException">
+		/// Thrown if the bucket's storage type does not support search.
+		/// </exception>
+		public List<IDocHubFile> SearchFiles(DocumentBucket bucket, string query, SearchFilesConfiguration config = null)
+		{
+			if (bucket == null)
+				throw new ArgumentNullException(nameof(bucket));
+			if (string.IsNullOrWhiteSpace(query))
+				throw new ArgumentException("A non-empty search query is required.", nameof(query));
+
+			config = config ?? new SearchFilesConfiguration();
+
+			var storageHandler = StorageHandlerFactory.Create(_connection, bucket);
+
+			if (!(storageHandler is ISearchableStorageHandler searchable))
+				throw new NotSupportedException($"Search is not supported for storage type '{bucket.StorageType}'.");
+
+			var data = new WebFileSearchData
+			{
+				Bucket = bucket,
+				Query = query,
+				Context = config.Context,
+			};
+
+			return searchable.SearchFiles(data);
+		}
+
+		#endregion
+
 		#region Delete
 
 		/// <summary>
