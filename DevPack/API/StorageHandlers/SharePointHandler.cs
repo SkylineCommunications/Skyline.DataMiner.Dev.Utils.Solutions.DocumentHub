@@ -176,6 +176,16 @@
 			if (args.Context != null)
 				return await ReadPage(args);
 
+			if (!string.IsNullOrWhiteSpace(args.Filter))
+			{
+				return await SearchFilesAsync(new WebFileSearchData
+				{
+					Bucket = args.Bucket,
+					Query = args.Filter,
+					Context = args.Context,
+				});
+			}
+
 			// Initialize paging context
 			var context = new SharePointPageData();
 			args.Context = context;
