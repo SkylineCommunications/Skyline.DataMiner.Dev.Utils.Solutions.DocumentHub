@@ -29,13 +29,13 @@
 		public ConcurrentQueue<DriveItem> PageRemainderBuffer { get; } = new ConcurrentQueue<DriveItem>();
 
 		/// <summary>
-		/// Gets or sets the Graph <c>@odata.nextLink</c> continuation URL. When <c>null</c> and
+		/// Gets the Graph <c>@odata.nextLink</c> continuation URL. When <c>null</c> and
 		/// <see cref="SearchStarted"/> is <c>true</c>, no more Graph pages are available.
 		/// </summary>
 		public string NextPageLink { get; internal set; }
 
 		/// <summary>
-		/// Gets or sets a value indicating whether the initial search request has been issued.
+		/// Gets a value indicating whether the initial search request has been issued.
 		/// </summary>
 		public bool SearchStarted { get; internal set; }
 
