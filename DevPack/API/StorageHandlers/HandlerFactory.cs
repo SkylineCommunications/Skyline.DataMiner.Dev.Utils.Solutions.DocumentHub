@@ -80,6 +80,29 @@
 		/// </param>
 		void DeleteFile(DeleteData data);
 	}
+
+	/// <summary>
+	/// Defines the contract for storage handlers that support search queries.
+	/// </summary>
+	/// <remarks>
+	/// Handlers that can execute a query language (e.g. KQL against Microsoft Graph)
+	/// against their backing store should implement this interface. This keeps search
+	/// capability optional so that handlers without a native query engine
+	/// (such as the local file system) don't need to fake one.
+	/// </remarks>
+	internal interface ISearchableStorageHandler
+	{
+		/// <summary>
+		/// Executes a search query against the storage and returns the matching files.
+		/// </summary>
+		/// <param name="data">
+		/// The search data containing the target bucket, the query string, and optional paging context.
+		/// </param>
+		/// <returns>
+		/// A list of <see cref="IDocHubFile"/> objects representing the matching files.
+		/// </returns>
+		List<IDocHubFile> SearchFiles(SearchData data);
+	}
 	#endregion
 
 	#region Factory

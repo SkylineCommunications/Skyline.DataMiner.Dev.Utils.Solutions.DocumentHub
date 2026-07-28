@@ -28,7 +28,7 @@
 	/// </summary>
 	/// <remarks>
 	/// This class provides file enumeration, existence checks, folder creation, and uploads
-	/// to a SharePoint document library.  
+	/// to a SharePoint document library.
 	/// <para>
 	/// ⚠ Paging is implemented manually because Microsoft Graph paginates per-folder, not recursively.
 	/// This means logical paging must aggregate multiple Graph pages and maintain internal buffers.
@@ -44,7 +44,7 @@
 	/// var files = handler.ReadFiles(new WebFileReadData { Bucket = bucket });
 	/// </code>
 	/// </example>
-	internal class SharePointHandler : IStorageHandler
+	internal class SharePointHandler : IStorageHandler, ISearchableStorageHandler
 	{
 		#region Globals
 
@@ -240,6 +240,61 @@
 			UploadImageAsync(image, directory, name)
 				.GetAwaiter()
 				.GetResult();
+		}
+
+		/// <summary>
+		/// Executes a KQL search against the configured SharePoint document library using the
+		/// Microsoft Graph <c>driveItem: search</c> endpoint.
+		/// </summary>
+		/// <remarks>
+		/// The <see cref="SearchData.Query"/> value is passed as-is to Graph and therefore
+		/// accepts KQL syntax (e.g. <c>filetype:pdf title:"design doc"</c>). Results are scoped
+		/// to the drive selected during handler construction. Bucket-level
+		/// <see cref="DocumentBucket.Extensions"/> are enforced client-side, mirroring
+		/// <see cref="ReadFiles(ReadData)"/>.
+		/// </remarks>
+		public List<IDocHubFile> SearchFiles(SearchData data)
+		{
+			return SearchFilesAsync(data)
+				.GetAwaiter()
+				.GetResult();
+		}
+
+		/// <summary>
+		/// Async counterpart to <see cref="SearchFiles(SearchData)"/>.
+		/// </summary>
+		public async Task<List<IDocHubFile>> SearchFilesAsync(SearchData data)
+		{
+			if (!(data is WebFileSearchData args))
+				throw new ArgumentException("SharePointHandler requires WebFileSearchData.", nameof(data));
+
+			if (string.IsNullOrWhiteSpace(args.Query))
+				throw new ArgumentException("A non-empty search query is required.", nameof(data));
+
+			// If paging context exists, return next page only
+			if (args.Context != null)
+				return await SearchPage(args);
+
+			// Initialize paging context and drain until end
+			var context = new SharePointSearchPageData();
+			args.Context = context;
+
+			var files = new List<IDocHubFile>();
+
+			while (context.HasNextPage())
+			{
+				var page = await SearchPage(args);
+
+				// Safety break if no results and no further pages
+				if (page.Count == 0 && !context.HasNextPage())
+				{
+					break;
+				}
+
+				files.AddRange(page);
+			}
+
+			return files;
 		}
 
 		#endregion
@@ -693,6 +748,119 @@
 
 			// Reconstruct path with forward slashes
 			return string.Join("/", segments);
+		}
+
+		/// <summary>
+		/// Reads a single logical page of SharePoint search results.
+		/// </summary>
+		private async Task<List<IDocHubFile>> SearchPage(WebFileSearchData args)
+		{
+			if (!(args.Context is SharePointSearchPageData spContext))
+				throw new ArgumentException("SharePointHandler search requires SharePointSearchPageData.", nameof(args.Context));
+
+			var bucket = args.Bucket;
+
+			// End-of-traversal
+			if (spContext.SearchStarted
+				&& spContext.NextPageLink == null
+				&& spContext.PageRemainderBuffer.Count == 0)
+			{
+				return new List<IDocHubFile>();
+			}
+
+			var allowedExtensions = bucket != null && !string.IsNullOrEmpty(bucket.Extensions)
+				? new HashSet<string>(bucket.Extensions.Split(','), StringComparer.OrdinalIgnoreCase)
+				: null;
+
+			var collected = new List<DriveItem>(spContext.PageSize);
+
+			// Drain any leftovers from the previous logical page first
+			while (collected.Count < spContext.PageSize && spContext.PageRemainderBuffer.TryDequeue(out var buffered))
+			{
+				collected.Add(buffered);
+			}
+
+			// Keep pulling Graph pages until logical page is filled or the search is exhausted
+			while (collected.Count < spContext.PageSize
+				   && (!spContext.SearchStarted || spContext.NextPageLink != null))
+			{
+				var response = await ExecuteSearchPageRequest(spContext, args.Query);
+				if (response == null)
+					break;
+
+				CollectSearchFiles(allowedExtensions, spContext, collected, response);
+			}
+
+			var result = new List<IDocHubFile>(collected.Count);
+			foreach (var item in collected)
+			{
+				result.Add(new DriveItemAdapter
+				{
+					DriveItem = item,
+				});
+			}
+
+			return result;
+		}
+
+		/// <summary>
+		/// Executes the next Graph search page request and updates the continuation link.
+		/// </summary>
+		private async Task<Microsoft.Graph.Drives.Item.Items.Item.SearchWithQ.SearchWithQGetResponse> ExecuteSearchPageRequest(
+			SharePointSearchPageData context,
+			string query)
+		{
+			var builder = _graphClient
+				.Drives[_drive.Id]
+				.Items["root"]
+				.SearchWithQ(query);
+
+			Microsoft.Graph.Drives.Item.Items.Item.SearchWithQ.SearchWithQGetResponse response;
+
+			if (!context.SearchStarted)
+			{
+				response = await builder.GetAsSearchWithQGetResponseAsync(cfg => cfg.QueryParameters.Top = context.PageSize);
+			}
+			else
+			{
+				// Resume paging via @odata.nextLink
+				response = await builder.WithUrl(context.NextPageLink).GetAsSearchWithQGetResponseAsync();
+			}
+
+			context.SearchStarted = true;
+			context.NextPageLink = response?.OdataNextLink;
+			return response;
+		}
+
+		/// <summary>
+		/// Collects file items from a Graph search page into the logical page and buffers overflow.
+		/// </summary>
+		private static void CollectSearchFiles(
+			HashSet<string> allowedExtensions,
+			SharePointSearchPageData context,
+			ICollection<DriveItem> collected,
+			Microsoft.Graph.Drives.Item.Items.Item.SearchWithQ.SearchWithQGetResponse page)
+		{
+			if (page?.Value == null)
+				return;
+
+			var files = page.Value
+				.Where(i => i.File != null &&
+							(allowedExtensions == null ||
+							 allowedExtensions.Contains(Path.GetExtension(i.Name).TrimStart('.'))))
+				.ToList();
+
+			foreach (var file in files)
+			{
+				if (collected.Count < context.PageSize)
+				{
+					collected.Add(file);
+				}
+				else
+				{
+					context.PageRemainderBuffer.Enqueue(file);
+				}
+			}
 		}
 
 		private string RetrieveClientSecret()
