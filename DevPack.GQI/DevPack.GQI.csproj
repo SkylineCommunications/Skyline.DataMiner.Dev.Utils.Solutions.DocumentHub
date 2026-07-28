@@ -6,8 +6,8 @@
     <AssemblyName>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub.GQI</AssemblyName>
     <PackageId>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub.GQI</PackageId>
     <RootNamespace>Skyline.DataMiner.Solutions.DocumentHub.GQI</RootNamespace>
-    <PackageVersion>1.1.1-prerelease4</PackageVersion>
-    <Version>1.1.1.4</Version>
+    <PackageVersion>1.1.1-prerelease5</PackageVersion>
+    <Version>1.1.1.5</Version>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
