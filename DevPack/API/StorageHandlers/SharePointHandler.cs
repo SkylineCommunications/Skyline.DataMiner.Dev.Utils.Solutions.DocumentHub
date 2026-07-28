@@ -28,7 +28,7 @@
 	/// </summary>
 	/// <remarks>
 	/// This class provides file enumeration, existence checks, folder creation, and uploads
-	/// to a SharePoint document library.  
+	/// to a SharePoint document library.
 	/// <para>
 	/// ⚠ Paging is implemented manually because Microsoft Graph paginates per-folder, not recursively.
 	/// This means logical paging must aggregate multiple Graph pages and maintain internal buffers.
