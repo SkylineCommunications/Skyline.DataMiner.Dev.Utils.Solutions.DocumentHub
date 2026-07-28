@@ -14,23 +14,23 @@
 		}
 
 		/// <summary>
-		/// Buffer for DriveItems that did not fit into the current logical page.
+		/// Gets the buffer for DriveItems that did not fit into the current logical page.
 		/// </summary>
 		public ConcurrentQueue<DriveItem> PageRemainderBuffer { get; } = new ConcurrentQueue<DriveItem>();
 
 		/// <summary>
-		/// Identifiers of folders that still need to be traversed.
+		/// Gets the identifiers of folders that still need to be traversed.
 		/// </summary>
 		public ConcurrentQueue<string> FolderQueue { get; internal set; } = new ConcurrentQueue<string>(new[] { "root" });
 
 		/// <summary>
-		/// Continuation URL (@odata.nextLink) for the folder currently being paged.
+		/// Gets the continuation URL (@odata.nextLink) for the folder currently being paged.
 		/// Null when a new folder traversal must be started.
 		/// </summary>
 		public string NextPageLink { get; internal set; }
 
 		/// <summary>
-		/// Id of the folder whose children are currently being paged.
+		/// Gets the ID of the folder whose children are currently being paged.
 		/// </summary>
 		public string CurrentFolderId { get; internal set; }
 
