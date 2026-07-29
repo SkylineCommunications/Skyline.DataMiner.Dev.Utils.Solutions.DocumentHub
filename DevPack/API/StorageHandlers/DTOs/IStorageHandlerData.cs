@@ -102,6 +102,8 @@
 		public string Query { get; set; }
 
 		public DocHubPageData Context { get; set; }
+
+		public string Region { get; set; }
 	}
 
 	internal class WebFileSearchData : SearchData
