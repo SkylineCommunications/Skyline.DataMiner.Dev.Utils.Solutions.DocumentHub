@@ -40,6 +40,13 @@
 		public bool SearchStarted { get; internal set; }
 
 		/// <summary>
+		/// Gets or sets the resolved Graph item id of the folder the search is scoped to
+		/// (derived from <c>DocumentBucket.UploadPath</c>). Populated on the first page
+		/// request and reused for subsequent pages.
+		/// </summary>
+		public string FolderId { get; internal set; }
+
+		/// <summary>
 		/// Checks if there are more pages left.
 		/// </summary>
 		/// <returns>
