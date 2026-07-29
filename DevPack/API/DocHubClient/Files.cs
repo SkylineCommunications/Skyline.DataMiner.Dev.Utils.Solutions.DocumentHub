@@ -440,6 +440,7 @@
 				Bucket = bucket,
 				Query = query,
 				Context = config.Context,
+				Region = config.Region,
 			};
 
 			return searchable.SearchFiles(data);

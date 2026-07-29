@@ -244,14 +244,14 @@
 
 		/// <summary>
 		/// Executes a KQL search against the configured SharePoint document library using the
-		/// Microsoft Graph <c>driveItem: search</c> endpoint.
+		/// Microsoft Graph <c>POST /search/query</c> endpoint (Microsoft Search API).
 		/// </summary>
 		/// <remarks>
-		/// The <see cref="SearchData.Query"/> value is passed as-is to Graph and therefore
-		/// accepts KQL syntax (e.g. <c>filetype:pdf title:"design doc"</c>). Results are scoped
-		/// to the drive selected during handler construction. Bucket-level
-		/// <see cref="DocumentBucket.Extensions"/> are enforced client-side, mirroring
-		/// <see cref="ReadFiles(ReadData)"/>.
+		/// The <see cref="SearchData.Query"/> value accepts full Keyword Query Language, e.g.
+		/// <c>filetype:pdf title:"design doc"</c>. Results are scoped to the folder configured
+		/// on <see cref="DocumentBucket.UploadPath"/> by appending a <c>path:</c> clause derived
+		/// from that folder's Graph <c>webUrl</c>. Bucket-level <see cref="DocumentBucket.Extensions"/>
+		/// are enforced client-side, mirroring <see cref="ReadFiles(ReadData)"/>.
 		/// </remarks>
 		public List<IDocHubFile> SearchFiles(SearchData data)
 		{
@@ -762,17 +762,17 @@
 
 			// End-of-traversal
 			if (spContext.SearchStarted
-				&& spContext.NextPageLink == null
+				&& !spContext.MoreResultsAvailable
 				&& spContext.PageRemainderBuffer.Count == 0)
 			{
 				return new List<IDocHubFile>();
 			}
 
-			// Resolve the bucket's UploadPath to a Graph item id exactly once so search is
+			// Resolve the bucket's UploadPath to a KQL `path:` clause exactly once so search is
 			// scoped to the same folder the other handler methods operate on.
-			if (spContext.FolderId == null)
+			if (spContext.PathClause == null)
 			{
-				spContext.FolderId = await ResolveBucketFolderIdAsync(bucket);
+				spContext.PathClause = await ResolveBucketPathClauseAsync(bucket);
 			}
 
 			var allowedExtensions = bucket != null && !string.IsNullOrEmpty(bucket.Extensions)
@@ -787,15 +787,15 @@
 				collected.Add(buffered);
 			}
 
-			// Keep pulling Graph pages until logical page is filled or the search is exhausted
+			// Keep pulling Microsoft Search pages until logical page is filled or the search is exhausted
 			while (collected.Count < spContext.PageSize
-				   && (!spContext.SearchStarted || spContext.NextPageLink != null))
+				   && (!spContext.SearchStarted || spContext.MoreResultsAvailable))
 			{
-				var response = await ExecuteSearchPageRequest(spContext, args.Query);
-				if (response == null)
+				var container = await ExecuteSearchPageRequest(spContext, args);
+				if (container == null)
 					break;
 
-				CollectSearchFiles(allowedExtensions, spContext, collected, response);
+				CollectSearchFiles(allowedExtensions, spContext, collected, container);
 			}
 
 			var result = new List<IDocHubFile>(collected.Count);
@@ -811,10 +811,11 @@
 		}
 
 		/// <summary>
-		/// Resolves the folder referenced by <see cref="DocumentBucket.UploadPath"/> to a Graph
-		/// item id. Falls back to the drive's root when the bucket has no UploadPath.
+		/// Resolves the folder referenced by <see cref="DocumentBucket.UploadPath"/> to a KQL
+		/// <c>path:</c> clause using the folder's Graph <c>webUrl</c>. Falls back to the drive's
+		/// root when the bucket has no UploadPath.
 		/// </summary>
-		private async Task<string> ResolveBucketFolderIdAsync(DocumentBucket bucket)
+		private async Task<string> ResolveBucketPathClauseAsync(DocumentBucket bucket)
 		{
 			var trimmedPath = (bucket?.UploadPath ?? string.Empty).Trim('/', '\\');
 
@@ -839,54 +840,67 @@
 			if (folder == null || folder.Folder == null)
 				throw new InvalidOperationException("Could not find folder with path /" + (bucket?.UploadPath ?? string.Empty));
 
-			return folder.Id;
+			if (string.IsNullOrEmpty(folder.WebUrl))
+				throw new InvalidOperationException("Resolved folder has no WebUrl; cannot scope Microsoft Search query.");
+
+			return "path:\"" + folder.WebUrl + "\"";
 		}
 
 		/// <summary>
-		/// Executes the next Graph search page request and updates the continuation link.
+		/// Executes one Microsoft Search page request and advances the paging cursor.
 		/// </summary>
-		private async Task<Microsoft.Graph.Drives.Item.Items.Item.SearchWithQ.SearchWithQGetResponse> ExecuteSearchPageRequest(
+		private async Task<SearchHitsContainer> ExecuteSearchPageRequest(
 			SharePointSearchPageData context,
-			string query)
+			WebFileSearchData args)
 		{
-			var builder = _graphClient
-				.Drives[_drive.Id]
-				.Items[context.FolderId]
-				.SearchWithQ(query);
+			// Combine bucket path scoping with the user's KQL query.
+			var fullQuery = "(" + context.PathClause + ") AND (" + args.Query + ")";
 
-			Microsoft.Graph.Drives.Item.Items.Item.SearchWithQ.SearchWithQGetResponse response;
+			var body = new Microsoft.Graph.Search.Query.QueryPostRequestBody
+			{
+				Requests = new List<SearchRequest>
+				{
+					new SearchRequest
+					{
+						EntityTypes = new List<EntityType?> { EntityType.DriveItem },
+						Query = new SearchQuery { QueryString = fullQuery },
+						From = context.From,
+						Size = context.PageSize,
+						Region = args.Region,
+					},
+				},
+			};
 
-			if (!context.SearchStarted)
-			{
-				response = await builder.GetAsSearchWithQGetResponseAsync(cfg => cfg.QueryParameters.Top = context.PageSize);
-			}
-			else
-			{
-				// Resume paging via @odata.nextLink
-				response = await builder.WithUrl(context.NextPageLink).GetAsSearchWithQGetResponseAsync();
-			}
+			var response = await _graphClient.Search.Query.PostAsQueryPostResponseAsync(body);
+			var container = response?.Value?.FirstOrDefault()?.HitsContainers?.FirstOrDefault();
 
 			context.SearchStarted = true;
-			context.NextPageLink = response?.OdataNextLink;
-			return response;
+			context.MoreResultsAvailable = container?.MoreResultsAvailable == true;
+			context.From += context.PageSize;
+
+			return container;
 		}
 
 		/// <summary>
-		/// Collects file items from a Graph search page into the logical page and buffers overflow.
+		/// Collects file items from a Microsoft Search hits container into the logical page and
+		/// buffers overflow.
 		/// </summary>
 		private static void CollectSearchFiles(
 			HashSet<string> allowedExtensions,
 			SharePointSearchPageData context,
 			ICollection<DriveItem> collected,
-			Microsoft.Graph.Drives.Item.Items.Item.SearchWithQ.SearchWithQGetResponse page)
+			SearchHitsContainer container)
 		{
-			if (page?.Value == null)
+			if (container?.Hits == null)
 				return;
 
-			var files = page.Value
-				.Where(i => i.File != null &&
-							(allowedExtensions == null ||
-							 allowedExtensions.Contains(Path.GetExtension(i.Name).TrimStart('.'))))
+			var files = container.Hits
+				.Select(h => h.Resource as DriveItem)
+				.Where(i => i != null
+							&& i.Folder == null
+							&& !string.IsNullOrEmpty(i.Name)
+							&& (allowedExtensions == null
+								|| allowedExtensions.Contains(Path.GetExtension(i.Name).TrimStart('.'))))
 				.ToList();
 
 			foreach (var file in files)
