@@ -768,6 +768,13 @@
 				return new List<IDocHubFile>();
 			}
 
+			// Resolve the bucket's UploadPath to a Graph item id exactly once so search is
+			// scoped to the same folder the other handler methods operate on.
+			if (spContext.FolderId == null)
+			{
+				spContext.FolderId = await ResolveBucketFolderIdAsync(bucket);
+			}
+
 			var allowedExtensions = bucket != null && !string.IsNullOrEmpty(bucket.Extensions)
 				? new HashSet<string>(bucket.Extensions.Split(','), StringComparer.OrdinalIgnoreCase)
 				: null;
@@ -804,6 +811,38 @@
 		}
 
 		/// <summary>
+		/// Resolves the folder referenced by <see cref="DocumentBucket.UploadPath"/> to a Graph
+		/// item id. Falls back to the drive's root when the bucket has no UploadPath.
+		/// </summary>
+		private async Task<string> ResolveBucketFolderIdAsync(DocumentBucket bucket)
+		{
+			var trimmedPath = (bucket?.UploadPath ?? string.Empty).Trim('/', '\\');
+
+			DriveItem folder;
+			if (string.IsNullOrEmpty(trimmedPath))
+			{
+				folder = (await _graphClient
+					.Sites[_site.Id]
+					.Drives[_drive.Id]
+					.GetAsync())
+					.Root;
+			}
+			else
+			{
+				folder = await _graphClient
+					.Drives[_drive.Id]
+					.Root
+					.ItemWithPath(trimmedPath)
+					.GetAsync();
+			}
+
+			if (folder == null || folder.Folder == null)
+				throw new InvalidOperationException("Could not find folder with path /" + (bucket?.UploadPath ?? string.Empty));
+
+			return folder.Id;
+		}
+
+		/// <summary>
 		/// Executes the next Graph search page request and updates the continuation link.
 		/// </summary>
 		private async Task<Microsoft.Graph.Drives.Item.Items.Item.SearchWithQ.SearchWithQGetResponse> ExecuteSearchPageRequest(
@@ -812,7 +851,7 @@
 		{
 			var builder = _graphClient
 				.Drives[_drive.Id]
-				.Items["root"]
+				.Items[context.FolderId]
 				.SearchWithQ(query);
 
 			Microsoft.Graph.Drives.Item.Items.Item.SearchWithQ.SearchWithQGetResponse response;
