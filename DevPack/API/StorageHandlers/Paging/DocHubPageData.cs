@@ -42,6 +42,7 @@
 		/// The number of items to include per page. This value is assigned to the created instance’s
 		/// <c>PageSize</c> property.
 		/// </param>
+		/// <param name="isSearch">Indicates whether the page data is for a search operation.</param>
 		/// <returns>
 		/// A concrete <see cref="DocHubPageData"/> instance corresponding to the specified
 		/// <paramref name="storageType"/>, initialized with the given <paramref name="pageSize"/>.
@@ -49,12 +50,15 @@
 		/// <exception cref="NotSupportedException">
 		/// Thrown when the specified <paramref name="storageType"/> is not supported.
 		/// </exception>
-		public static DocHubPageData CreatePageData(StorageType storageType, int pageSize)
+		public static DocHubPageData CreatePageData(StorageType storageType, int pageSize, bool isSearch = false)
 		{
 			switch (storageType)
 			{
 				case StorageType.SharePoint:
-					return new SharePointPageData() { PageSize = pageSize };
+					if (isSearch)
+						return new SharePointSearchPageData() { PageSize = pageSize };
+					else
+						return new SharePointPageData() { PageSize = pageSize };
 
 				case StorageType.Local:
 					return new LocalPageData() { PageSize = pageSize };
