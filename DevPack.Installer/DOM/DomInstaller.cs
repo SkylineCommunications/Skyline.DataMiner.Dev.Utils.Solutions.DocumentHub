@@ -5,13 +5,9 @@
 	using DevPack.Installer.DOM.DocumentBucket_Definition;
 	using DevPack.Installer.DOM.DomSource_Definition;
 	using DevPack.Installer.DOM.Sharepoint_Definition;
-	using DevPack.Installer.Module;
 	using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Apps.Modules;
-	using Skyline.DataMiner.Net.ManagerStore;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.Net.Sections;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Utils.DOM.Builders;
 
@@ -36,22 +32,34 @@
 			Log("Installation for SDM DocumentHub started...");
 
 			var moduleHelper = new ModuleSettingsHelper(_connection.HandleMessages);
-			var moduleComparer = new ModuleSettingsComparer();
-			var moduleSettings = moduleHelper.ModuleSettings.Read(ModuleSettingsExposers.ModuleId.Equal(DocumentBucketDomMapper.ModuleId)).SingleOrDefault();
+			var existingSettings = moduleHelper.ModuleSettings.Read(ModuleSettingsExposers.ModuleId.Equal(DocumentBucketDomMapper.ModuleId)).SingleOrDefault();
+
+			// Always (re)apply the module settings so the DOM definition stays current on every deploy.
+			Log("Installing Module Settings...");
 			var module = new DomModuleBuilder()
 					.WithModuleId(DocumentBucketDomMapper.ModuleId)
 					.WithInformationEvents(false)
 					.WithHistory(true)
 					.Build();
 
-			// If the module settings differ import it
-			// The comparer is not exhaustive it only checks for the properties we care about
-			if (moduleSettings == null || moduleComparer.Equals(moduleSettings, module))
+			// Preserve the admin-configured network attachment settings (share path + credential)
+			// from the existing module so they are not cleared when we update the settings.
+			if (existingSettings?.DomManagerSettings?.DomInstanceNetworkAttachmentSettings != null)
 			{
-				Log("Installing Module Settings...");
-				Import(moduleHelper.ModuleSettings, ModuleSettingsExposers.ModuleId.Equal(DocumentBucketDomMapper.ModuleId), module);
-				Log("Installed Module Settings");
+				module.DomManagerSettings.DomInstanceNetworkAttachmentSettings = existingSettings.DomManagerSettings.DomInstanceNetworkAttachmentSettings;
+				Log("Preserved existing network attachment settings (share path and credential).");
 			}
+
+			if (existingSettings == null)
+			{
+				moduleHelper.ModuleSettings.Create(module);
+			}
+			else
+			{
+				moduleHelper.ModuleSettings.Update(module);
+			}
+
+			Log("Installed Module Settings");
 
 			var documentBucketInstaller = new DocumentBucketInstaller(_connection, _logMethod);
 			var sharepointInstaller = new SharepointInstaller(_connection, _logMethod);
@@ -65,21 +73,6 @@
 		internal void Log(string message)
 		{
 			_logMethod?.Invoke($"|DomInstaller|DevPack.Installer: {message}");
-		}
-
-		private void Import<T>(ICrudHelperComponent<T> crudHelperComponent, FilterElement<T> equalityFilter, T dataType)
-			where T : DataType
-		{
-			bool exists = crudHelperComponent.Read(equalityFilter).Any();
-
-			if (exists)
-			{
-				crudHelperComponent.Update(dataType);
-			}
-			else
-			{
-				crudHelperComponent.Create(dataType);
-			}
 		}
 	}
 }
