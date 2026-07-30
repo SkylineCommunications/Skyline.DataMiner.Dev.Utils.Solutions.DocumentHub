@@ -176,13 +176,10 @@
 			// If a filter/query is provided when ReadFiles is called, we reroute to SearchFiles.
 			if (!string.IsNullOrWhiteSpace(data.Filter))
 			{
-				var searchContext = new SharePointSearchPageData();
-				args.Context = data.Context;
 				var searchData = new WebFileSearchData
 				{
 					Bucket = data.Bucket,
 					Query = data.Filter,
-					Context = searchContext,
 					Region = "EMEA", // Region is required for search requests with application-wide permissions.
 				};
 
@@ -192,16 +189,6 @@
 			// If paging context exists, return next page only
 			if (args.Context != null)
 				return await ReadPage(args);
-
-			if (!string.IsNullOrWhiteSpace(args.Filter))
-			{
-				return await SearchFilesAsync(new WebFileSearchData
-				{
-					Bucket = args.Bucket,
-					Query = args.Filter,
-					Context = args.Context,
-				});
-			}
 
 			// Initialize paging context
 			var context = new SharePointPageData();
