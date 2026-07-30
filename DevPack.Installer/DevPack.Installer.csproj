@@ -9,9 +9,9 @@
 		<GenerateDataMinerPackage>True</GenerateDataMinerPackage>
 		<MinimumRequiredDmVersion>10.4.0.0 - 14003</MinimumRequiredDmVersion>
 		<!-- <MinimumRequiredDmWebVersion>10.6.2 (CU0)</MinimumRequiredDmWebVersion> -->
-		<PackageVersion>1.0.1</PackageVersion>
-		<Version>1.0.1</Version>
-		<VersionComment>Initial Version</VersionComment>
+		<PackageVersion>1.0.2</PackageVersion>
+		<Version>1.0.2</Version>
+		<VersionComment>Fixed GetRelativePath web path normalization</VersionComment>
 		<!-- Do NOT fill in the Organization Token here. This points to either an Environment Variable skyline__sdk__dataminertoken holding the organization token or a Visual Studio User Secret holding the token. -->
 		<CatalogPublishKeyName>skyline:sdk:dataminertoken</CatalogPublishKeyName>
 		<CatalogDefaultDownloadKeyName>skyline:sdk:dataminertoken</CatalogDefaultDownloadKeyName>
