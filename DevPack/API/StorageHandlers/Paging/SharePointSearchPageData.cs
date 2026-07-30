@@ -4,14 +4,14 @@
 	using Microsoft.Graph.Models;
 
 	/// <summary>
-	/// Paging context used when searching files in SharePoint storage via Microsoft Graph's
-	/// driveItem <c>search</c> endpoint.
+	/// Paging context used when searching files in SharePoint storage via the Microsoft Graph
+	/// <c>POST /search/query</c> endpoint.
 	/// </summary>
 	/// <remarks>
-	/// Unlike <see cref="SharePointPageData"/>, no folder queue is required because Graph search
-	/// returns a flat, drive-wide result set. Only the OData continuation link and an overflow
-	/// buffer are maintained so multiple Graph pages can be aggregated into a single logical page
-	/// of <see cref="DocHubPageData.PageSize"/> items.
+	/// The Microsoft Search endpoint uses cursor-based paging via <see cref="From"/> and
+	/// <see cref="DocHubPageData.PageSize"/> (as <c>size</c>) instead of an <c>@odata.nextLink</c>.
+	/// The <see cref="PathClause"/> is derived once from <c>DocumentBucket.UploadPath</c> and
+	/// re-used across pages.
 	/// </remarks>
 	public class SharePointSearchPageData : DocHubPageData
 	{
@@ -23,21 +23,33 @@
 		}
 
 		/// <summary>
-		/// Gets the buffer for DriveItems that were retrieved from Microsoft Graph but did not
+		/// Gets the buffer for DriveItems that were retrieved from Microsoft Search but did not
 		/// fit into the previous logical page.
 		/// </summary>
 		public ConcurrentQueue<DriveItem> PageRemainderBuffer { get; } = new ConcurrentQueue<DriveItem>();
 
 		/// <summary>
-		/// Gets the Graph <c>@odata.nextLink</c> continuation URL. When <c>null</c> and
-		/// <see cref="SearchStarted"/> is <c>true</c>, no more Graph pages are available.
+		/// Gets the next result offset (Microsoft Search <c>from</c> parameter).
 		/// </summary>
-		public string NextPageLink { get; internal set; }
+		public int From { get; internal set; }
+
+		/// <summary>
+		/// Gets a value indicating whether Microsoft Search reported more results beyond the
+		/// current cursor.
+		/// </summary>
+		public bool MoreResultsAvailable { get; internal set; }
 
 		/// <summary>
 		/// Gets a value indicating whether the initial search request has been issued.
 		/// </summary>
 		public bool SearchStarted { get; internal set; }
+
+		/// <summary>
+		/// Gets or sets the cached KQL <c>path:</c> clause used to scope the search to the
+		/// folder referenced by <c>DocumentBucket.UploadPath</c>. Populated on the first page
+		/// request and reused for subsequent pages.
+		/// </summary>
+		public string PathClause { get; internal set; }
 
 		/// <summary>
 		/// Checks if there are more pages left.
@@ -48,7 +60,7 @@
 		public override bool HasNextPage()
 		{
 			return !SearchStarted
-				|| NextPageLink != null
+				|| MoreResultsAvailable
 				|| PageRemainderBuffer.Count > 0;
 		}
 	}
