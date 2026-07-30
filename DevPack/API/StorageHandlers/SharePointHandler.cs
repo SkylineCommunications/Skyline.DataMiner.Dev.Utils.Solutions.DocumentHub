@@ -13,6 +13,7 @@
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Security;
@@ -171,6 +172,20 @@
 		{
 			if (!(data is WebFileReadData args))
 				throw new ArgumentException("SharePointHandler requires WebFileReadData.", nameof(data));
+
+			// If a filter/query is provided when ReadFiles is called, we reroute to SearchFiles.
+			if (!string.IsNullOrWhiteSpace(data.Filter))
+			{
+				var searchData = new WebFileSearchData
+				{
+					Bucket = data.Bucket,
+					Query = data.Filter,
+					Context = args.Context,
+					Region = "EMEA", // Region is required for search requests with application-wide permissions.
+				};
+
+				return await SearchFilesAsync(searchData);
+			}
 
 			// If paging context exists, return next page only
 			if (args.Context != null)
