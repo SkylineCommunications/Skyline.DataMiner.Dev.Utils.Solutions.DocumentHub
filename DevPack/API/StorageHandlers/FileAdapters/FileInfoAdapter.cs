@@ -104,7 +104,9 @@
 			var relativePath = dirFullPath.Substring(rootFullPath.Length)
 				.TrimStart(Path.DirectorySeparatorChar);
 
-			return relativePath;
+			// Normalize to forward slashes so web paths are consistent
+			// (Windows filesystem paths use '\', but web/URL paths use '/').
+			return relativePath.Replace('\\', '/');
 		}
 
 		public string GetModule()
