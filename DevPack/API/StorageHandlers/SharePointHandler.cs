@@ -13,7 +13,6 @@
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM;
-	using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Security;
@@ -109,7 +108,7 @@
 
 			// Retrieve client secret
 			var clientSecret = RetrieveClientSecret();
-			
+
 			// Authenticate using Azure AD client credentials flow
 			var credential = new Azure.Identity.ClientSecretCredential(
 				_sharePoint.TenantID,
@@ -908,6 +907,11 @@
 		{
 			if (container?.Hits == null)
 				return;
+
+			foreach (var h in container.Hits)
+			{
+				($"{h.Resource?.GetType().Name} - {h.HitId} - {h.Summary}");
+			}
 
 			var files = container.Hits
 				.Select(h => h.Resource as DriveItem)
