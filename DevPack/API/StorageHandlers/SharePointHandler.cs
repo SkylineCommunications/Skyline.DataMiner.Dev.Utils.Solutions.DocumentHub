@@ -826,9 +826,22 @@
 
 		/// <summary>
 		/// Resolves the folder referenced by <see cref="DocumentBucket.UploadPath"/> to a KQL
-		/// <c>path:</c> clause using the folder's Graph <c>webUrl</c>. Falls back to the drive's
-		/// root when the bucket has no UploadPath.
+		/// <c>ParentLink:</c> clause using the folder's Graph <c>webUrl</c>. Falls back to the
+		/// drive's root when the bucket has no UploadPath.
 		/// </summary>
+		/// <remarks>
+		/// <para>
+		/// We deliberately use the SharePoint search managed property <c>ParentLink</c> instead
+		/// of the more obvious <c>path:</c> refiner. In Microsoft Search over driveItems,
+		/// <c>path:</c> matches the item's display-form URL (e.g. <c>.../Forms/DispForm.aspx?ID=...</c>),
+		/// which never lines up with the folder's storage URL, so folder scoping via
+		/// <c>path:</c> silently returns 0 hits.
+		/// </para>
+		/// <para>
+		/// The URL is unescaped (<c>%20</c> → space) because SharePoint indexes the decoded
+		/// form of the managed property value.
+		/// </para>
+		/// </remarks>
 		private async Task<string> ResolveBucketPathClauseAsync(DocumentBucket bucket)
 		{
 			var trimmedPath = (bucket?.UploadPath ?? string.Empty).Trim('/', '\\');
@@ -857,7 +870,8 @@
 			if (string.IsNullOrEmpty(folder.WebUrl))
 				throw new InvalidOperationException("Resolved folder has no WebUrl; cannot scope Microsoft Search query.");
 
-			return "path:\"" + folder.WebUrl + "\"";
+			var decodedWebUrl = Uri.UnescapeDataString(folder.WebUrl);
+			return "ParentLink:\"" + decodedWebUrl + "\"";
 		}
 
 		/// <summary>
