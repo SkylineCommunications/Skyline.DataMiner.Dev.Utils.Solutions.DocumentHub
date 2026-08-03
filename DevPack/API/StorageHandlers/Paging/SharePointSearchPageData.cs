@@ -1,6 +1,7 @@
 ﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API.Paging
 {
 	using System.Collections.Concurrent;
+	using System.Collections.Generic;
 	using Microsoft.Graph.Models;
 
 	/// <summary>
@@ -10,8 +11,8 @@
 	/// <remarks>
 	/// The Microsoft Search endpoint uses cursor-based paging via <see cref="From"/> and
 	/// <see cref="DocHubPageData.PageSize"/> (as <c>size</c>) instead of an <c>@odata.nextLink</c>.
-	/// The <see cref="PathClause"/> is derived once from <c>DocumentBucket.UploadPath</c> and
-	/// re-used across pages.
+	/// The <see cref="ScopingClause"/> and <see cref="AllowedParentIds"/> set are derived once
+	/// from <c>DocumentBucket.UploadPath</c> and re-used across pages.
 	/// </remarks>
 	public class SharePointSearchPageData : DocHubPageData
 	{
@@ -45,11 +46,19 @@
 		public bool SearchStarted { get; internal set; }
 
 		/// <summary>
-		/// Gets or sets the cached KQL <c>path:</c> clause used to scope the search to the
-		/// folder referenced by <c>DocumentBucket.UploadPath</c>. Populated on the first page
-		/// request and reused for subsequent pages.
+		/// Gets or sets the cached KQL scoping clause (currently a <c>site:</c> refiner)
+		/// applied server-side. Populated on the first page request and reused for subsequent
+		/// pages.
 		/// </summary>
-		public string PathClause { get; internal set; }
+		public string ScopingClause { get; internal set; }
+
+		/// <summary>
+		/// Gets or sets the set of driveItem ids that represent the bucket's UploadPath folder
+		/// and every folder nested underneath it. Search hits whose
+		/// <c>parentReference.id</c> is not in this set are filtered out client-side so the
+		/// final result set stays scoped to the bucket folder subtree.
+		/// </summary>
+		public HashSet<string> AllowedParentIds { get; internal set; }
 
 		/// <summary>
 		/// Checks if there are more pages left.

@@ -782,11 +782,12 @@
 				return new List<IDocHubFile>();
 			}
 
-			// Resolve the bucket's UploadPath to a KQL `path:` clause exactly once so search is
-			// scoped to the same folder the other handler methods operate on.
-			if (spContext.PathClause == null)
+			// Resolve the bucket's UploadPath to (a) a KQL scoping clause applied server-side
+			// and (b) the set of allowed parent folder ids used to filter hits client-side to
+			// the bucket-folder subtree.
+			if (spContext.ScopingClause == null)
 			{
-				spContext.PathClause = await ResolveBucketPathClauseAsync(bucket);
+				await ResolveBucketScopingAsync(spContext, bucket);
 			}
 
 			var allowedExtensions = bucket != null && !string.IsNullOrEmpty(bucket.Extensions)
@@ -825,11 +826,22 @@
 		}
 
 		/// <summary>
-		/// Resolves the folder referenced by <see cref="DocumentBucket.UploadPath"/> to a KQL
-		/// <c>path:</c> clause using the folder's Graph <c>webUrl</c>. Falls back to the drive's
-		/// root when the bucket has no UploadPath.
+		/// Resolves the folder referenced by <see cref="DocumentBucket.UploadPath"/> into (1) a
+		/// KQL <c>site:</c> scoping clause applied server-side and (2) the set of driveItem ids
+		/// (the bucket folder plus every folder under it) used to filter hits client-side to the
+		/// bucket-folder subtree.
 		/// </summary>
-		private async Task<string> ResolveBucketPathClauseAsync(DocumentBucket bucket)
+		/// <remarks>
+		/// <para>
+		/// The Microsoft Search <c>path:</c> refiner matches driveItem hits by their
+		/// display-form URL (<c>.../Forms/DispForm.aspx?ID=...</c>), not their storage URL,
+		/// so it cannot be used for folder-level scoping. The response's
+		/// <c>parentReference.path</c> is not populated for driveItem hits either, but
+		/// <c>parentReference.id</c> is - hence the client-side filter over a pre-computed
+		/// set of folder ids.
+		/// </para>
+		/// </remarks>
+		private async Task ResolveBucketScopingAsync(SharePointSearchPageData context, DocumentBucket bucket)
 		{
 			var trimmedPath = (bucket?.UploadPath ?? string.Empty).Trim('/', '\\');
 
@@ -854,10 +866,49 @@
 			if (folder == null || folder.Folder == null)
 				throw new InvalidOperationException("Could not find folder with path /" + (bucket?.UploadPath ?? string.Empty));
 
-			if (string.IsNullOrEmpty(folder.WebUrl))
-				throw new InvalidOperationException("Resolved folder has no WebUrl; cannot scope Microsoft Search query.");
+			var siteUrl = "https://" + _sharePoint.SiteURL.TrimEnd('/');
+			context.ScopingClause = "site:\"" + siteUrl + "\"";
 
-			return "path:\"" + folder.WebUrl + "\"";
+			var allowedIds = new HashSet<string>(StringComparer.Ordinal) { folder.Id };
+			await CollectDescendantFolderIdsAsync(folder.Id, allowedIds);
+			context.AllowedParentIds = allowedIds;
+		}
+
+		/// <summary>
+		/// Recursively enumerates every folder id under <paramref name="folderId"/> and adds
+		/// them to <paramref name="ids"/>.
+		/// </summary>
+		private async Task CollectDescendantFolderIdsAsync(string folderId, HashSet<string> ids)
+		{
+			var page = await _graphClient
+				.Drives[_drive.Id]
+				.Items[folderId]
+				.Children
+				.GetAsync(cfg => cfg.QueryParameters.Select = new[] { "id", "folder" });
+
+			while (page != null)
+			{
+				if (page.Value != null)
+				{
+					foreach (var child in page.Value)
+					{
+						if (child.Folder != null && !string.IsNullOrEmpty(child.Id) && ids.Add(child.Id))
+						{
+							await CollectDescendantFolderIdsAsync(child.Id, ids);
+						}
+					}
+				}
+
+				if (string.IsNullOrEmpty(page.OdataNextLink))
+					break;
+
+				page = await _graphClient
+					.Drives[_drive.Id]
+					.Items[folderId]
+					.Children
+					.WithUrl(page.OdataNextLink)
+					.GetAsync();
+			}
 		}
 
 		/// <summary>
@@ -867,8 +918,10 @@
 			SharePointSearchPageData context,
 			WebFileSearchData args)
 		{
-			// Combine bucket path scoping with the user's KQL query.
-			var fullQuery = "(" + context.PathClause + ") AND (" + args.Query + ")";
+			// Combine site scoping with the user's KQL query; the bucket-folder subtree filter
+			// is applied client-side in CollectSearchFiles because Microsoft Search cannot
+			// express "everything under this folder" reliably for driveItem hits.
+			var fullQuery = "(" + context.ScopingClause + ") AND (" + args.Query + ")";
 
 			var body = new Microsoft.Graph.Search.Query.QueryPostRequestBody
 			{
@@ -912,26 +965,20 @@
 			if (container?.Hits == null)
 				return;
 
-			DebugLog($"CollectSearchFiles: allowedExtensions={(allowedExtensions == null ? "<null>" : string.Join(",", allowedExtensions))} hitCount={container.Hits.Count}");
+			DebugLog($"CollectSearchFiles: allowedExtensions={(allowedExtensions == null ? "<null>" : string.Join(",", allowedExtensions))} allowedParentIds={context.AllowedParentIds?.Count ?? 0} hitCount={container.Hits.Count}");
 
 			int hitIndex = 0;
 			foreach (var h in container.Hits)
 			{
-				var resourceTypeName = h.Resource?.GetType().Name ?? "<null>";
 				var asDriveItem = h.Resource as DriveItem;
 				var name = asDriveItem?.Name;
-				var extension = string.IsNullOrEmpty(name) ? "<no-name>" : Path.GetExtension(name).TrimStart('.');
-				bool driveItemCast = asDriveItem != null;
-				bool isFile = asDriveItem?.File != null;
-				bool isFolder = asDriveItem?.Folder != null;
-				bool extensionAllowed = allowedExtensions == null
-					|| (name != null && allowedExtensions.Contains(extension));
+				var parentId = asDriveItem?.ParentReference?.Id;
+				var inScope = context.AllowedParentIds == null
+					|| (parentId != null && context.AllowedParentIds.Contains(parentId));
 
 				DebugLog(
-					$"  hit[{hitIndex}] resourceType={resourceTypeName} " +
-					$"driveItemCast={driveItemCast} name={name ?? "<null>"} " +
-					$"extension={extension} isFile={isFile} isFolder={isFolder} " +
-					$"extensionAllowed={extensionAllowed} hitId={h.HitId}");
+					$"  hit[{hitIndex}] driveItemCast={asDriveItem != null} name={name ?? "<null>"} " +
+					$"parentId={parentId ?? "<null>"} inScope={inScope} hitId={h.HitId}");
 				hitIndex++;
 			}
 
@@ -940,6 +987,9 @@
 				.Where(i => i != null
 							&& i.Folder == null
 							&& !string.IsNullOrEmpty(i.Name)
+							&& (context.AllowedParentIds == null
+								|| (i.ParentReference?.Id != null
+									&& context.AllowedParentIds.Contains(i.ParentReference.Id)))
 							&& (allowedExtensions == null
 								|| allowedExtensions.Contains(Path.GetExtension(i.Name).TrimStart('.'))))
 				.ToList();
