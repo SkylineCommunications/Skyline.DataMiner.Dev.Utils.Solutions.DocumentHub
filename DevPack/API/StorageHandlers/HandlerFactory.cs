@@ -85,8 +85,8 @@
 	/// Defines the contract for storage handlers that support search queries.
 	/// </summary>
 	/// <remarks>
-	/// Handlers that can execute a query language (e.g. KQL against Microsoft Graph)
-	/// against their backing store should implement this interface. This keeps search
+	/// Handlers that can execute a query language against their
+	/// backing store should implement this interface. This keeps search
 	/// capability optional so that handlers without a native query engine
 	/// (such as the local file system) don't need to fake one.
 	/// </remarks>
