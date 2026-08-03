@@ -153,6 +153,7 @@
 		/// ⚠ Microsoft Graph paginates per folder, so this method aggregates multiple folder pages
 		/// into a single logical page using <see cref="SharePointPageData"/>.
 		/// </remarks>
+		/// <returns>A <see cref="List{IDocHubFile}"/> of file abstractions.</returns>
 		public List<IDocHubFile> ReadFiles(ReadData data)
 		{
 			return ReadFilesAsync(data)
@@ -167,6 +168,7 @@
 		/// ⚠ Microsoft Graph paginates per folder, so this method aggregates multiple folder pages
 		/// into a single logical page using <see cref="SharePointPageData"/>.
 		/// </remarks>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation returning a <see cref="List{IDocHubFile}"/> of file abstractions.</returns>
 		public async Task<List<IDocHubFile>> ReadFilesAsync(ReadData data)
 		{
 			if (!(data is WebFileReadData args))
@@ -190,18 +192,14 @@
 			if (args.Context != null)
 				return await ReadPage(args);
 
-			// Initialize paging context
 			var context = new SharePointPageData();
 			args.Context = context;
 
 			var files = new List<IDocHubFile>();
 
-			// Iterate until no more data is available
 			while (context.HasNextPage())
 			{
 				var page = await ReadPage(args);
-
-				// Safety break if no results and no further pages
 				if (page.Count == 0 && !context.HasNextPage())
 				{
 					break;
@@ -216,6 +214,7 @@
 		/// <summary>
 		/// Checks whether a file exists in SharePoint.
 		/// </summary>
+		/// <returns><c>true</c> if the file exists; otherwise, <c>false</c>.</returns>
 		public bool FileExists(FileExistsData data)
 		{
 			if (!(data is WebFileExistsData args))
@@ -232,6 +231,7 @@
 		/// <summary>
 		/// Uploads a file from disk to SharePoint.
 		/// </summary>
+		/// <returns>The relative path of the uploaded file.</returns>
 		public string UploadFile(UploadData data)
 		{
 			if (!(data is WebFileUploadData args))
