@@ -179,6 +179,7 @@
 				{
 					Bucket = data.Bucket,
 					Query = data.Filter,
+					Context = data.Context,
 					Region = "EMEA", // Region is required for search requests with application-wide permissions.
 				};
 
