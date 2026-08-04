@@ -631,31 +631,36 @@
 				// Normalize directory path
 				var normalizedDirectory = NormalizeDirectoryPath(directory);
 
-				// TODO: directory is unused here. Will the upload work for non-root DriveItems?
-				MemoryStream jpegStream = new MemoryStream();
-
-				// Serialize image to memory
-				image.Save(jpegStream, ImageFormat.Jpeg);
-				jpegStream.Position = 0;
-
-				string path;
-				if (string.IsNullOrEmpty(normalizedDirectory))
+				using (MemoryStream jpegStream = new MemoryStream())
 				{
-					// Upload to root directory
-					path = name;
-				}
-				else
-				{
-					// Upload to subdirectory
-					path = $"{normalizedDirectory}/{name}";
-				}
+					// Serialize image to memory
+					image.Save(jpegStream, ImageFormat.Jpeg);
+					jpegStream.Position = 0;
 
-				var item = await _graphClient
-					.Drives[_drive.Id]
-					.Root
-					.ItemWithPath(path)
-					.Content
-					.PutAsync(jpegStream);
+					// what to do with the other image formats: jpg, png, bmp, gif, etc.?
+					string fileName = $"{name}.jpeg";
+					string path;
+					if (string.IsNullOrEmpty(normalizedDirectory))
+					{
+						// Upload to root directory
+						path = fileName;
+					}
+					else
+					{
+						// Ensure the target folder exists before uploading
+						await EnsureFolderPathExistsAsync(normalizedDirectory);
+
+						// Upload to subdirectory
+						path = $"{normalizedDirectory}/{fileName}";
+					}
+
+					var item = await _graphClient
+						.Drives[_drive.Id]
+						.Root
+						.ItemWithPath(path)
+						.Content
+						.PutAsync(jpegStream);
+				}
 			}
 			catch (Exception e)
 			{
