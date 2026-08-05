@@ -6,14 +6,8 @@
 	/// Represents the configuration options for executing a search against a storage backend
 	/// that supports search (currently SharePoint via Microsoft Graph KQL).
 	/// </summary>
-	public class SearchFilesConfiguration
+	public class SearchFilesConfiguration : IPageableConfiguration
 	{
-		/// <summary>
-		/// Gets or sets the optional paging context that maintains paging state between calls.
-		/// Reuse the same instance to continue paging through subsequent result pages.
-		/// </summary>
-		public DocHubPageData Context { get; set; }
-
 		/// <summary>
 		/// Gets or sets the Microsoft Search region (e.g. <c>"EUR"</c>, <c>"NAM"</c>, <c>"APC"</c>).
 		/// </summary>
@@ -24,5 +18,8 @@
 		/// endpoint will return <c>400 Bad Request</c>.
 		/// </remarks>
 		public string Region { get; set; }
+
+		/// <inheritdoc/>
+		public DocHubPageData Context { get; set; }
 	}
 }
