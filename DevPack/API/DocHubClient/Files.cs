@@ -7,6 +7,7 @@
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient.Configurations;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient.Exceptions;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
