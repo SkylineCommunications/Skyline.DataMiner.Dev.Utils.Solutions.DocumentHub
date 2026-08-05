@@ -602,7 +602,7 @@
 					else
 					{
 						// Upload to subdirectory
-						pathPart = $"{normalizedDirectory}/{name}";						
+						pathPart = $"{normalizedDirectory}/{name}";
 					}
 
 					item = await _graphClient
