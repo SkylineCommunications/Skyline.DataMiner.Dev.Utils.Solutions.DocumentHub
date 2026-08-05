@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient.Configurations
 {
 	using System;
 	using System.Collections.Generic;
