@@ -49,7 +49,7 @@ The `DevPack.Tests` project contains unit tests using an in-memory DOM mock (`Do
 | **SDM - DomSource**        | `DomSourceDomRepository_CRUD_Tests`, `DomSourceDomRepository_FilterTests_Tests`               | 13    |
 | **SDM - DocumentBucket**   | `DocumentBucketDomRepository_CRUD_Tests`, `DocumentBucketDomRepository_FilterTests_Tests`     | 26    |
 
-**Total: 104 tests** (includes 3 parameterized test methods)
+**Total: 109 tests** (includes 3 parameterized test methods)
 
 ### SDM Repository Tests
 
