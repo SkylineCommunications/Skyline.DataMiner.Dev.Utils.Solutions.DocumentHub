@@ -10,6 +10,7 @@
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
+	using Skyline.DataMiner.Utils.SecureCoding.SecureIO;
 
 	/// <summary>
 	/// Handles file and image storage on the local filesystem.
@@ -64,7 +65,10 @@
 			if (!(data is WebFileExistsData args))
 				throw new ArgumentException("LocalHandler requires WebFileFileExistsData.", nameof(data));
 
-			string filePath = Path.Combine(ResolveLocalDirectory(args.Directory), args.Name);
+			var directory = args.Directory;
+			var name = args.Name;
+
+			string filePath = SecurePath.ConstructSecurePath(directory, $"{name}");
 			return File.Exists(filePath);
 		}
 
@@ -193,6 +197,16 @@
 			}
 
 			return files;
+		}
+
+		/// <summary>
+		/// Asynchronous version of <see cref="ReadFiles(ReadData)"/>.
+		/// </summary>
+		/// <param name="data">The storage handler data containing category and filter information.</param>
+		/// <returns>A list of all <see cref="IDocHubFile"/> matching the criteria.</returns>
+		public async Task<List<IDocHubFile>> ReadFilesAsync(ReadData data)
+		{
+			return await Task.FromResult(ReadFiles(data));
 		}
 
 		/// <summary>
