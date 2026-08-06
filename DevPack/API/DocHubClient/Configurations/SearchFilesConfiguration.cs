@@ -8,16 +8,9 @@
 	/// </summary>
 	public class SearchFilesConfiguration : IPageableConfiguration
 	{
-		/// <summary>
-		/// Gets or sets the Microsoft Search region (e.g. <c>"EUR"</c>, <c>"NAM"</c>, <c>"APC"</c>).
-		/// </summary>
-		/// <remarks>
-		/// Required by Microsoft Graph <c>/search/query</c> when the request is issued with an
-		/// application-only token (which is the case for SharePoint here, because the handler
-		/// authenticates via <c>ClientSecretCredential</c>). When left <c>null</c> the Graph
-		/// endpoint will return <c>400 Bad Request</c>.
-		/// </remarks>
-		public string Region { get; set; }
+		// Required by Microsoft Graph /search/query when the request is issued with an application-only token.
+		// Set to "EMEA" by default.
+		public string Region => "EMEA";
 
 		/// <inheritdoc/>
 		public DocHubPageData Context { get; set; }
