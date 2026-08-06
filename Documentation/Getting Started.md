@@ -257,6 +257,27 @@ byte[] bytes = client.Files.GetBytes(domFile);
 byte[] bytes = client.Files.GetBytes("my_module", instanceId, "report.pdf");
 ```
 
+#### Searching Files
+
+```csharp
+using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient;
+using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient.Configurations;
+
+var client = engine.GetDocHubClient();
+
+// Basic KQL search against a SharePoint bucket
+var results = client.Files.SearchFiles(spBucket, "filetype:pdf title:\"design doc\"");
+
+// Search with pagination
+var config = new SearchFilesConfiguration
+{
+    Context = new DocHubPageData { PageSize = 50 },
+};
+var page = client.Files.SearchFiles(spBucket, "quarterly report", config);
+```
+
+> **Note**: Search is only supported for `StorageType.SharePoint` buckets. The query is passed straight through to Microsoft Graph as a KQL query.
+
 ## Basic Usage
 
 Once you have instances of the `DocHubClient` and `IDocumentHubApiHelper`, you can start using their features.
