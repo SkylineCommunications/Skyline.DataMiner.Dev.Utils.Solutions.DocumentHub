@@ -61,9 +61,10 @@ Each repository test class covers:
 ### API Tests
 
 API tests validate parameter handling:
-- Null category, filePath, and domInstanceId validation
+- Null category, filePath, query, and domInstanceId validation
 - Storage type restrictions (e.g., DOM storage with qualifier overload)
 - DomSource module validation
+- Bucket type restrictions for the search functionality
 
 ### File Adapter Tests
 
