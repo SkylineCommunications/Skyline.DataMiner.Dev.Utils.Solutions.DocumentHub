@@ -8,6 +8,8 @@
 	using System.Linq;
 	using System.Threading.Tasks;
 	using Microsoft.Graph;
+	using Microsoft.Graph.Models;
+	using Microsoft.Graph.Models.ODataErrors;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM;
@@ -19,7 +21,6 @@
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointConfiguration;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Validation;
-	using Drive = Microsoft.Graph.Drive;
 	using File = System.IO.File;
 
 	/// <summary>
@@ -27,7 +28,7 @@
 	/// </summary>
 	/// <remarks>
 	/// This class provides file enumeration, existence checks, folder creation, and uploads
-	/// to a SharePoint document library.  
+	/// to a SharePoint document library.
 	/// <para>
 	/// ⚠ Paging is implemented manually because Microsoft Graph paginates per-folder, not recursively.
 	/// This means logical paging must aggregate multiple Graph pages and maintain internal buffers.
@@ -43,7 +44,7 @@
 	/// var files = handler.ReadFiles(new WebFileReadData { Bucket = bucket });
 	/// </code>
 	/// </example>
-	internal class SharePointHandler : IStorageHandler
+	internal class SharePointHandler : IStorageHandler, ISearchableStorageHandler
 	{
 		#region Globals
 
@@ -124,20 +125,19 @@
 
 			// Resolve SharePoint site
 			_site = _graphClient.Sites[$"{hostname}:{path}"]
-				.Request()
 				.GetAsync()
 				.GetAwaiter()
 				.GetResult();
 
 			// Retrieve document libraries (drives)
-			var drives = _graphClient.Sites[_site.Id].Drives
-				.Request()
+			var drives = _graphClient.Sites[_site.Id]
+				.Drives
 				.GetAsync()
 				.GetAwaiter()
 				.GetResult();
 
 			// Select configured document library
-			_drive = drives.FirstOrDefault(d => d.Name.Equals(_sharePoint.DocumentLibraryName, StringComparison.OrdinalIgnoreCase));
+			_drive = drives.Value.FirstOrDefault(d => d.Name.Equals(_sharePoint.DocumentLibraryName, StringComparison.OrdinalIgnoreCase));
 			if (_drive == null)
 				throw new NullReferenceException($"Library '{_sharePoint.DocumentLibraryName}' not found.");
 		}
@@ -153,27 +153,53 @@
 		/// ⚠ Microsoft Graph paginates per folder, so this method aggregates multiple folder pages
 		/// into a single logical page using <see cref="SharePointPageData"/>.
 		/// </remarks>
+		/// <returns>A <see cref="List{IDocHubFile}"/> of file abstractions.</returns>
 		public List<IDocHubFile> ReadFiles(ReadData data)
+		{
+			return ReadFilesAsync(data)
+				.GetAwaiter()
+				.GetResult();
+		}
+
+		/// <summary>
+		/// Reads all files using recursive traversal with manual paging.
+		/// </summary>
+		/// <remarks>
+		/// ⚠ Microsoft Graph paginates per folder, so this method aggregates multiple folder pages
+		/// into a single logical page using <see cref="SharePointPageData"/>.
+		/// </remarks>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation returning a <see cref="List{IDocHubFile}"/> of file abstractions.</returns>
+		public async Task<List<IDocHubFile>> ReadFilesAsync(ReadData data)
 		{
 			if (!(data is WebFileReadData args))
 				throw new ArgumentException("SharePointHandler requires WebFileReadData.", nameof(data));
 
+			// If a filter/query is provided when ReadFiles is called, we reroute to SearchFiles.
+			if (!string.IsNullOrWhiteSpace(data.Filter))
+			{
+				var searchData = new WebFileSearchData
+				{
+					Bucket = data.Bucket,
+					Query = data.Filter,
+					Context = data.Context,
+					Region = "EMEA", // Region is required for search requests with application-wide permissions.
+				};
+
+				return await SearchFilesAsync(searchData);
+			}
+
 			// If paging context exists, return next page only
 			if (args.Context != null)
-				return ReadPage(args);
+				return await ReadPage(args);
 
-			// Initialize paging context
 			var context = new SharePointPageData();
 			args.Context = context;
 
 			var files = new List<IDocHubFile>();
 
-			// Iterate until no more data is available
 			while (context.HasNextPage())
 			{
-				var page = ReadPage(args);
-
-				// Safety break if no results and no further pages
+				var page = await ReadPage(args);
 				if (page.Count == 0 && !context.HasNextPage())
 				{
 					break;
@@ -188,6 +214,7 @@
 		/// <summary>
 		/// Checks whether a file exists in SharePoint.
 		/// </summary>
+		/// <returns><c>true</c> if the file exists; otherwise, <c>false</c>.</returns>
 		public bool FileExists(FileExistsData data)
 		{
 			if (!(data is WebFileExistsData args))
@@ -204,6 +231,7 @@
 		/// <summary>
 		/// Uploads a file from disk to SharePoint.
 		/// </summary>
+		/// <returns>The relative path of the uploaded file.</returns>
 		public string UploadFile(UploadData data)
 		{
 			if (!(data is WebFileUploadData args))
@@ -228,22 +256,89 @@
 				.GetResult();
 		}
 
+		/// <summary>
+		/// Executes a KQL search against the configured SharePoint document library using the
+		/// Microsoft Graph <c>POST /search/query</c> endpoint (Microsoft Search API).
+		/// </summary>
+		/// <remarks>
+		/// The <see cref="SearchData.Query"/> value accepts full Keyword Query Language, e.g.
+		/// <c>filetype:pdf title:"design doc"</c>. Results are scoped to the folder configured
+		/// on <see cref="DocumentBucket.UploadPath"/> by appending a <c>path:</c> clause derived
+		/// from that folder's Graph <c>webUrl</c>. Bucket-level <see cref="DocumentBucket.Extensions"/>
+		/// are enforced client-side, mirroring <see cref="ReadFiles(ReadData)"/>.
+		/// </remarks>
+		public List<IDocHubFile> SearchFiles(SearchData data)
+		{
+			return SearchFilesAsync(data)
+				.GetAwaiter()
+				.GetResult();
+		}
+
+		/// <summary>
+		/// Async counterpart to <see cref="SearchFiles(SearchData)"/>.
+		/// </summary>
+		public async Task<List<IDocHubFile>> SearchFilesAsync(SearchData data)
+		{
+			if (!(data is WebFileSearchData args))
+				throw new ArgumentException("SharePointHandler requires WebFileSearchData.", nameof(data));
+
+			if (string.IsNullOrWhiteSpace(args.Query))
+				throw new ArgumentException("A non-empty search query is required.", nameof(data));
+
+			// If paging context exists, return next page only
+			if (args.Context != null)
+				return await SearchPage(args);
+
+			// Initialize paging context and drain until end
+			var context = new SharePointSearchPageData();
+			args.Context = context;
+
+			var files = new List<IDocHubFile>();
+
+			while (context.HasNextPage())
+			{
+				var page = await SearchPage(args);
+
+				// Safety break if no results and no further pages
+				if (page.Count == 0 && !context.HasNextPage())
+				{
+					break;
+				}
+
+				files.AddRange(page);
+			}
+
+			return files;
+		}
+
 		#endregion
 
 		#region Private
 
 		/// <summary>
+		/// Enqueues subfolders discovered in the current Graph page.
+		/// </summary>
+		private static void EnqueueSubFolders(SharePointPageData context, DriveItemCollectionResponse page)
+		{
+			if (page?.Value == null) return;
+
+			foreach (var folder in page.Value)
+			{
+				if (folder.Folder != null)
+					context.FolderQueue.Enqueue(folder.Id);
+			}
+		}
+
+		/// <summary>
 		/// Reads a single logical page of SharePoint files.
 		/// </summary>
-		private List<IDocHubFile> ReadPage(ReadData data)
+		private async Task<List<IDocHubFile>> ReadPage(ReadData data)
 		{
 			// Validate and cast input
-			var args = data as WebFileReadData;
-			if (args == null)
+			if (!(data is WebFileReadData args))
 				throw new ArgumentException("SharePointHandler requires WebFileReadData.", nameof(data));
 
-			var spContext = args.Context as SharePointPageData;
-			if (spContext == null)
+			if (!(args.Context is SharePointPageData spContext))
 				throw new ArgumentException("SharePointHandler requires SharePointPageContext.", nameof(args.Context));
 
 			var bucket = args.Bucket;
@@ -252,47 +347,40 @@
 			// Initialize bucket root exactly once (replace initial "root" sentinel)
 			if (bucket != null
 				&& spContext.FolderQueue.Count == 1
-				&& spContext.FolderQueue.Peek() == "root"
-				&& spContext.NextPageRequest == null)
+				&& (spContext.FolderQueue.TryPeek(out string first) && first == "root")
+				&& spContext.NextPageLink == null)
 			{
 				var trimmedPath = (bucket.UploadPath ?? string.Empty).Trim('/', '\\');
 
 				DriveItem folder;
 				if (string.IsNullOrEmpty(trimmedPath))
 				{
-					folder = _graphClient
+					folder = (await _graphClient
 						.Sites[_site.Id]
 						.Drives[_drive.Id]
-						.Root
-						.Request()
-						.GetAsync()
-						.GetAwaiter()
-						.GetResult();
+						.GetAsync())
+						.Root;
 				}
 				else
 				{
-					folder = _graphClient
-						.Sites[_site.Id]
+					folder = await _graphClient
 						.Drives[_drive.Id]
 						.Root
 						.ItemWithPath(trimmedPath)
-						.Request()
-						.GetAsync()
-						.GetAwaiter()
-						.GetResult();
+						.GetAsync();
 				}
 
 				if (folder == null || folder.Folder == null)
 					throw new InvalidOperationException("Could not find folder with path /" + bucket.UploadPath);
 
 				// Do NOT replace the queue instance (other code may hold references)
-				spContext.FolderQueue.Clear();
+				spContext.FolderQueue.TryDequeue(out _);
 				spContext.FolderQueue.Enqueue(folder.Id);
 			}
 
 			// End-of-traversal: no folders, no Graph pages, no buffered items
 			if (spContext.FolderQueue.Count == 0
-				&& spContext.NextPageRequest == null
+				&& spContext.NextPageLink == null
 				&& spContext.PageRemainderBuffer.Count == 0)
 			{
 				return new List<IDocHubFile>();
@@ -304,7 +392,7 @@
 										: null;
 
 			// Fetch next logical page (Graph paging + remainder buffer)
-			var driveItems = FetchNextPageInternal(filter, allowedExtensions, spContext);
+			var driveItems = await FetchNextPageInternal(filter, allowedExtensions, spContext);
 
 			// Wrap DriveItems in adapter objects
 			var result = new List<IDocHubFile>(driveItems.Count);
@@ -317,6 +405,42 @@
 			}
 
 			return result;
+		}
+
+		/// <summary>
+		/// Executes the next Graph page request and updates the continuation link.
+		/// </summary>
+		private async Task<DriveItemCollectionResponse> ExecuteGraphPageRequest(SharePointPageData context)
+		{
+			DriveItemCollectionResponse response;
+
+			if (context.NextPageLink == null)
+			{
+				// First page for this folder
+				if (!context.FolderQueue.TryDequeue(out var folderId))
+					return null;
+
+				context.CurrentFolderId = folderId;
+
+				response = await _graphClient
+					.Drives[_drive.Id]
+					.Items[context.CurrentFolderId]
+					.Children
+					.GetAsync(cfg => cfg.QueryParameters.Top = context.PageSize);
+			}
+			else
+			{
+				// Resume paging via @odata.nextLink
+				response = await _graphClient
+					.Drives[_drive.Id]
+					.Items[context.CurrentFolderId]
+					.Children
+					.WithUrl(context.NextPageLink)
+					.GetAsync();
+			}
+
+			context.NextPageLink = response?.OdataNextLink;
+			return response;
 		}
 
 		/// <summary>
@@ -348,7 +472,7 @@
 		/// A list of <see cref="DriveItem"/> objects representing the next logical page of files.
 		/// The list size is at most <see cref="DocHubPageData.PageSize"/>.
 		/// </returns>
-		private IList<DriveItem> FetchNextPageInternal(string filter, HashSet<string> allowedExtensions, SharePointPageData context)
+		private async Task<IList<DriveItem>> FetchNextPageInternal(string filter, HashSet<string> allowedExtensions, SharePointPageData context)
 		{
 			var collected = new List<DriveItem>(context.PageSize);
 
@@ -358,9 +482,9 @@
 			// Continue folder traversal until logical page is full or no data remains
 			while (ShouldContinuePaging(context, collected))
 			{
-				EnsureNextPageRequest(context);
-
-				var page = ExecuteGraphPageRequest(context);
+				var page = await ExecuteGraphPageRequest(context);
+				if (page == null)
+					break;
 
 				EnqueueSubFolders(context, page);
 				CollectFiles(filter, allowedExtensions, context, collected, page);
@@ -376,7 +500,10 @@
 		{
 			while (collected.Count < context.PageSize && context.PageRemainderBuffer.Count > 0)
 			{
-				collected.Add(context.PageRemainderBuffer.Dequeue());
+				if (context.PageRemainderBuffer.TryDequeue(out DriveItem dequeued))
+				{
+					collected.Add(dequeued);
+				}
 			}
 		}
 
@@ -386,46 +513,7 @@
 		private static bool ShouldContinuePaging(SharePointPageData context, ICollection<DriveItem> collected)
 		{
 			return collected.Count < context.PageSize &&
-				   (context.FolderQueue.Count > 0 || context.NextPageRequest != null);
-		}
-
-		/// <summary>
-		/// Ensures a Graph paging request exists for the current folder.
-		/// </summary>
-		private void EnsureNextPageRequest(SharePointPageData context)
-		{
-			if (context.NextPageRequest != null)
-				return;
-
-			var folderId = context.FolderQueue.Dequeue();
-
-			context.NextPageRequest = _graphClient
-				.Drives[_drive.Id]
-				.Items[folderId]
-				.Children
-				.Request()
-				.Top(context.PageSize);
-		}
-
-		/// <summary>
-		/// Executes the current Graph page request and updates the continuation token.
-		/// </summary>
-		private IDriveItemChildrenCollectionPage ExecuteGraphPageRequest(SharePointPageData context)
-		{
-			var page = context.NextPageRequest.GetAsync().GetAwaiter().GetResult();
-			context.NextPageRequest = page.NextPageRequest;
-			return page;
-		}
-
-		/// <summary>
-		/// Enqueues subfolders discovered in the current Graph page.
-		/// </summary>
-		private static void EnqueueSubFolders(SharePointPageData context, IDriveItemChildrenCollectionPage page)
-		{
-			foreach (var folder in page.CurrentPage.Where(i => i.Folder != null))
-			{
-				context.FolderQueue.Enqueue(folder.Id);
-			}
+				   (context.FolderQueue.Count > 0 || context.NextPageLink != null);
 		}
 
 		/// <summary>
@@ -436,9 +524,11 @@
 			HashSet<string> allowedExtensions,
 			SharePointPageData context,
 			ICollection<DriveItem> collected,
-			IDriveItemChildrenCollectionPage page)
+			DriveItemCollectionResponse page)
 		{
-			var files = page.CurrentPage
+			if (page?.Value == null) return;
+
+			var files = page.Value
 				.Where(i => i.File != null &&
 							(string.IsNullOrEmpty(filter) ||
 							 i.Name.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0) &&
@@ -467,34 +557,17 @@
 		{
 			try
 			{
-				// Normalize directory path
-				var normalizedDirectory = NormalizeDirectoryPath(directory);
-
-				string path;
-				if (string.IsNullOrEmpty(normalizedDirectory))
-				{
-					// File in root directory
-					path = name;
-				}
-				else
-				{
-					// File in subdirectory
-					path = $"{normalizedDirectory}/{name}";
-				}
-
-				var driveItem = await _graphClient
-					.Sites[_site.Id]
+				var searchResponse = await _graphClient
 					.Drives[_drive.Id]
 					.Root
-					.ItemWithPath(path)
-					.Request()
+					.ItemWithPath($"{directory}/{name}")
 					.GetAsync();
 
-				return true;
+				return searchResponse != null && searchResponse.File != null;
 			}
-			catch (ServiceException ex)
+			catch (ODataError ex)
 			{
-				if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+				if (ex.ResponseStatusCode == (int)System.Net.HttpStatusCode.NotFound)
 					return false;
 
 				throw;
@@ -504,7 +577,7 @@
 		/// <summary>
 		/// Uploads a file to SharePoint and returns the resulting Web URL.
 		/// </summary>
-		private async Task<string> UploadFileAsync(string directory, string filepath, string name)
+		private async Task<string> UploadFileAsync(string directory, string filePath, string name)
 		{
 			try
 			{
@@ -517,35 +590,27 @@
 					await EnsureFolderPathExistsAsync(normalizedDirectory);
 				}
 
-				using (var stream = File.OpenRead(filepath))
+				using (var stream = File.OpenRead(filePath))
 				{
 					DriveItem item;
-
+					string pathPart;
 					if (string.IsNullOrEmpty(normalizedDirectory))
 					{
 						// Upload to root directory
-						item = await _graphClient
-							.Sites[_site.Id]
-							.Drives[_drive.Id]
-							.Root
-							.ItemWithPath(name)
-							.Content
-							.Request()
-							.PutAsync<DriveItem>(stream);
+						pathPart = name;
 					}
 					else
 					{
 						// Upload to subdirectory
-						var path = $"{normalizedDirectory}/{name}";
-						item = await _graphClient
-							.Sites[_site.Id]
+						pathPart = $"{normalizedDirectory}/{name}";
+					}
+
+					item = await _graphClient
 							.Drives[_drive.Id]
 							.Root
-							.ItemWithPath(path)
+							.ItemWithPath(pathPart)
 							.Content
-							.Request()
-							.PutAsync<DriveItem>(stream);
-					}
+							.PutAsync(stream);
 
 					return item?.WebUrl;
 				}
@@ -565,40 +630,37 @@
 			{
 				// Normalize directory path
 				var normalizedDirectory = NormalizeDirectoryPath(directory);
-				var filename = $"{name}.jpeg";
 
-				// Ensure folder structure exists (skip for root)
-				if (!string.IsNullOrEmpty(normalizedDirectory))
+				using (MemoryStream jpegStream = new MemoryStream())
 				{
-					await EnsureFolderPathExistsAsync(normalizedDirectory);
+					// Serialize image to memory
+					image.Save(jpegStream, ImageFormat.Jpeg);
+					jpegStream.Position = 0;
+
+					// what to do with the other image formats: jpg, png, bmp, gif, etc.?
+					string fileName = $"{name}.jpeg";
+					string path;
+					if (string.IsNullOrEmpty(normalizedDirectory))
+					{
+						// Upload to root directory
+						path = fileName;
+					}
+					else
+					{
+						// Ensure the target folder exists before uploading
+						await EnsureFolderPathExistsAsync(normalizedDirectory);
+
+						// Upload to subdirectory
+						path = $"{normalizedDirectory}/{fileName}";
+					}
+
+					var item = await _graphClient
+						.Drives[_drive.Id]
+						.Root
+						.ItemWithPath(path)
+						.Content
+						.PutAsync(jpegStream);
 				}
-
-				MemoryStream jpegStream = new MemoryStream();
-
-				// Serialize image to memory
-				image.Save(jpegStream, ImageFormat.Jpeg);
-				jpegStream.Position = 0;
-
-				string path;
-				if (string.IsNullOrEmpty(normalizedDirectory))
-				{
-					// Upload to root directory
-					path = filename;
-				}
-				else
-				{
-					// Upload to subdirectory
-					path = $"{normalizedDirectory}/{filename}";
-				}
-
-				var item = await _graphClient
-					.Sites[_site.Id]
-					.Drives[_drive.Id]
-					.Root
-					.ItemWithPath(path)
-					.Content
-					.Request()
-					.PutAsync<DriveItem>(jpegStream);
 			}
 			catch (Exception e)
 			{
@@ -634,14 +696,12 @@
 				{
 					// Check if folder exists
 					await _graphClient
-						.Sites[_site.Id]
 						.Drives[_drive.Id]
 						.Root
 						.ItemWithPath(currentPath)
-						.Request()
 						.GetAsync();
 				}
-				catch (ServiceException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+				catch (ODataError ex) when (ex.ResponseStatusCode == (int)System.Net.HttpStatusCode.NotFound)
 				{
 					// Folder missing -> create it
 					var parentPath = Path.GetDirectoryName(currentPath).Replace("\\", "/");
@@ -656,23 +716,19 @@
 					if (string.IsNullOrEmpty(parentPath) || parentPath == ".")
 					{
 						await _graphClient
-							.Sites[_site.Id]
 							.Drives[_drive.Id]
-							.Root
+							.Items["root"]
 							.Children
-							.Request()
-							.AddAsync(folder);
+							.PostAsync(folder);
 					}
 					else
 					{
 						await _graphClient
-							.Sites[_site.Id]
 							.Drives[_drive.Id]
 							.Root
 							.ItemWithPath(parentPath)
 							.Children
-							.Request()
-							.AddAsync(folder);
+							.PostAsync(folder);
 					}
 				}
 				catch (Exception e)
@@ -711,6 +767,275 @@
 
 			// Reconstruct path with forward slashes
 			return string.Join("/", segments);
+		}
+
+		/// <summary>
+		/// Reads a single logical page of SharePoint search results.
+		/// </summary>
+		private async Task<List<IDocHubFile>> SearchPage(WebFileSearchData args)
+		{
+			if (!(args.Context is SharePointSearchPageData spContext))
+				throw new ArgumentException("SharePointHandler search requires SharePointSearchPageData.", nameof(args.Context));
+
+			var bucket = args.Bucket;
+
+			// End-of-traversal
+			if (spContext.SearchStarted
+				&& !spContext.MoreResultsAvailable
+				&& spContext.PageRemainderBuffer.Count == 0)
+			{
+				return new List<IDocHubFile>();
+			}
+
+			// Resolve the bucket's UploadPath to (a) a KQL scoping clause applied server-side
+			// and (b) the set of allowed parent folder ids used to filter hits client-side to
+			// the bucket-folder subtree.
+			if (spContext.ScopingClause == null)
+			{
+				await ResolveBucketScopingAsync(spContext, bucket);
+			}
+
+			var allowedExtensions = bucket != null && !string.IsNullOrEmpty(bucket.Extensions)
+				? new HashSet<string>(bucket.Extensions.Split(','), StringComparer.OrdinalIgnoreCase)
+				: null;
+
+			var collected = new List<DriveItem>(spContext.PageSize);
+
+			// Drain any leftovers from the previous logical page first
+			while (collected.Count < spContext.PageSize && spContext.PageRemainderBuffer.TryDequeue(out var buffered))
+			{
+				collected.Add(buffered);
+			}
+
+			// Keep pulling Microsoft Search pages until logical page is filled or the search is exhausted
+			while (collected.Count < spContext.PageSize
+				   && (!spContext.SearchStarted || spContext.MoreResultsAvailable))
+			{
+				var container = await ExecuteSearchPageRequest(spContext, args);
+				if (container == null)
+					break;
+
+				CollectSearchFiles(allowedExtensions, spContext, collected, container);
+			}
+
+			var result = new List<IDocHubFile>(collected.Count);
+			foreach (var item in collected)
+			{
+				result.Add(new DriveItemAdapter
+				{
+					DriveItem = item,
+				});
+			}
+
+			return result;
+		}
+
+		/// <summary>
+		/// Resolves the folder referenced by <see cref="DocumentBucket.UploadPath"/> into (1) a
+		/// KQL <c>site:</c> scoping clause applied server-side and (2) the set of driveItem ids
+		/// (the bucket folder plus every folder under it) used to filter hits client-side to the
+		/// bucket-folder subtree.
+		/// </summary>
+		/// <remarks>
+		/// <para>
+		/// The Microsoft Search <c>path:</c> refiner matches driveItem hits by their
+		/// display-form URL (<c>.../Forms/DispForm.aspx?ID=...</c>), not their storage URL,
+		/// so it cannot be used for folder-level scoping. The response's
+		/// <c>parentReference.path</c> is not populated for driveItem hits either, but
+		/// <c>parentReference.id</c> is - hence the client-side filter over a pre-computed
+		/// set of folder ids.
+		/// </para>
+		/// </remarks>
+		private async Task ResolveBucketScopingAsync(SharePointSearchPageData context, DocumentBucket bucket)
+		{
+			var trimmedPath = (bucket?.UploadPath ?? string.Empty).Trim('/', '\\');
+
+			DriveItem folder;
+			if (string.IsNullOrEmpty(trimmedPath))
+			{
+				folder = (await _graphClient
+					.Sites[_site.Id]
+					.Drives[_drive.Id]
+					.GetAsync())
+					.Root;
+			}
+			else
+			{
+				folder = await _graphClient
+					.Drives[_drive.Id]
+					.Root
+					.ItemWithPath(trimmedPath)
+					.GetAsync();
+			}
+
+			if (folder == null || folder.Folder == null)
+				throw new InvalidOperationException("Could not find folder with path /" + (bucket?.UploadPath ?? string.Empty));
+
+			var siteUrl = "https://" + _sharePoint.SiteURL.TrimEnd('/');
+			context.ScopingClause = "site:\"" + siteUrl + "\"";
+
+			var allowedIds = new HashSet<string>(StringComparer.Ordinal) { folder.Id };
+			await CollectDescendantFolderIdsAsync(folder.Id, allowedIds);
+			context.AllowedParentIds = allowedIds;
+		}
+
+		/// <summary>
+		/// Recursively enumerates every folder id under <paramref name="folderId"/> and adds
+		/// them to <paramref name="ids"/>.
+		/// </summary>
+		private async Task CollectDescendantFolderIdsAsync(string folderId, HashSet<string> ids)
+		{
+			var page = await _graphClient
+				.Drives[_drive.Id]
+				.Items[folderId]
+				.Children
+				.GetAsync(cfg => cfg.QueryParameters.Select = new[] { "id", "folder" });
+
+			while (page != null)
+			{
+				if (page.Value != null)
+				{
+					foreach (var child in page.Value)
+					{
+						if (child.Folder != null && !string.IsNullOrEmpty(child.Id) && ids.Add(child.Id))
+						{
+							await CollectDescendantFolderIdsAsync(child.Id, ids);
+						}
+					}
+				}
+
+				if (string.IsNullOrEmpty(page.OdataNextLink))
+					break;
+
+				page = await _graphClient
+					.Drives[_drive.Id]
+					.Items[folderId]
+					.Children
+					.WithUrl(page.OdataNextLink)
+					.GetAsync();
+			}
+		}
+
+		/// <summary>
+		/// Executes one Microsoft Search page request and advances the paging cursor.
+		/// </summary>
+		private async Task<SearchHitsContainer> ExecuteSearchPageRequest(
+			SharePointSearchPageData context,
+			WebFileSearchData args)
+		{
+			// Combine site scoping with the user's KQL query; the bucket-folder subtree filter
+			// is applied client-side in CollectSearchFiles because Microsoft Search cannot
+			// express "everything under this folder" reliably for driveItem hits.
+			var fullQuery = "(" + context.ScopingClause + ") AND (" + args.Query + ")";
+
+			var body = new Microsoft.Graph.Search.Query.QueryPostRequestBody
+			{
+				Requests = new List<SearchRequest>
+				{
+					new SearchRequest
+					{
+						EntityTypes = new List<EntityType?> { EntityType.DriveItem },
+						Query = new SearchQuery { QueryString = fullQuery },
+						From = context.From,
+						Size = context.PageSize,
+						Region = args.Region,
+					},
+				},
+			};
+
+			DebugLog($"Request: from={context.From} size={context.PageSize} region={args.Region ?? "<null>"} query=\"{fullQuery}\"");
+
+			var response = await _graphClient.Search.Query.PostAsQueryPostResponseAsync(body);
+			var container = response?.Value?.FirstOrDefault()?.HitsContainers?.FirstOrDefault();
+
+			DebugLog($"Response: total={container?.Total?.ToString() ?? "<null>"} hits={container?.Hits?.Count ?? 0} moreResultsAvailable={container?.MoreResultsAvailable}");
+
+			context.SearchStarted = true;
+			context.MoreResultsAvailable = container?.MoreResultsAvailable == true;
+			context.From += context.PageSize;
+
+			return container;
+		}
+
+		/// <summary>
+		/// Collects file items from a Microsoft Search hits container into the logical page and
+		/// buffers overflow.
+		/// </summary>
+		private static void CollectSearchFiles(
+			HashSet<string> allowedExtensions,
+			SharePointSearchPageData context,
+			ICollection<DriveItem> collected,
+			SearchHitsContainer container)
+		{
+			if (container?.Hits == null)
+				return;
+
+			DebugLog($"CollectSearchFiles: allowedExtensions={(allowedExtensions == null ? "<null>" : string.Join(",", allowedExtensions))} allowedParentIds={context.AllowedParentIds?.Count ?? 0} hitCount={container.Hits.Count}");
+
+			int hitIndex = 0;
+			foreach (var h in container.Hits)
+			{
+				var asDriveItem = h.Resource as DriveItem;
+				var name = asDriveItem?.Name;
+				var parentId = asDriveItem?.ParentReference?.Id;
+				var inScope = context.AllowedParentIds == null
+					|| (parentId != null && context.AllowedParentIds.Contains(parentId));
+
+				DebugLog(
+					$"  hit[{hitIndex}] driveItemCast={asDriveItem != null} name={name ?? "<null>"} " +
+					$"parentId={parentId ?? "<null>"} inScope={inScope} hitId={h.HitId}");
+				hitIndex++;
+			}
+
+			var files = container.Hits
+				.Select(h => h.Resource as DriveItem)
+				.Where(i => i != null
+							&& i.Folder == null
+							&& !string.IsNullOrEmpty(i.Name)
+							&& (context.AllowedParentIds == null
+								|| (i.ParentReference?.Id != null
+									&& context.AllowedParentIds.Contains(i.ParentReference.Id)))
+							&& (allowedExtensions == null
+								|| allowedExtensions.Contains(Path.GetExtension(i.Name).TrimStart('.'))))
+				.ToList();
+
+			DebugLog($"  -> {files.Count} hit(s) kept after filtering");
+
+			foreach (var file in files)
+			{
+				if (collected.Count < context.PageSize)
+				{
+					collected.Add(file);
+				}
+				else
+				{
+					context.PageRemainderBuffer.Enqueue(file);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Appends a debug line to <c>C:\Skyline DataMiner\Logging\DocumentHub_Search.txt</c>.
+		/// </summary>
+		/// <remarks>
+		/// Ad-hoc file logger for the SharePoint search path; the handler runs inside the
+		/// DataMiner process where <c>Console.WriteLine</c> goes nowhere. Wrapped in a
+		/// try/catch so a failing log write can never break the caller. Remove or gate behind
+		/// a flag before shipping.
+		/// </remarks>
+		private static void DebugLog(string message)
+		{
+			try
+			{
+				const string logPath = @"C:\Skyline DataMiner\Logging\DocumentHub_Search.txt";
+				var line = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", System.Globalization.CultureInfo.InvariantCulture)
+					+ " " + message + Environment.NewLine;
+				File.AppendAllText(logPath, line);
+			}
+			catch
+			{
+				// Never let logging break the caller.
+			}
 		}
 
 		private string RetrieveClientSecret()

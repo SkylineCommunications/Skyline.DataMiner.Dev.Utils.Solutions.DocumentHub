@@ -5,10 +5,12 @@
 	using System.Drawing;
 	using System.IO;
 	using System.Linq;
+	using System.Threading.Tasks;
 	using Skyline.DataMiner.Solutions.DocumentHub.API;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
+	using Skyline.DataMiner.Utils.SecureCoding.SecureIO;
 
 	/// <summary>
 	/// Handles file and image storage on the local filesystem.
@@ -63,7 +65,10 @@
 			if (!(data is WebFileExistsData args))
 				throw new ArgumentException("LocalHandler requires WebFileFileExistsData.", nameof(data));
 
-			string filePath = Path.Combine(ResolveLocalDirectory(args.Directory), args.Name);
+			var directory = args.Directory;
+			var name = args.Name;
+
+			string filePath = SecurePath.ConstructSecurePath(directory, $"{name}");
 			return File.Exists(filePath);
 		}
 
@@ -82,7 +87,7 @@
 			}
 
 			// Construct the full file path and save the image as JPEG
-			string filePath = Path.Combine(directory, $"{name}.jpeg");
+			string filePath = SecurePath.ConstructSecurePath(directory, $"{name}.jpeg");
 			image.Save(filePath);
 		}
 
@@ -118,7 +123,7 @@
 			}
 
 			// Combine directory and target filename
-			string targetPath = Path.Combine(targetDirectory, name);
+			string targetPath = SecurePath.ConstructSecurePath(targetDirectory, name);
 
 			// Copy the file to the target location (overwrite if exists)
 			File.Copy(filePath, targetPath, overwrite: true);
@@ -192,6 +197,16 @@
 			}
 
 			return files;
+		}
+
+		/// <summary>
+		/// Asynchronous version of <see cref="ReadFiles(ReadData)"/>.
+		/// </summary>
+		/// <param name="data">The storage handler data containing bucket and filter information.</param>
+		/// <returns>A list of all <see cref="IDocHubFile"/> matching the criteria.</returns>
+		public async Task<List<IDocHubFile>> ReadFilesAsync(ReadData data)
+		{
+			return await Task.FromResult(ReadFiles(data));
 		}
 
 		/// <summary>

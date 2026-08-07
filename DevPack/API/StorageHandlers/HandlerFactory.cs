@@ -2,6 +2,7 @@
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Threading.Tasks;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers;
@@ -51,6 +52,15 @@
 		/// A list of <see cref="IDocHubFile"/> objects representing the files read from storage.
 		/// </returns>
 		List<IDocHubFile> ReadFiles(ReadData data);
+
+		/// <summary>
+		/// Asynchronously reads files from the storage based on the specified bucket and filter.
+		/// </summary>
+		/// <param name="data">
+		/// The storage handler data containing bucket and filter information.
+		/// </param>
+		/// <returns>/ list of <see cref="IDocHubFile"/> objects representing the files read from storage.</returns>
+		Task<List<IDocHubFile>> ReadFilesAsync(ReadData data);
 	}
 
 	/// <summary>
@@ -69,6 +79,29 @@
 		/// The delete data containing the bucket and file name.
 		/// </param>
 		void DeleteFile(DeleteData data);
+	}
+
+	/// <summary>
+	/// Defines the contract for storage handlers that support search queries.
+	/// </summary>
+	/// <remarks>
+	/// Handlers that can execute a query language against their
+	/// backing store should implement this interface. This keeps search
+	/// capability optional so that handlers without a native query engine
+	/// (such as the local file system) don't need to fake one.
+	/// </remarks>
+	internal interface ISearchableStorageHandler
+	{
+		/// <summary>
+		/// Executes a search query against the storage and returns the matching files.
+		/// </summary>
+		/// <param name="data">
+		/// The search data containing the target bucket, the query string, and optional paging context.
+		/// </param>
+		/// <returns>
+		/// A list of <see cref="IDocHubFile"/> objects representing the matching files.
+		/// </returns>
+		List<IDocHubFile> SearchFiles(SearchData data);
 	}
 	#endregion
 

@@ -7,6 +7,7 @@ namespace DevPack.Tests.API
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient.Configurations;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient.Exceptions;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Helpers;

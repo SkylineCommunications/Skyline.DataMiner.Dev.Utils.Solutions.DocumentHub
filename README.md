@@ -42,13 +42,14 @@ The `DevPack.Tests` project contains unit tests using an in-memory DOM mock (`Do
 | **API - Files Upload**     | `Files_UploadFile_Tests`                                                                      | 8     |
 | **API - Files Read**       | `Files_ReadFiles_Tests`                                                                       | 5     |
 | **API - Files Delete**     | `Files_DeleteFile_Tests`                                                                      | 6     |
+| **API - Files Search**     | `Files_SearchFiles_Tests`                                                                     | 5     |
 | **API - File Validator**   | `FileValidator_ValidateAndSanitizeFile_Tests`                                                 | 19    |
 | **API - File Adapters**    | `FileInfoAdapter_GetRelativePath_Tests`                                                       | 11    |
 | **SDM - SharePoint**       | `SharepointDomRepository_CRUD_Tests`, `SharepointDomRepository_FilterTests_Tests`             | 13    |
 | **SDM - DomSource**        | `DomSourceDomRepository_CRUD_Tests`, `DomSourceDomRepository_FilterTests_Tests`               | 13    |
 | **SDM - DocumentBucket**   | `DocumentBucketDomRepository_CRUD_Tests`, `DocumentBucketDomRepository_FilterTests_Tests`     | 26    |
 
-**Total: 104 tests** (includes 3 parameterized test methods)
+**Total: 109 tests** (includes 3 parameterized test methods)
 
 ### SDM Repository Tests
 
@@ -60,9 +61,10 @@ Each repository test class covers:
 ### API Tests
 
 API tests validate parameter handling:
-- Null category, filePath, and domInstanceId validation
+- Null category, filePath, query, and domInstanceId validation
 - Storage type restrictions (e.g., DOM storage with qualifier overload)
 - DomSource module validation
+- Bucket type restrictions for the search functionality
 
 ### File Adapter Tests
 

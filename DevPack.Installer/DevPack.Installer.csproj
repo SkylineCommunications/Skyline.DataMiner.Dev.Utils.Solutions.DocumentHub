@@ -7,11 +7,10 @@
 	<PropertyGroup>
 		<DataMinerType>Package</DataMinerType>
 		<GenerateDataMinerPackage>True</GenerateDataMinerPackage>
-		<MinimumRequiredDmVersion>10.4.0.0 - 14003</MinimumRequiredDmVersion>
-		<!-- <MinimumRequiredDmWebVersion>10.6.2 (CU0)</MinimumRequiredDmWebVersion> -->
-		<PackageVersion>1.0.2</PackageVersion>
-		<Version>1.0.2</Version>
-		<VersionComment>Fixed GetRelativePath web path normalization</VersionComment>
+		<MinimumRequiredDmVersion>10.6.5.0 - 17061</MinimumRequiredDmVersion>
+		<PackageVersion>1.1.1</PackageVersion>
+		<Version>1.1.1</Version>
+		<VersionComment>Migrated from Graph API v4 to v5</VersionComment>
 		<!-- Do NOT fill in the Organization Token here. This points to either an Environment Variable skyline__sdk__dataminertoken holding the organization token or a Visual Studio User Secret holding the token. -->
 		<CatalogPublishKeyName>skyline:sdk:dataminertoken</CatalogPublishKeyName>
 		<CatalogDefaultDownloadKeyName>skyline:sdk:dataminertoken</CatalogDefaultDownloadKeyName>
