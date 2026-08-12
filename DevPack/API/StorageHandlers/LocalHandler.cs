@@ -48,7 +48,7 @@
 		{
 			var directory = relativePath ?? string.Empty;
 			directory = directory.TrimStart('/', '\\');
-			return string.IsNullOrEmpty(directory) ? WebFileManagerRoot : Path.Combine(WebFileManagerRoot, directory);
+			return string.IsNullOrEmpty(directory) ? WebFileManagerRoot : SecurePath.ConstructSecurePath(WebFileManagerRoot, directory);
 		}
 
 		/// <summary>
@@ -65,10 +65,7 @@
 			if (!(data is WebFileExistsData args))
 				throw new ArgumentException("LocalHandler requires WebFileFileExistsData.", nameof(data));
 
-			var directory = args.Directory;
-			var name = args.Name;
-
-			string filePath = SecurePath.ConstructSecurePath(directory, $"{name}");
+			string filePath = SecurePath.ConstructSecurePath(ResolveLocalDirectory(args.Directory), args.Name);
 			return File.Exists(filePath);
 		}
 
