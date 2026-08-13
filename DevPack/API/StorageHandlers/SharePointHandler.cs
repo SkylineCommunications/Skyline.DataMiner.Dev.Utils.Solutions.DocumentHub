@@ -849,28 +849,23 @@
 		{
 			var trimmedPath = (bucket?.UploadPath ?? string.Empty).Trim('/', '\\');
 
-			DriveItem folder;
+			var siteUrl = "https://" + _sharePoint.SiteURL.TrimEnd('/');
+			context.ScopingClause = "site:\"" + siteUrl + "\"";
+
 			if (string.IsNullOrEmpty(trimmedPath))
 			{
-				folder = await _graphClient
-					.Drives[_drive.Id]
-					.Root
-					.GetAsync();
+				context.AllowedParentIds = null;
+				return;
 			}
-			else
-			{
-				folder = await _graphClient
-					.Drives[_drive.Id]
-					.Root
-					.ItemWithPath(trimmedPath)
-					.GetAsync();
-			}
+
+			var folder = await _graphClient
+				.Drives[_drive.Id]
+				.Root
+				.ItemWithPath(trimmedPath)
+				.GetAsync();
 
 			if (folder == null || folder.Folder == null)
 				throw new InvalidOperationException("Could not find folder with path /" + (bucket?.UploadPath ?? string.Empty));
-
-			var siteUrl = "https://" + _sharePoint.SiteURL.TrimEnd('/');
-			context.ScopingClause = "site:\"" + siteUrl + "\"";
 
 			var allowedIds = new HashSet<string>(StringComparer.Ordinal) { folder.Id };
 			await CollectDescendantFolderIdsAsync(folder.Id, allowedIds);
