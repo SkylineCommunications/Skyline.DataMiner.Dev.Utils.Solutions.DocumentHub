@@ -355,11 +355,10 @@
 				DriveItem folder;
 				if (string.IsNullOrEmpty(trimmedPath))
 				{
-					folder = (await _graphClient
-						.Sites[_site.Id]
+					folder = await _graphClient
 						.Drives[_drive.Id]
-						.GetAsync())
-						.Root;
+						.Root
+						.GetAsync();
 				}
 				else
 				{
@@ -853,11 +852,10 @@
 			DriveItem folder;
 			if (string.IsNullOrEmpty(trimmedPath))
 			{
-				folder = (await _graphClient
-					.Sites[_site.Id]
+				folder = await _graphClient
 					.Drives[_drive.Id]
-					.GetAsync())
-					.Root;
+					.Root
+					.GetAsync();
 			}
 			else
 			{
