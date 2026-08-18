@@ -220,6 +220,24 @@ byte[] bytes = client.Files.GetBytes(domFile);
 byte[] bytes = client.Files.GetBytes("my_module", instanceId, "report.pdf");
 ```
 
+### Search
+
+```csharp
+// Basic KQL search (SharePoint buckets only)
+var results = client.Files.SearchFiles(spBucket, "filetype:pdf title:\"design doc\"");
+
+// Search with pagination
+var pageContext = new DocHubPageData { PageSize = 50 };
+var config = new SearchFilesConfiguration { Context = pageContext };
+
+do
+{
+    var results = client.Files.SearchFiles(spBucket, "invoice", config);
+    // Process results...
+}
+while (pageContext.HasNextPage());
+```
+
 ## IDocHubFile Properties
 
 ```csharp
