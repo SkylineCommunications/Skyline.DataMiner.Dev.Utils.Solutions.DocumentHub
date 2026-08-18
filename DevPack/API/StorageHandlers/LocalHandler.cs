@@ -49,7 +49,10 @@
 		{
 			var directory = relativePath ?? string.Empty;
 			directory = directory.TrimStart('/', '\\');
-			return string.IsNullOrEmpty(directory) ? WebFileManagerRoot : Path.Combine(WebFileManagerRoot, directory);
+
+			return string.IsNullOrEmpty(directory)
+				? WebFileManagerRoot
+				: Path.Combine(WebFileManagerRoot, directory);
 		}
 #pragma warning restore SLC_SC0002 // Avoid using 'System.IO.Path.Combine'
 
