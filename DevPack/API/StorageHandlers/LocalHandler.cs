@@ -39,6 +39,7 @@
 		{
 		}
 
+#pragma warning disable SLC_SC0002 // Avoid using 'System.IO.Path.Combine' - unexpected behavior when using SecurePath construction
 		/// <summary>
 		/// Resolves a relative upload path to the full local directory under <see cref="WebFileManagerRoot"/>.
 		/// </summary>
@@ -50,6 +51,7 @@
 			directory = directory.TrimStart('/', '\\');
 			return string.IsNullOrEmpty(directory) ? WebFileManagerRoot : Path.Combine(WebFileManagerRoot, directory);
 		}
+#pragma warning restore SLC_SC0002 // Avoid using 'System.IO.Path.Combine'
 
 		/// <summary>
 		/// Checks if a file exists at the given directory path.
