@@ -92,7 +92,6 @@ var config1 = helper.SharePointConfigurations.Create(new SharePointConfiguration
     Name = "Marketing Site",
     TenantID = "tenant-id",
     ClientID = "client-id",
-    ClientSecret = "client-secret",
     SiteURL = "https://contoso.sharepoint.com/sites/Marketing",
     DocumentLibraryName = "Shared Documents",
 });
@@ -102,7 +101,6 @@ var config2 = helper.SharePointConfigurations.Create(new SharePointConfiguration
     Name = "Engineering Site",
     TenantID = "tenant-id",
     ClientID = "client-id",
-    ClientSecret = "client-secret",
     SiteURL = "https://contoso.sharepoint.com/sites/Engineering",
     DocumentLibraryName = "Technical Docs",
 });
