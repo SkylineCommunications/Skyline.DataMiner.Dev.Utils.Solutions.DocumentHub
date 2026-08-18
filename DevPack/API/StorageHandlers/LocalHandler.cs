@@ -70,10 +70,7 @@
 			if (!(data is WebFileExistsData args))
 				throw new ArgumentException("LocalHandler requires WebFileFileExistsData.", nameof(data));
 
-			var directory = args.Directory;
-			var name = args.Name;
-
-			string filePath = SecurePath.ConstructSecurePath(directory, $"{name}");
+			string filePath = SecurePath.ConstructSecurePath(ResolveLocalDirectory(args.Directory), args.Name);
 			return File.Exists(filePath);
 		}
 
@@ -207,7 +204,7 @@
 		/// <summary>
 		/// Asynchronous version of <see cref="ReadFiles(ReadData)"/>.
 		/// </summary>
-		/// <param name="data">The storage handler data containing category and filter information.</param>
+		/// <param name="data">The storage handler data containing bucket and filter information.</param>
 		/// <returns>A list of all <see cref="IDocHubFile"/> matching the criteria.</returns>
 		public async Task<List<IDocHubFile>> ReadFilesAsync(ReadData data)
 		{

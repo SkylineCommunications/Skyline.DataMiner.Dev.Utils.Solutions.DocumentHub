@@ -7,8 +7,7 @@
 	<PropertyGroup>
 		<DataMinerType>Package</DataMinerType>
 		<GenerateDataMinerPackage>True</GenerateDataMinerPackage>
-		<MinimumRequiredDmVersion>10.4.0.0 - 14003</MinimumRequiredDmVersion>
-		<!-- <MinimumRequiredDmWebVersion>10.6.2 (CU0)</MinimumRequiredDmWebVersion> -->
+		<MinimumRequiredDmVersion>10.6.5.0 - 17061</MinimumRequiredDmVersion>
 		<PackageVersion>1.1.1</PackageVersion>
 		<Version>1.1.1</Version>
 		<VersionComment>Migrated from Graph API v4 to v5</VersionComment>
