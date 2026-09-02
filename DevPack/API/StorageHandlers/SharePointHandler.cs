@@ -361,7 +361,6 @@
 				.Drives[_drive.Id]
 				.Items[item.Id]
 				.Content
-				.Request()
 				.GetAsync()
 				.GetAwaiter()
 				.GetResult();

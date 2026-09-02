@@ -3,6 +3,7 @@
 	using System;
 	using System.Collections.Generic;
 	using System.IO;
+	using System.Threading.Tasks;
 	using FluentAssertions;
 	using Moq;
 	using Skyline.DataMiner.Net;
@@ -13,7 +14,7 @@
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup;
-	using DriveItem = Microsoft.Graph.DriveItem;
+	using DriveItem = Microsoft.Graph.Models.DriveItem;
 
 	[TestClass]
 	public class Files_DownloadFile_Tests
@@ -206,6 +207,11 @@
 			public List<IDocHubFile> ReadFiles(ReadData data)
 			{
 				throw new NotSupportedException();
+			}
+
+			public Task<List<IDocHubFile>> ReadFilesAsync(ReadData data)
+			{
+				return Task.FromException<List<IDocHubFile>>(new NotSupportedException());
 			}
 
 			public string UploadFile(UploadData data)
