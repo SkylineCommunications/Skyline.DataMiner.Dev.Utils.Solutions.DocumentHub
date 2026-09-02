@@ -5,8 +5,6 @@
 	using System.IO;
 	using System.Linq;
 	using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient.Configurations;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient.Exceptions;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
@@ -29,10 +27,48 @@
 		private readonly FileValidator validator;
 
 		internal Files(IConnection connection)
+			: this(connection, StorageHandlerFactory.Create)
+		{
+		}
+
+		internal Files(IConnection connection, Func<IConnection, DocumentBucket, IStorageHandler> storageHandlerFactory)
 		{
 			_connection = connection ?? throw new ArgumentNullException(nameof(connection));
+			_storageHandlerFactory = storageHandlerFactory ?? throw new ArgumentNullException(nameof(storageHandlerFactory));
 			validator = new FileValidator(_connection);
 		}
+
+		private readonly Func<IConnection, DocumentBucket, IStorageHandler> _storageHandlerFactory;
+
+		#region Download
+
+		/// <summary>
+		/// Downloads a DocumentHub file to a local destination using the storage configured by the bucket.
+		/// </summary>
+		/// <param name="bucket">The document bucket that contains the file.</param>
+		/// <param name="file">A file returned by <see cref="ReadFiles(DocumentBucket,ReadFilesConfiguration)"/>.</param>
+		/// <param name="destinationPath">The full local path, including file name, where the file will be saved.</param>
+		/// <exception cref="ArgumentNullException">
+		/// Thrown when <paramref name="bucket"/>, <paramref name="file"/>, or <paramref name="destinationPath"/> is null or empty.
+		/// </exception>
+		/// <remarks>
+		/// The download is first written to a temporary file in the destination directory. The destination
+		/// is replaced only after the download succeeds, so failed downloads do not leave partial output.
+		/// </remarks>
+		public void DownloadFile(DocumentBucket bucket, IDocHubFile file, string destinationPath)
+		{
+			if (bucket == null)
+				throw new ArgumentNullException(nameof(bucket));
+			if (file == null)
+				throw new ArgumentNullException(nameof(file));
+			if (string.IsNullOrWhiteSpace(destinationPath))
+				throw new ArgumentNullException(nameof(destinationPath));
+
+			var storageHandler = _storageHandlerFactory(_connection, bucket);
+			storageHandler.DownloadFile(file, destinationPath);
+		}
+
+		#endregion
 
 		#region Upload
 
@@ -64,7 +100,7 @@
 			var validatedBucket = uploadData.Bucket;
 
 			// Create appropriate storage handler based on bucket's storage type.
-			var storageHandler = StorageHandlerFactory.Create(_connection, validatedBucket);
+			var storageHandler = _storageHandlerFactory(_connection, validatedBucket);
 
 			// Check for existing file to prevent overwriting.
 			if (storageHandler.FileExists(new WebFileExistsData
@@ -114,7 +150,7 @@
 			var validatedBucket = uploadData.Bucket;
 
 			// Create appropriate storage handler based on bucket's storage type.
-			var storageHandler = StorageHandlerFactory.Create(_connection, validatedBucket);
+			var storageHandler = _storageHandlerFactory(_connection, validatedBucket);
 
 			// Check for existing file to prevent overwriting.
 			if (storageHandler.FileExists(new DomFileExistsData
@@ -171,7 +207,7 @@
 			if (bucket.StorageType == StorageType.DOM)
 				throw new InvalidOperationException("This overload is not supported for DOM storage. Use UploadFile(bucket, filePath, domInstanceId, name) instead.");
 
-			var storageHandler = StorageHandlerFactory.Create(_connection, bucket);
+			var storageHandler = _storageHandlerFactory(_connection, bucket);
 
 			// Build effective upload path (do not mutate original bucket).
 			string basePath = bucket.UploadPath ?? string.Empty;
@@ -384,13 +420,7 @@
 			if (string.IsNullOrEmpty(filename))
 				throw new ArgumentNullException(nameof(filename));
 
-			var domHelper = new DomHelper(_connection.HandleMessages, moduleId);
-
-			var instance = domHelper.DomInstances.Read(DomInstanceExposers.Id.Equal(instanceId)).SingleOrDefault();
-			if (instance == null)
-				throw new InvalidOperationException($"Could not find DOM instance with id {instanceId}");
-
-			return domHelper.DomInstances.Attachments.Get(instance.ID, filename);
+			return new DomAttachmentsHandler(_connection).GetBytes(moduleId, instanceId, filename);
 		}
 		#endregion
 
@@ -474,7 +504,7 @@
 		{
 			FileValidator.ValidateBaseParameters(bucket, fileName);
 
-			var storageHandler = StorageHandlerFactory.Create(_connection, bucket);
+			var storageHandler = _storageHandlerFactory(_connection, bucket);
 
 			if (!(storageHandler is IDeletableStorageHandler deletableHandler))
 				throw new InvalidOperationException($"Delete is not supported for storage type '{bucket.StorageType}'.");
@@ -494,7 +524,7 @@
 
 		internal List<IDocHubFile> ReadFiles(DocumentBucket bucket, ReadData data)
 		{
-			var storageHandler = StorageHandlerFactory.Create(_connection, bucket);
+			var storageHandler = _storageHandlerFactory(_connection, bucket);
 			return storageHandler.ReadFiles(data);
 		}
 
