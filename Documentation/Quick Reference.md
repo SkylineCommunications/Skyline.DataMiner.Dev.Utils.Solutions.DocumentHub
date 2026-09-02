@@ -92,7 +92,6 @@ var config1 = helper.SharePointConfigurations.Create(new SharePointConfiguration
     Name = "Marketing Site",
     TenantID = "tenant-id",
     ClientID = "client-id",
-    ClientSecret = "client-secret",
     SiteURL = "https://contoso.sharepoint.com/sites/Marketing",
     DocumentLibraryName = "Shared Documents",
 });
@@ -102,7 +101,6 @@ var config2 = helper.SharePointConfigurations.Create(new SharePointConfiguration
     Name = "Engineering Site",
     TenantID = "tenant-id",
     ClientID = "client-id",
-    ClientSecret = "client-secret",
     SiteURL = "https://contoso.sharepoint.com/sites/Engineering",
     DocumentLibraryName = "Technical Docs",
 });
@@ -218,6 +216,24 @@ byte[] bytes = client.Files.GetBytes(domFile);
 
 // From module, instance ID, and filename
 byte[] bytes = client.Files.GetBytes("my_module", instanceId, "report.pdf");
+```
+
+### Search
+
+```csharp
+// Basic KQL search (SharePoint buckets only)
+var results = client.Files.SearchFiles(spBucket, "filetype:pdf title:\"design doc\"");
+
+// Search with pagination
+var pageContext = new DocHubPageData { PageSize = 50 };
+var config = new SearchFilesConfiguration { Context = pageContext };
+
+do
+{
+    var results = client.Files.SearchFiles(spBucket, "invoice", config);
+    // Process results...
+}
+while (pageContext.HasNextPage());
 ```
 
 ## IDocHubFile Properties

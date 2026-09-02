@@ -5,10 +5,12 @@
 	using System.Drawing;
 	using System.IO;
 	using System.Linq;
+	using System.Threading.Tasks;
 	using Skyline.DataMiner.Solutions.DocumentHub.API;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
+	using Skyline.DataMiner.Utils.SecureCoding.SecureIO;
 
 	/// <summary>
 	/// Handles file and image storage on the local filesystem.
@@ -35,6 +37,30 @@
 		/// </summary>
 		public LocalHandler()
 		{
+		}
+
+#pragma warning disable SLC_SC0002 // Avoid using 'System.IO.Path.Combine' - unexpected behavior when using SecurePath construction
+		/// <summary>
+		/// Downloads a local DocumentHub file to the specified destination.
+		/// </summary>
+		/// <param name="file">The local file to download.</param>
+		/// <param name="destinationPath">The full local destination path.</param>
+		public void DownloadFile(IDocHubFile file, string destinationPath)
+		{
+			if (file == null)
+				throw new ArgumentNullException(nameof(file));
+			if (!(file is FileInfoAdapter))
+				throw new ArgumentException("LocalHandler requires a local DocumentHub file.", nameof(file));
+
+			var sourcePath = file.GetFilePath();
+			if (string.IsNullOrWhiteSpace(sourcePath))
+				throw new ArgumentException("The local file does not contain a source path.", nameof(file));
+			if (!File.Exists(sourcePath))
+				throw new FileNotFoundException($"Source file not found: '{sourcePath}'", sourcePath);
+
+			AtomicFileDownloader.Write(
+				destinationPath,
+				temporaryPath => File.Copy(sourcePath, temporaryPath, overwrite: false));
 		}
 
 		/// <summary>
@@ -69,8 +95,12 @@
 		{
 			var directory = relativePath ?? string.Empty;
 			directory = directory.TrimStart('/', '\\');
-			return string.IsNullOrEmpty(directory) ? WebFileManagerRoot : Path.Combine(WebFileManagerRoot, directory);
+
+			return string.IsNullOrEmpty(directory)
+				? WebFileManagerRoot
+				: Path.Combine(WebFileManagerRoot, directory);
 		}
+#pragma warning restore SLC_SC0002 // Avoid using 'System.IO.Path.Combine'
 
 		/// <summary>
 		/// Checks if a file exists at the given directory path.
@@ -86,7 +116,7 @@
 			if (!(data is WebFileExistsData args))
 				throw new ArgumentException("LocalHandler requires WebFileFileExistsData.", nameof(data));
 
-			string filePath = Path.Combine(ResolveLocalDirectory(args.Directory), args.Name);
+			string filePath = SecurePath.ConstructSecurePath(ResolveLocalDirectory(args.Directory), args.Name);
 			return File.Exists(filePath);
 		}
 
@@ -105,7 +135,7 @@
 			}
 
 			// Construct the full file path and save the image as JPEG
-			string filePath = Path.Combine(directory, $"{name}.jpeg");
+			string filePath = SecurePath.ConstructSecurePath(directory, $"{name}.jpeg");
 			image.Save(filePath);
 		}
 
@@ -141,7 +171,7 @@
 			}
 
 			// Combine directory and target filename
-			string targetPath = Path.Combine(targetDirectory, name);
+			string targetPath = SecurePath.ConstructSecurePath(targetDirectory, name);
 
 			// Copy the file to the target location (overwrite if exists)
 			File.Copy(filePath, targetPath, overwrite: true);
@@ -215,6 +245,16 @@
 			}
 
 			return files;
+		}
+
+		/// <summary>
+		/// Asynchronous version of <see cref="ReadFiles(ReadData)"/>.
+		/// </summary>
+		/// <param name="data">The storage handler data containing bucket and filter information.</param>
+		/// <returns>A list of all <see cref="IDocHubFile"/> matching the criteria.</returns>
+		public async Task<List<IDocHubFile>> ReadFilesAsync(ReadData data)
+		{
+			return await Task.FromResult(ReadFiles(data));
 		}
 
 		/// <summary>

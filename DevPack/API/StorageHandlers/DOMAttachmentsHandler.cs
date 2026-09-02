@@ -4,6 +4,7 @@
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
+	using System.Threading.Tasks;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
@@ -170,19 +171,29 @@
 			return files;
 		}
 
-		/// <summary>
-		/// Uploads a file to a specific DOM instance.
-		/// </summary>
-		/// <param name="data">
-		/// Data describing which file to upload and to which DOM instance.
-		/// </param>
-		/// <returns>
-		/// The ID of the DOM instance as a string.
-		/// </returns>
-		/// <exception cref="ArgumentException">
-		/// Thrown if <paramref name="data"/> is not of type <see cref="DomFileUploadData"/>.
-		/// </exception>
-		public string UploadFile(UploadData data)
+        /// <summary>
+        /// Asynchronous version of <see cref="ReadFiles(ReadData)"/>
+        /// </summary>
+        /// <param name="data">The data describing which files to read.</param>
+        /// <returns>List of <see cref="IDocHubFile"/> representing the files found.</returns>
+        public async Task<List<IDocHubFile>> ReadFilesAsync(ReadData data)
+        {
+			return await Task.FromResult(ReadFiles(data));
+        }
+
+        /// <summary>
+        /// Uploads a file to a specific DOM instance.
+        /// </summary>
+        /// <param name="data">
+        /// Data describing which file to upload and to which DOM instance.
+        /// </param>
+        /// <returns>
+        /// The ID of the DOM instance as a string.
+        /// </returns>
+        /// <exception cref="ArgumentException">
+        /// Thrown if <paramref name="data"/> is not of type <see cref="DomFileUploadData"/>.
+        /// </exception>
+        public string UploadFile(UploadData data)
 		{
 			if (!(data is DomFileUploadData args))
 				throw new ArgumentException("DOMAttachmentsHandler requires DOMFileUploadData.", nameof(data));

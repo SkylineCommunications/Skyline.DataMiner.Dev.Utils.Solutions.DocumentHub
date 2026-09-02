@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient.Configurations
 {
 	using System;
 	using System.Collections.Generic;
@@ -8,13 +8,8 @@
 	/// Represents the configuration options for reading files, including paging context, file name filtering, and the set
 	/// of DOM instance identifiers to retrieve attachments for.
 	/// </summary>
-	public class ReadFilesConfiguration
+	public class ReadFilesConfiguration : IPageableConfiguration
 	{
-		/// <summary>
-		/// Gets or sets the optional paging context that maintains paging state between calls.
-		/// </summary>
-		public DocHubPageData Context { get; set; }
-
 		/// <summary>
 		/// Gets or sets the optional case-insensitive filter applied to file names.
 		/// </summary>
@@ -24,5 +19,8 @@
 		/// Gets or sets the DOM instance identifiers whose attachments should be retrieved.
 		/// </summary>
 		public IEnumerable<Guid> DomInstanceIds { get; set; }
+
+		/// <inheritdoc/>
+		public DocHubPageData Context { get; set; }
 	}
 }

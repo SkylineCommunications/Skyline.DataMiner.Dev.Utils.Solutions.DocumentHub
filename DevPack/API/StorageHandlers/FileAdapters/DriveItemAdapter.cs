@@ -1,8 +1,8 @@
 ﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters
 {
-	using System;
-	using System.IO;
-	using Microsoft.Graph;
+    using System;
+    using System.IO;
+    using Microsoft.Graph.Models;
 
 	/// <summary>
 	/// Represents a file that is accessible via web-based operations within DocHub.

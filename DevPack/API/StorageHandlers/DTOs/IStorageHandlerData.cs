@@ -94,6 +94,23 @@
 	}
 	#endregion
 
+	#region Search
+	internal class SearchData : IStorageHandlerData
+	{
+		public DocumentBucket Bucket { get; set; }
+
+		public string Query { get; set; }
+
+		public DocHubPageData Context { get; set; }
+
+		public string Region { get; set; }
+	}
+
+	internal class WebFileSearchData : SearchData
+	{
+	}
+	#endregion
+
 	#region Delete
 	internal class DeleteData : IStorageHandlerData
 	{

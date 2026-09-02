@@ -134,7 +134,6 @@ var marketingConfig = helper.SharePointConfigurations.Create(new SharePointConfi
     Name = "Marketing Site",
     TenantID = "your-tenant-id",
     ClientID = "your-client-id",
-    ClientSecret = "your-client-secret",
     SiteURL = "https://contoso.sharepoint.com/sites/Marketing",
     DocumentLibraryName = "Shared Documents",
 });
@@ -145,7 +144,6 @@ var engineeringConfig = helper.SharePointConfigurations.Create(new SharePointCon
     Name = "Engineering Site",
     TenantID = "your-tenant-id",
     ClientID = "your-client-id",
-    ClientSecret = "your-client-secret",
     SiteURL = "https://contoso.sharepoint.com/sites/Engineering",
     DocumentLibraryName = "Technical Docs",
 });
@@ -256,6 +254,27 @@ byte[] bytes = client.Files.GetBytes(domFile);
 // Get bytes by module, instance ID, and filename
 byte[] bytes = client.Files.GetBytes("my_module", instanceId, "report.pdf");
 ```
+
+#### Searching Files
+
+```csharp
+using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient;
+using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient.Configurations;
+
+var client = engine.GetDocHubClient();
+
+// Basic KQL search against a SharePoint bucket
+var results = client.Files.SearchFiles(spBucket, "filetype:pdf title:\"design doc\"");
+
+// Search with pagination
+var config = new SearchFilesConfiguration
+{
+    Context = new DocHubPageData { PageSize = 50 },
+};
+var page = client.Files.SearchFiles(spBucket, "quarterly report", config);
+```
+
+> **Note**: Search is only supported for `StorageType.SharePoint` buckets. The query is passed straight through to Microsoft Graph as a KQL query.
 
 ## Basic Usage
 
