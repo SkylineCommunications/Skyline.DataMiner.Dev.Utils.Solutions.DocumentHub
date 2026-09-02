@@ -20,6 +20,13 @@
 	internal interface IStorageHandler
 	{
 		/// <summary>
+		/// Downloads a file from storage to a local destination.
+		/// </summary>
+		/// <param name="file">The file to download.</param>
+		/// <param name="destinationPath">The full local destination path.</param>
+		void DownloadFile(IDocHubFile file, string destinationPath);
+
+		/// <summary>
 		/// Checks whether a file with the specified name already exists in the given directory.
 		/// </summary>
 		/// <param name="data">

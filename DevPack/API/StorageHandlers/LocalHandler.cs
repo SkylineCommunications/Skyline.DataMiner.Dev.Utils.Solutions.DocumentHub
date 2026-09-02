@@ -38,6 +38,29 @@
 		}
 
 		/// <summary>
+		/// Downloads a local DocumentHub file to the specified destination.
+		/// </summary>
+		/// <param name="file">The local file to download.</param>
+		/// <param name="destinationPath">The full local destination path.</param>
+		public void DownloadFile(IDocHubFile file, string destinationPath)
+		{
+			if (file == null)
+				throw new ArgumentNullException(nameof(file));
+			if (!(file is FileInfoAdapter))
+				throw new ArgumentException("LocalHandler requires a local DocumentHub file.", nameof(file));
+
+			var sourcePath = file.GetFilePath();
+			if (string.IsNullOrWhiteSpace(sourcePath))
+				throw new ArgumentException("The local file does not contain a source path.", nameof(file));
+			if (!File.Exists(sourcePath))
+				throw new FileNotFoundException($"Source file not found: '{sourcePath}'", sourcePath);
+
+			AtomicFileDownloader.Write(
+				destinationPath,
+				temporaryPath => File.Copy(sourcePath, temporaryPath, overwrite: false));
+		}
+
+		/// <summary>
 		/// Resolves a relative upload path to the full local directory under <see cref="WebFileManagerRoot"/>.
 		/// </summary>
 		/// <param name="relativePath">A relative path (may be null, empty, or have leading slashes).</param>

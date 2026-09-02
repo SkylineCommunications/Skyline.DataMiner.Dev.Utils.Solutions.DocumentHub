@@ -23,6 +23,7 @@
 	{
 		private readonly IConnection _connection;
 		private readonly IRepository<DomSource> _domSourceRepository;
+		private readonly Func<IDocHubDomFile, byte[]> _downloadBytes;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DomAttachmentsHandler"/> class.
@@ -34,9 +35,62 @@
 		{
 			_connection = connection;
 			_domSourceRepository = new DomSourceDomRepository(connection);
+			_downloadBytes = GetBytes;
+		}
+
+		internal DomAttachmentsHandler(Func<IDocHubDomFile, byte[]> downloadBytes)
+		{
+			_downloadBytes = downloadBytes ?? throw new ArgumentNullException(nameof(downloadBytes));
 		}
 
 		#region Public Methods
+
+		/// <summary>
+		/// Downloads a DOM attachment to the specified local destination.
+		/// </summary>
+		/// <param name="file">The DOM attachment to download.</param>
+		/// <param name="destinationPath">The full local destination path.</param>
+		public void DownloadFile(IDocHubFile file, string destinationPath)
+		{
+			if (file == null)
+				throw new ArgumentNullException(nameof(file));
+			if (!(file is IDocHubDomFile domFile))
+				throw new ArgumentException("DOMAttachmentsHandler requires a DOM DocumentHub file.", nameof(file));
+
+			var bytes = _downloadBytes(domFile);
+			if (bytes == null)
+				throw new IOException($"DOM returned no content for attachment '{file.GetFile()}'.");
+
+			AtomicFileDownloader.Write(
+				destinationPath,
+				temporaryPath => File.WriteAllBytes(temporaryPath, bytes));
+		}
+
+		internal byte[] GetBytes(IDocHubDomFile domFile)
+		{
+			if (domFile == null)
+				throw new ArgumentNullException(nameof(domFile));
+
+			return GetBytes(domFile.GetModule(), domFile.GetInstanceId(), domFile.GetFile());
+		}
+
+		internal byte[] GetBytes(string moduleId, Guid instanceId, string filename)
+		{
+			if (string.IsNullOrEmpty(moduleId))
+				throw new ArgumentNullException(nameof(moduleId));
+			if (string.IsNullOrEmpty(filename))
+				throw new ArgumentNullException(nameof(filename));
+
+			var domHelper = new DomHelper(_connection.HandleMessages, moduleId);
+			var instance = domHelper.DomInstances
+				.Read(DomInstanceExposers.Id.Equal(instanceId))
+				.SingleOrDefault();
+
+			if (instance == null)
+				throw new InvalidOperationException($"Could not find DOM instance with id '{instanceId}' in module '{moduleId}'.");
+
+			return domHelper.DomInstances.Attachments.Get(instance.ID, filename);
+		}
 
 		/// <summary>
 		/// Checks whether a specific file exists in a DOM instance.
