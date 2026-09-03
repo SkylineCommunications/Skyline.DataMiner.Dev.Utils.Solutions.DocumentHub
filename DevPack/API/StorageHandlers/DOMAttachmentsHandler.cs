@@ -11,6 +11,7 @@
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
@@ -54,14 +55,17 @@
 		public void DownloadFile(IDocHubFile file, string destinationPath)
 		{
 			if (file == null)
+			{
 				throw new ArgumentNullException(nameof(file));
+			}
+
 			if (!(file is IDocHubDomFile domFile))
+			{
 				throw new ArgumentException("DOMAttachmentsHandler requires a DOM DocumentHub file.", nameof(file));
+			}
 
-			var bytes = _downloadBytes(domFile);
-			if (bytes == null)
-				throw new IOException($"DOM returned no content for attachment '{file.GetFile()}'.");
-
+			var bytes = _downloadBytes(domFile)
+				?? throw new IOException($"DOM returned no content for attachment '{file.GetFile()}'.");
 			AtomicFileDownloader.Write(
 				destinationPath,
 				temporaryPath => File.WriteAllBytes(temporaryPath, bytes));

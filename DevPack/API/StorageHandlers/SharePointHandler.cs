@@ -16,6 +16,7 @@
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Security;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
@@ -163,11 +164,19 @@
 		public void DownloadFile(IDocHubFile file, string destinationPath)
 		{
 			if (file == null)
+			{
 				throw new ArgumentNullException(nameof(file));
+			}
+
 			if (!(file is DriveItemAdapter sharePointFile))
+			{
 				throw new ArgumentException("SharePointHandler requires a SharePoint DocumentHub file.", nameof(file));
+			}
+
 			if (sharePointFile.DriveItem == null || string.IsNullOrWhiteSpace(sharePointFile.DriveItem.Id))
+			{
 				throw new ArgumentException("The SharePoint file does not contain a drive item identifier.", nameof(file));
+			}
 
 			using (var source = _openDownloadStream(sharePointFile.DriveItem))
 			{
