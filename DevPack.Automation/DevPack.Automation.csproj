@@ -6,8 +6,8 @@
     <AssemblyName>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub.Automation</AssemblyName>
     <RootNamespace>Skyline.DataMiner.Solutions.DocumentHub.Automation</RootNamespace>
     <PackageId>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub.Automation</PackageId>
-    <PackageVersion>1.1.2-prerelease</PackageVersion>
-    <Version>1.1.2-prerelease</Version>
+    <PackageVersion>1.1.2-prereleas2</PackageVersion>
+    <Version>1.1.2-prereleas2</Version>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
