@@ -21,7 +21,7 @@
 		}
 
 		/// <summary>
-		/// Gets or sets provides access to document file operations such as upload and read.
+		/// Gets or sets access to document file operations such as upload, download, and read.
 		/// </summary>
 		public Files Files { get; set; }
 	}

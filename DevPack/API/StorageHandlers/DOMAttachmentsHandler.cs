@@ -11,6 +11,7 @@
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
@@ -24,6 +25,7 @@
 	{
 		private readonly IConnection _connection;
 		private readonly IRepository<DomSource> _domSourceRepository;
+		private readonly Func<IDocHubDomFile, byte[]> _downloadBytes;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DomAttachmentsHandler"/> class.
@@ -35,9 +37,39 @@
 		{
 			_connection = connection;
 			_domSourceRepository = new DomSourceDomRepository(connection);
+			_downloadBytes = GetBytes;
 		}
 
-		#region Public Methods
+		internal DomAttachmentsHandler(Func<IDocHubDomFile, byte[]> downloadBytes)
+		{
+			_downloadBytes = downloadBytes ?? throw new ArgumentNullException(nameof(downloadBytes));
+		}
+
+		#region Public and Internal Methods
+
+		/// <summary>
+		/// Downloads a DOM attachment to the specified local destination.
+		/// </summary>
+		/// <param name="file">The DOM attachment to download.</param>
+		/// <param name="destinationPath">The full local destination path.</param>
+		public void DownloadFile(IDocHubFile file, string destinationPath)
+		{
+			if (file == null)
+			{
+				throw new ArgumentNullException(nameof(file));
+			}
+
+			if (!(file is IDocHubDomFile domFile))
+			{
+				throw new ArgumentException("DOMAttachmentsHandler requires a DOM DocumentHub file.", nameof(file));
+			}
+
+			var bytes = _downloadBytes(domFile)
+				?? throw new IOException($"DOM returned no content for attachment '{file.GetFile()}'.");
+			AtomicFileDownloader.Write(
+				destinationPath,
+				temporaryPath => File.WriteAllBytes(temporaryPath, bytes));
+		}
 
 		/// <summary>
 		/// Checks whether a specific file exists in a DOM instance.
@@ -117,29 +149,29 @@
 			return files;
 		}
 
-        /// <summary>
-        /// Asynchronous version of <see cref="ReadFiles(ReadData)"/>
-        /// </summary>
-        /// <param name="data">The data describing which files to read.</param>
-        /// <returns>List of <see cref="IDocHubFile"/> representing the files found.</returns>
-        public async Task<List<IDocHubFile>> ReadFilesAsync(ReadData data)
-        {
+		/// <summary>
+		/// Asynchronous version of <see cref="ReadFiles(ReadData)"/>
+		/// </summary>
+		/// <param name="data">The data describing which files to read.</param>
+		/// <returns>List of <see cref="IDocHubFile"/> representing the files found.</returns>
+		public async Task<List<IDocHubFile>> ReadFilesAsync(ReadData data)
+		{
 			return await Task.FromResult(ReadFiles(data));
-        }
+		}
 
-        /// <summary>
-        /// Uploads a file to a specific DOM instance.
-        /// </summary>
-        /// <param name="data">
-        /// Data describing which file to upload and to which DOM instance.
-        /// </param>
-        /// <returns>
-        /// The ID of the DOM instance as a string.
-        /// </returns>
-        /// <exception cref="ArgumentException">
-        /// Thrown if <paramref name="data"/> is not of type <see cref="DomFileUploadData"/>.
-        /// </exception>
-        public string UploadFile(UploadData data)
+		/// <summary>
+		/// Uploads a file to a specific DOM instance.
+		/// </summary>
+		/// <param name="data">
+		/// Data describing which file to upload and to which DOM instance.
+		/// </param>
+		/// <returns>
+		/// The ID of the DOM instance as a string.
+		/// </returns>
+		/// <exception cref="ArgumentException">
+		/// Thrown if <paramref name="data"/> is not of type <see cref="DomFileUploadData"/>.
+		/// </exception>
+		public string UploadFile(UploadData data)
 		{
 			if (!(data is DomFileUploadData args))
 				throw new ArgumentException("DOMAttachmentsHandler requires DOMFileUploadData.", nameof(data));
@@ -232,6 +264,31 @@
 
 			return results.ToList();
 		}
+
+		internal byte[] GetBytes(IDocHubDomFile domFile)
+		{
+			if (domFile == null)
+				throw new ArgumentNullException(nameof(domFile));
+
+			return GetBytes(domFile.GetModule(), domFile.GetInstanceId(), domFile.GetFile());
+		}
+
+		internal byte[] GetBytes(string moduleId, Guid instanceId, string filename)
+		{
+			if (string.IsNullOrEmpty(moduleId))
+				throw new ArgumentNullException(nameof(moduleId));
+			if (string.IsNullOrEmpty(filename))
+				throw new ArgumentNullException(nameof(filename));
+
+			var domHelper = new DomHelper(_connection.HandleMessages, moduleId);
+			var instance = domHelper.DomInstances
+				.Read(DomInstanceExposers.Id.Equal(instanceId))
+				.SingleOrDefault()
+			?? throw new InvalidOperationException($"Could not find DOM instance with id '{instanceId}' in module '{moduleId}'.");
+
+			return domHelper.DomInstances.Attachments.Get(instance.ID, filename);
+		}
+
 		#endregion
 
 		#region Private Methods
