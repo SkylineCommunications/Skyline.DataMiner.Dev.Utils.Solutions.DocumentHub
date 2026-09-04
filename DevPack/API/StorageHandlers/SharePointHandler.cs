@@ -74,6 +74,9 @@
 		/// </summary>
 		private readonly Drive _drive;
 
+		/// <summary>
+		/// Encapsulated method which turns a SharePoint file (<see cref="DriveItem"/>) into a <see cref="Stream"/> suitable for download.
+		/// </summary>
 		private readonly Func<DriveItem, Stream> _openDownloadStream;
 		#endregion
 

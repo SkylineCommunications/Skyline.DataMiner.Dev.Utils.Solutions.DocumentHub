@@ -45,7 +45,7 @@
 			_downloadBytes = downloadBytes ?? throw new ArgumentNullException(nameof(downloadBytes));
 		}
 
-		#region Public Methods
+		#region Public and Internal Methods
 
 		/// <summary>
 		/// Downloads a DOM attachment to the specified local destination.
@@ -69,32 +69,6 @@
 			AtomicFileDownloader.Write(
 				destinationPath,
 				temporaryPath => File.WriteAllBytes(temporaryPath, bytes));
-		}
-
-		internal byte[] GetBytes(IDocHubDomFile domFile)
-		{
-			if (domFile == null)
-				throw new ArgumentNullException(nameof(domFile));
-
-			return GetBytes(domFile.GetModule(), domFile.GetInstanceId(), domFile.GetFile());
-		}
-
-		internal byte[] GetBytes(string moduleId, Guid instanceId, string filename)
-		{
-			if (string.IsNullOrEmpty(moduleId))
-				throw new ArgumentNullException(nameof(moduleId));
-			if (string.IsNullOrEmpty(filename))
-				throw new ArgumentNullException(nameof(filename));
-
-			var domHelper = new DomHelper(_connection.HandleMessages, moduleId);
-			var instance = domHelper.DomInstances
-				.Read(DomInstanceExposers.Id.Equal(instanceId))
-				.SingleOrDefault();
-
-			if (instance == null)
-				throw new InvalidOperationException($"Could not find DOM instance with id '{instanceId}' in module '{moduleId}'.");
-
-			return domHelper.DomInstances.Attachments.Get(instance.ID, filename);
 		}
 
 		/// <summary>
@@ -175,29 +149,29 @@
 			return files;
 		}
 
-        /// <summary>
-        /// Asynchronous version of <see cref="ReadFiles(ReadData)"/>
-        /// </summary>
-        /// <param name="data">The data describing which files to read.</param>
-        /// <returns>List of <see cref="IDocHubFile"/> representing the files found.</returns>
-        public async Task<List<IDocHubFile>> ReadFilesAsync(ReadData data)
-        {
+		/// <summary>
+		/// Asynchronous version of <see cref="ReadFiles(ReadData)"/>
+		/// </summary>
+		/// <param name="data">The data describing which files to read.</param>
+		/// <returns>List of <see cref="IDocHubFile"/> representing the files found.</returns>
+		public async Task<List<IDocHubFile>> ReadFilesAsync(ReadData data)
+		{
 			return await Task.FromResult(ReadFiles(data));
-        }
+		}
 
-        /// <summary>
-        /// Uploads a file to a specific DOM instance.
-        /// </summary>
-        /// <param name="data">
-        /// Data describing which file to upload and to which DOM instance.
-        /// </param>
-        /// <returns>
-        /// The ID of the DOM instance as a string.
-        /// </returns>
-        /// <exception cref="ArgumentException">
-        /// Thrown if <paramref name="data"/> is not of type <see cref="DomFileUploadData"/>.
-        /// </exception>
-        public string UploadFile(UploadData data)
+		/// <summary>
+		/// Uploads a file to a specific DOM instance.
+		/// </summary>
+		/// <param name="data">
+		/// Data describing which file to upload and to which DOM instance.
+		/// </param>
+		/// <returns>
+		/// The ID of the DOM instance as a string.
+		/// </returns>
+		/// <exception cref="ArgumentException">
+		/// Thrown if <paramref name="data"/> is not of type <see cref="DomFileUploadData"/>.
+		/// </exception>
+		public string UploadFile(UploadData data)
 		{
 			if (!(data is DomFileUploadData args))
 				throw new ArgumentException("DOMAttachmentsHandler requires DOMFileUploadData.", nameof(data));
@@ -290,6 +264,31 @@
 
 			return results.ToList();
 		}
+
+		internal byte[] GetBytes(IDocHubDomFile domFile)
+		{
+			if (domFile == null)
+				throw new ArgumentNullException(nameof(domFile));
+
+			return GetBytes(domFile.GetModule(), domFile.GetInstanceId(), domFile.GetFile());
+		}
+
+		internal byte[] GetBytes(string moduleId, Guid instanceId, string filename)
+		{
+			if (string.IsNullOrEmpty(moduleId))
+				throw new ArgumentNullException(nameof(moduleId));
+			if (string.IsNullOrEmpty(filename))
+				throw new ArgumentNullException(nameof(filename));
+
+			var domHelper = new DomHelper(_connection.HandleMessages, moduleId);
+			var instance = domHelper.DomInstances
+				.Read(DomInstanceExposers.Id.Equal(instanceId))
+				.SingleOrDefault()
+			?? throw new InvalidOperationException($"Could not find DOM instance with id '{instanceId}' in module '{moduleId}'.");
+
+			return domHelper.DomInstances.Attachments.Get(instance.ID, filename);
+		}
+
 		#endregion
 
 		#region Private Methods

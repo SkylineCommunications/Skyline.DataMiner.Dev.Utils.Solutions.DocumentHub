@@ -26,6 +26,8 @@
 
 		private readonly FileValidator validator;
 
+		private readonly Func<IConnection, DocumentBucket, IStorageHandler> _storageHandlerFactory;
+
 		internal Files(IConnection connection)
 			: this(connection, StorageHandlerFactory.Create)
 		{
@@ -37,8 +39,6 @@
 			_storageHandlerFactory = storageHandlerFactory ?? throw new ArgumentNullException(nameof(storageHandlerFactory));
 			validator = new FileValidator(_connection);
 		}
-
-		private readonly Func<IConnection, DocumentBucket, IStorageHandler> _storageHandlerFactory;
 
 		#region Download
 
@@ -58,11 +58,19 @@
 		public void DownloadFile(DocumentBucket bucket, IDocHubFile file, string destinationPath)
 		{
 			if (bucket == null)
+			{
 				throw new ArgumentNullException(nameof(bucket));
+			}
+
 			if (file == null)
+			{
 				throw new ArgumentNullException(nameof(file));
+			}
+
 			if (string.IsNullOrWhiteSpace(destinationPath))
+			{
 				throw new ArgumentNullException(nameof(destinationPath));
+			}
 
 			var storageHandler = _storageHandlerFactory(_connection, bucket);
 			storageHandler.DownloadFile(file, destinationPath);
