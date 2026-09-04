@@ -2,12 +2,16 @@
 {
 	using System;
 	using System.IO;
+	using System.Threading;
 
 	/// <summary>
 	/// Writes downloaded content to a temporary sibling file before atomically publishing it.
 	/// </summary>
 	internal static class AtomicFileDownloader
 	{
+		private const int MaximumReplaceAttempts = 3;
+		private const int ReplaceRetryDelayMilliseconds = 150;
+
 		internal static void Write(string destinationPath, Action<string> writeTemporaryFile)
 		{
 			if (string.IsNullOrWhiteSpace(destinationPath))
@@ -46,7 +50,7 @@
 
 				if (File.Exists(fullDestinationPath))
 				{
-					File.Replace(temporaryPath, fullDestinationPath, null);
+					ReplaceWithRetry(temporaryPath, fullDestinationPath);
 				}
 				else
 				{
@@ -58,6 +62,22 @@
 				if (File.Exists(temporaryPath))
 				{
 					File.Delete(temporaryPath);
+				}
+			}
+		}
+
+		private static void ReplaceWithRetry(string temporaryPath, string destinationPath)
+		{
+			for (var attempt = 1; attempt <= MaximumReplaceAttempts; attempt++)
+			{
+				try
+				{
+					File.Replace(temporaryPath, destinationPath, null);
+					return;
+				}
+				catch (IOException) when (attempt < MaximumReplaceAttempts)
+				{
+					Thread.Sleep(ReplaceRetryDelayMilliseconds);
 				}
 			}
 		}
