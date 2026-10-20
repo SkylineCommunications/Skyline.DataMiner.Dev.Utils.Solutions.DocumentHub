@@ -16,6 +16,7 @@
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Security;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
@@ -72,6 +73,11 @@
 		/// Document library (drive) inside the SharePoint site.
 		/// </summary>
 		private readonly Drive _drive;
+
+		/// <summary>
+		/// Encapsulated method which turns a SharePoint file (<see cref="DriveItem"/>) into a <see cref="Stream"/> suitable for download.
+		/// </summary>
+		private readonly Func<DriveItem, Stream> _openDownloadStream;
 		#endregion
 
 		#region Constructor
@@ -140,11 +146,57 @@
 			_drive = drives.Value.FirstOrDefault(d => d.Name.Equals(_sharePoint.DocumentLibraryName, StringComparison.OrdinalIgnoreCase));
 			if (_drive == null)
 				throw new NullReferenceException($"Library '{_sharePoint.DocumentLibraryName}' not found.");
+
+			_openDownloadStream = OpenDownloadStream;
+		}
+
+		internal SharePointHandler(Func<DriveItem, Stream> openDownloadStream)
+		{
+			_openDownloadStream = openDownloadStream ?? throw new ArgumentNullException(nameof(openDownloadStream));
 		}
 
 		#endregion
 
 		#region Public
+
+		/// <summary>
+		/// Downloads a SharePoint file to the specified local destination.
+		/// </summary>
+		/// <param name="file">The SharePoint file to download.</param>
+		/// <param name="destinationPath">The full local destination path.</param>
+		public void DownloadFile(IDocHubFile file, string destinationPath)
+		{
+			if (file == null)
+			{
+				throw new ArgumentNullException(nameof(file));
+			}
+
+			if (!(file is DriveItemAdapter sharePointFile))
+			{
+				throw new ArgumentException("SharePointHandler requires a SharePoint DocumentHub file.", nameof(file));
+			}
+
+			if (sharePointFile.DriveItem == null || string.IsNullOrWhiteSpace(sharePointFile.DriveItem.Id))
+			{
+				throw new ArgumentException("The SharePoint file does not contain a drive item identifier.", nameof(file));
+			}
+
+			using (var source = _openDownloadStream(sharePointFile.DriveItem))
+			{
+				if (source == null)
+					throw new IOException($"SharePoint returned no content for file '{file.GetFile()}'.");
+
+				AtomicFileDownloader.Write(
+					destinationPath,
+					temporaryPath =>
+					{
+						using (var destination = File.Create(temporaryPath))
+						{
+							source.CopyTo(destination);
+						}
+					});
+			}
+		}
 
 		/// <summary>
 		/// Reads all files using recursive traversal with manual paging.
@@ -314,6 +366,17 @@
 		#endregion
 
 		#region Private
+
+		private Stream OpenDownloadStream(DriveItem item)
+		{
+			return _graphClient
+				.Drives[_drive.Id]
+				.Items[item.Id]
+				.Content
+				.GetAsync()
+				.GetAwaiter()
+				.GetResult();
+		}
 
 		/// <summary>
 		/// Enqueues subfolders discovered in the current Graph page.
