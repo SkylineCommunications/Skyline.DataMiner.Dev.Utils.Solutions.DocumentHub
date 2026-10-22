@@ -51,7 +51,7 @@ The `DevPack.Tests` project contains unit tests using an in-memory DOM mock (`Do
 | **SDM - DomSource**        | `DomSourceDomRepository_CRUD_Tests`, `DomSourceDomRepository_FilterTests_Tests`               | 13    |
 | **SDM - DocumentBucket**   | `DocumentBucketDomRepository_CRUD_Tests`, `DocumentBucketDomRepository_FilterTests_Tests`     | 26    |
 
-**Total: 143 tests** (includes 4 parameterized test methods)
+**Total: 155 tests** (includes 4 parameterized test methods)
 
 ### SDM Repository Tests
 
@@ -80,11 +80,13 @@ API tests validate parameter handling:
 ### Secret Store Tests
 
 `SecretKey_Tests`, `DpapiFileSecretStore_Tests` and `Secrets_Tests` cover the storage of secrets (e.g., the SharePoint client secret):
-- Secret key path building (`<storage>\<scope>\<name>.dat`) and name validation (no path traversal)
+- Secret key path building (`<source>\[<scope>\...]<name>.dat`, e.g. `sharepoint\<tenantId>\<clientId>.dat`) and segment validation (no path traversal)
 - Save/read round trip, with the secret never stored as plain text
 - Atomic replace of an existing secret without leftover temporary files
 - Missing secret handling, `Exists` and `Delete` behavior, and null argument validation
 - Isolation between scopes, and a secret file copied to another key failing to decrypt
+- Tenant/client ID validation for SharePoint client secrets
+- The public `DocHubClient.Secrets` API being write-only (no member returns a secret, no secret store types are exposed)
 - The in-memory store used as a test double
 
 ### Running Tests

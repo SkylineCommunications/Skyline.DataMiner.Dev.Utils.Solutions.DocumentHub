@@ -1,4 +1,8 @@
 ﻿<Project>
+	<PropertyGroup>
+		<!-- SLManagedAutomation.dll (DataMiner) is x86-only; it is loaded by DataMiner itself, so the MSIL/x86 mismatch (MSB3270) is expected. -->
+		<ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
 		<DebugType>full</DebugType>
 		<CodeAnalysisRuleSet>..\Internal\Code Analysis\qaction-debug.ruleset</CodeAnalysisRuleSet>
