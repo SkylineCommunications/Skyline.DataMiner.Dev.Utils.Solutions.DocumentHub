@@ -46,11 +46,12 @@ The `DevPack.Tests` project contains unit tests using an in-memory DOM mock (`Do
 | **API - File Download**    | `Files_DownloadFile_Tests`                                                                    | 9     |
 | **API - File Validator**   | `FileValidator_ValidateAndSanitizeFile_Tests`                                                 | 19    |
 | **API - File Adapters**    | `FileInfoAdapter_GetRelativePath_Tests`                                                       | 11    |
+| **API - Secrets**          | `SecretKey_Tests`, `DpapiFileSecretStore_Tests`, `InMemorySecretStore_Tests`                  | 25    |
 | **SDM - SharePoint**       | `SharepointDomRepository_CRUD_Tests`, `SharepointDomRepository_FilterTests_Tests`             | 13    |
 | **SDM - DomSource**        | `DomSourceDomRepository_CRUD_Tests`, `DomSourceDomRepository_FilterTests_Tests`               | 13    |
 | **SDM - DocumentBucket**   | `DocumentBucketDomRepository_CRUD_Tests`, `DocumentBucketDomRepository_FilterTests_Tests`     | 26    |
 
-**Total: 118 tests** (includes 3 parameterized test methods)
+**Total: 143 tests** (includes 4 parameterized test methods)
 
 ### SDM Repository Tests
 
@@ -75,6 +76,16 @@ API tests validate parameter handling:
 - Directory-boundary safety (e.g., `C:\Web` does not match `C:\Web2`)
 - Path-equals-root and trailing-separator handling
 - Case-insensitive matching and null/empty input handling
+
+### Secret Store Tests
+
+`SecretKey_Tests`, `DpapiFileSecretStore_Tests` and `InMemorySecretStore_Tests` cover the storage of secrets (e.g., the SharePoint client secret):
+- Secret key path building (`<storage>\<scope>\<name>.dat`) and name validation (no path traversal)
+- Save/read round trip, with the secret never stored as plain text
+- Atomic replace of an existing secret without leftover temporary files
+- Missing secret handling, `Exists` and `Delete` behavior, and null argument validation
+- Isolation between scopes, and a secret file copied to another key failing to decrypt
+- The in-memory store used as a test double
 
 ### Running Tests
 
