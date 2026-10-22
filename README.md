@@ -28,7 +28,7 @@ Depending on your project type, one of the following additional packages is also
 
 External resources:
 
-- [DataMiner Docs](https://docs.dataminer.services/) – Official DataMiner documentation
+- [DocumentHub](https://docs.dataminer.services/solutions/standard_solutions/DocumentHub/DocumentHub.html) – Official DocumentHub solution documentation
 
 ## Unit Tests
 
