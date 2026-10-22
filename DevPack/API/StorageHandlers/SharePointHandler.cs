@@ -60,9 +60,9 @@
 		private readonly SharePointConfiguration _sharePoint;
 
 		/// <summary>
-		/// Store used to retrieve the SharePoint client secret.
+		/// Creates the Azure AD credential; the client secret never leaves it.
 		/// </summary>
-		private readonly ISecretStore _secretStore;
+		private readonly SharePointCredentialProvider _credentialProvider;
 
 		/// <summary>
 		/// Microsoft Graph client used for SharePoint API operations.
@@ -96,9 +96,9 @@
 		/// <param name="bucket">
 		/// The <see cref="DocumentBucket"/> containing the storage type and related configuration for which this handler is being created.
 		/// </param>
-		/// <param name="secretStore">
-		/// The store used to retrieve the Azure AD client secret of the SharePoint configuration
-		/// (see <see cref="SharePointSecrets.ClientSecret(Guid)"/>).
+		/// <param name="secretReader">
+		/// The store used to retrieve the Azure AD client secret of the configured tenant and client
+		/// (see <see cref="SharePointSecrets.ClientSecret(Guid, Guid)"/>).
 		/// Optional; when <c>null</c>, a <see cref="DpapiFileSecretStore"/> using the default DocumentHub security folder is used.
 		/// If no secret exists for the configuration, the legacy <c>graphsecret.dat</c> file is used as a fallback.
 		/// </param>
@@ -114,10 +114,10 @@
 		/// <exception cref="NullReferenceException">
 		/// Thrown when the configured SharePoint document library cannot be found.
 		/// </exception>
-		internal SharePointHandler(IConnection connection, DocumentBucket bucket, ISecretStore secretStore = null)
+		internal SharePointHandler(IConnection connection, DocumentBucket bucket, ISecretReader secretReader = null)
 		{
 			_sharePointRepository = new SharePointConfigurationDomRepository(connection);
-			_secretStore = secretStore ?? new DpapiFileSecretStore();
+			_credentialProvider = new SharePointCredentialProvider(secretReader);
 
 			// Defensive check to avoid reinitialization
 			if (_graphClient != null && _drive != null)
@@ -133,14 +133,8 @@
 			_sharePoint = _sharePointRepository.Read(sharePointFilter).FirstOrDefault()
 				?? throw new ArgumentException("No SharePoint configuration tied to the provided bucket could be found.", nameof(bucket));
 
-			// Retrieve client secret
-			var clientSecret = GetClientSecret(identifierGuid);
-
-			// Authenticate using Azure AD client credentials flow
-			var credential = new Azure.Identity.ClientSecretCredential(
-				_sharePoint.TenantID,
-				_sharePoint.ClientID,
-				clientSecret);
+			// Create the credential; the client secret is handled inside the provider and never reaches this class
+			var credential = _credentialProvider.CreateCredential(_sharePoint.TenantID, _sharePoint.ClientID);
 
 			// Initialize Graph client
 			_graphClient = new GraphServiceClient(credential);
@@ -1113,24 +1107,6 @@
 			{
 				// Never let logging break the caller.
 			}
-		}
-
-		private string GetClientSecret(Guid configurationId)
-		{
-			var key = SharePointSecrets.ClientSecret(configurationId);
-			if (_secretStore.Exists(key))
-			{
-				return _secretStore.Read(key);
-			}
-
-			// Legacy fallback: single global secret file used before per-configuration secrets existed.
-			string legacyPath = @"C:\Skyline DataMiner\Security\DocumentHub\graphsecret.dat";
-			if (!File.Exists(legacyPath))
-			{
-				throw new FileNotFoundException($"Secret '{key}' not found.", legacyPath);
-			}
-
-			return DPAPIHelper.Decrypt(File.ReadAllText(legacyPath));
 		}
 
 		/// <summary>

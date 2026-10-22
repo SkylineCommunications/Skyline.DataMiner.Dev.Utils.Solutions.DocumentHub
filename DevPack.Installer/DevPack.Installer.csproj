@@ -1,34 +1,34 @@
-﻿<Project Sdk="Skyline.DataMiner.Sdk">
-	<PropertyGroup>
-		<TargetFramework>net48</TargetFramework>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-	</PropertyGroup>
-	<PropertyGroup>
-		<DataMinerType>Package</DataMinerType>
-		<GenerateDataMinerPackage>True</GenerateDataMinerPackage>
-		<MinimumRequiredDmVersion>10.6.5.0 - 17061</MinimumRequiredDmVersion>
-		<PackageVersion>1.1.4</PackageVersion>
-		<Version>1.1.4</Version>
-		<VersionComment>Added per-configuration SharePoint secret storage; legacy graphsecret.dat remains supported as a fallback.</VersionComment>
-		<!-- Do NOT fill in the Organization Token here. This points to either an Environment Variable skyline__sdk__dataminertoken holding the organization token or a Visual Studio User Secret holding the token. -->
-		<CatalogPublishKeyName>skyline:sdk:dataminertoken</CatalogPublishKeyName>
-		<CatalogDefaultDownloadKeyName>skyline:sdk:dataminertoken</CatalogDefaultDownloadKeyName>
-		<AssemblyTitle>Skyline.DataMiner.Solutions.DocumentHub.Installer</AssemblyTitle>
-	</PropertyGroup>
-	<ItemGroup>
-		<PackageReference Include="Skyline.DataMiner.CICD.CSharpAnalysis.Analyzer">
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="Skyline.DataMiner.Core.AppPackageInstaller" />
-		<PackageReference Include="Skyline.DataMiner.Dev.Automation" />
-		<PackageReference Include="Skyline.DataMiner.SDM.SourceGenerator.Runtime" />
-		<PackageReference Include="Skyline.DataMiner.Utils.DOM" />
-		<PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-	</ItemGroup>
-	<Import Project="..\SharedMappers\SharedMappers.projitems" Label="Shared" />
-	
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Skyline.DataMiner.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DataMinerType>Package</DataMinerType>
+    <GenerateDataMinerPackage>True</GenerateDataMinerPackage>
+    <MinimumRequiredDmVersion>10.6.5.0 - 17061</MinimumRequiredDmVersion>
+    <PackageVersion>1.1.4</PackageVersion>
+    <Version>1.1.4</Version>
+    <VersionComment>Added per-configuration SharePoint secret storage; legacy graphsecret.dat remains supported as a fallback.</VersionComment>
+    <!-- Do NOT fill in the Organization Token here. This points to either an Environment Variable skyline__sdk__dataminertoken holding the organization token or a Visual Studio User Secret holding the token. -->
+    <CatalogPublishKeyName>skyline:sdk:dataminertoken</CatalogPublishKeyName>
+    <CatalogDefaultDownloadKeyName>skyline:sdk:dataminertoken</CatalogDefaultDownloadKeyName>
+    <AssemblyTitle>Skyline.DataMiner.Solutions.DocumentHub.Installer</AssemblyTitle>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Skyline.DataMiner.CICD.CSharpAnalysis.Analyzer">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Skyline.DataMiner.Core.AppPackageInstaller" />
+    <PackageReference Include="Skyline.DataMiner.Dev.Automation" />
+    <PackageReference Include="Skyline.DataMiner.SDM.SourceGenerator.Runtime" />
+    <PackageReference Include="Skyline.DataMiner.Utils.DOM" />
+    <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <Import Project="..\SharedMappers\SharedMappers.projitems" Label="Shared" />
 </Project>

@@ -3,6 +3,8 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API.Security
 	using System;
 	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
+	using System.Security.AccessControl;
+	using System.Security.Principal;
 	using System.Text;
 
 	/// <summary>
@@ -41,7 +43,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API.Security
 			string tempPath = path + ".tmp";
 			string encrypted = DPAPIHelper.Encrypt(value, GetEntropy(key));
 
-			Directory.CreateDirectory(Path.GetDirectoryName(path));
+			CreateRestrictedDirectory(Path.GetDirectoryName(path));
 			File.WriteAllText(tempPath, encrypted);
 
 			// Atomic replace so readers never see a partially written file.
@@ -96,6 +98,40 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API.Security
 		}
 
 		private static byte[] GetEntropy(SecretKey key) => Encoding.UTF8.GetBytes(key.Entropy);
+
+		/// <summary>
+		/// Creates the folder (and any missing parent folders) so that only SYSTEM, the local Administrators and the
+		/// current account can access it. Inheritance from the parent is disabled. Existing folders are left unchanged.
+		/// </summary>
+		private static void CreateRestrictedDirectory(string directory)
+		{
+			if (Directory.Exists(directory))
+			{
+				return;
+			}
+
+			var security = new DirectorySecurity();
+			security.SetAccessRuleProtection(true, false);
+
+			var allowed = new[]
+			{
+				new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null),
+				new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null),
+				WindowsIdentity.GetCurrent().User,
+			};
+
+			foreach (var sid in allowed)
+			{
+				security.AddAccessRule(new FileSystemAccessRule(
+					sid,
+					FileSystemRights.FullControl,
+					InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
+					PropagationFlags.None,
+					AccessControlType.Allow));
+			}
+
+			Directory.CreateDirectory(directory, security);
+		}
 
 		private string GetPath(SecretKey key) => Path.Combine(_rootPath, key.RelativePath);
 	}

@@ -19,8 +19,8 @@
     <PackageVersion Include="Skyline.DataMiner.SDM" Version="1.0.3" />
     <PackageVersion Include="Skyline.DataMiner.SDM.SourceGenerator.Runtime" Version="1.0.3" />
     <PackageVersion Include="Skyline.DataMiner.Utils.DOM" Version="10.5.2.8" />
-    <PackageVersion Include="Skyline.DataMiner.Utils.SecureCoding" Version="2.2.3" />
-    <PackageVersion Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="2.2.3" />
+    <PackageVersion Include="Skyline.DataMiner.Utils.SecureCoding" Version="3.0.1" />
+    <PackageVersion Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="3.0.1" />
     <PackageVersion Include="System.Drawing.Common" Version="10.0.1" />
   </ItemGroup>
 </Project>

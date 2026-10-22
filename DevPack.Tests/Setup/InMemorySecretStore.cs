@@ -1,7 +1,8 @@
-namespace Skyline.DataMiner.Solutions.DocumentHub.API.Security
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup
 {
 	using System.Collections.Generic;
 	using System.IO;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.Security;
 
 	/// <summary>
 	/// Non-persistent <see cref="ISecretStore"/>, intended for tests.

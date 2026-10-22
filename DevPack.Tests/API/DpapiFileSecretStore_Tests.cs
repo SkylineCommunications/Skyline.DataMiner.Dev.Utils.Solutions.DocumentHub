@@ -31,7 +31,7 @@ namespace DevPack.Tests.API
 		[TestMethod]
 		public void SaveThenRead_ReturnsOriginalSecret()
 		{
-			var key = SharePointSecrets.ClientSecret(Guid.NewGuid());
+			var key = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
 
 			_store.Save(key, "my-secret");
 
@@ -41,7 +41,7 @@ namespace DevPack.Tests.API
 		[TestMethod]
 		public void Save_DoesNotStorePlainText()
 		{
-			var key = SharePointSecrets.ClientSecret(Guid.NewGuid());
+			var key = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
 
 			_store.Save(key, "my-secret");
 
@@ -52,7 +52,7 @@ namespace DevPack.Tests.API
 		[TestMethod]
 		public void Save_ExistingSecret_ReplacesValueAndLeavesNoTempFile()
 		{
-			var key = SharePointSecrets.ClientSecret(Guid.NewGuid());
+			var key = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
 			_store.Save(key, "old");
 
 			_store.Save(key, "new");
@@ -64,7 +64,7 @@ namespace DevPack.Tests.API
 		[TestMethod]
 		public void Save_EmptyValue_Throws()
 		{
-			var key = SharePointSecrets.ClientSecret(Guid.NewGuid());
+			var key = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
 
 			Action act = () => _store.Save(key, string.Empty);
 
@@ -74,7 +74,7 @@ namespace DevPack.Tests.API
 		[TestMethod]
 		public void Read_MissingSecret_ThrowsFileNotFound()
 		{
-			var key = SharePointSecrets.ClientSecret(Guid.NewGuid());
+			var key = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
 
 			Action act = () => _store.Read(key);
 
@@ -84,7 +84,7 @@ namespace DevPack.Tests.API
 		[TestMethod]
 		public void Exists_ReflectsSaveAndDelete()
 		{
-			var key = SharePointSecrets.ClientSecret(Guid.NewGuid());
+			var key = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
 			_store.Exists(key).Should().BeFalse();
 
 			_store.Save(key, "my-secret");
@@ -97,7 +97,7 @@ namespace DevPack.Tests.API
 		[TestMethod]
 		public void Delete_MissingSecret_DoesNotThrow()
 		{
-			var key = SharePointSecrets.ClientSecret(Guid.NewGuid());
+			var key = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
 
 			Action act = () => _store.Delete(key);
 
@@ -107,8 +107,8 @@ namespace DevPack.Tests.API
 		[TestMethod]
 		public void Secrets_AreIsolatedPerScope()
 		{
-			var keyA = SharePointSecrets.ClientSecret(Guid.NewGuid());
-			var keyB = SharePointSecrets.ClientSecret(Guid.NewGuid());
+			var keyA = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
+			var keyB = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
 
 			_store.Save(keyA, "secret-a");
 			_store.Save(keyB, "secret-b");
@@ -120,8 +120,8 @@ namespace DevPack.Tests.API
 		[TestMethod]
 		public void Read_FileCopiedToAnotherKey_FailsToDecrypt()
 		{
-			var keyA = SharePointSecrets.ClientSecret(Guid.NewGuid());
-			var keyB = SharePointSecrets.ClientSecret(Guid.NewGuid());
+			var keyA = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
+			var keyB = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
 			_store.Save(keyA, "secret-a");
 
 			var pathB = Path.Combine(_root, keyB.RelativePath);
