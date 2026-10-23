@@ -2,6 +2,7 @@
 {
 	using System;
 	using Azure.Identity;
+	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Security;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 
@@ -15,16 +16,30 @@
 	/// </remarks>
 	public class Secrets
 	{
-		private readonly ISecretStore _store;
+		/// <summary>
+		/// Name of the Automation script executed on every agent to save or delete a secret locally.
+		/// The script only needs to call <see cref="ApplyOnThisAgent"/> with its parameters.
+		/// </summary>
+		public const string ScriptName = "SLC-DH-AS-SaveClientSecret";
 
-		internal Secrets()
-			: this(new DpapiFileSecretStore())
+		/// <summary>Action value that saves the secret.</summary>
+		public const string SaveAction = "Save";
+
+		/// <summary>Action value that deletes the secret.</summary>
+		public const string DeleteAction = "Delete";
+
+		private readonly ISecretStore _store;
+		private readonly IAgentSecretDistributor _distributor;
+
+		internal Secrets(IConnection connection)
+			: this(new DpapiFileSecretStore(), new AgentSecretDistributor(connection))
 		{
 		}
 
-		internal Secrets(ISecretStore store)
+		internal Secrets(ISecretStore store, IAgentSecretDistributor distributor = null)
 		{
 			_store = store ?? throw new ArgumentNullException(nameof(store));
+			_distributor = distributor;
 		}
 
 		/// <summary>
@@ -80,22 +95,74 @@
 		}
 
 		/// <summary>
-		/// Saves the Azure AD client secret of a SharePoint app registration, replacing any existing one.
+		/// Saves the Azure AD client secret of a SharePoint app registration on every running agent of the cluster, replacing any existing one.
 		/// </summary>
+		/// <remarks>
+		/// Secrets are encrypted per machine, so the script <see cref="ScriptName"/> is executed on each agent to save it locally.
+		/// Agents that are not running are skipped and reported in the result; repeat the save once they are back.
+		/// </remarks>
 		/// <param name="tenantId">The Azure AD tenant identifier, as stored in the SharePoint configuration.</param>
 		/// <param name="clientId">The client (application) identifier, as stored in the SharePoint configuration.</param>
 		/// <param name="clientSecret">The client secret.</param>
+		/// <returns>The result per agent.</returns>
 		/// <exception cref="ArgumentException">
 		/// Thrown when <paramref name="tenantId"/> or <paramref name="clientId"/> is not a valid GUID, or <paramref name="clientSecret"/> is null or empty.
 		/// </exception>
-		public void SaveSharePointClientSecret(string tenantId, string clientId, string clientSecret)
+		/// <exception cref="InvalidOperationException">Thrown when the script <see cref="ScriptName"/> does not exist.</exception>
+		public ClusterSecretResult SaveSharePointClientSecret(string tenantId, string clientId, string clientSecret)
 		{
 			if (String.IsNullOrEmpty(clientSecret))
 			{
 				throw new ArgumentException("The client secret cannot be null or empty.", nameof(clientSecret));
 			}
 
-			_store.Save(SharePointSecrets.ClientSecret(tenantId, clientId), clientSecret);
+			SharePointSecrets.ValidateIds(tenantId, clientId);
+			return GetDistributor().Execute(SaveAction, tenantId, clientId, clientSecret);
+		}
+
+		/// <summary>
+		/// Deletes the client secret of the SharePoint app registration on every running agent of the cluster.
+		/// </summary>
+		/// <param name="tenantId">The Azure AD tenant identifier.</param>
+		/// <param name="clientId">The client (application) identifier.</param>
+		/// <returns>The result per agent.</returns>
+		/// <exception cref="ArgumentException">Thrown when <paramref name="tenantId"/> or <paramref name="clientId"/> is not a valid GUID.</exception>
+		/// <exception cref="InvalidOperationException">Thrown when the script <see cref="ScriptName"/> does not exist.</exception>
+		public ClusterSecretResult DeleteSharePointClientSecret(string tenantId, string clientId)
+		{
+			SharePointSecrets.ValidateIds(tenantId, clientId);
+			return GetDistributor().Execute(DeleteAction, tenantId, clientId, null);
+		}
+
+		/// <summary>
+		/// Saves or deletes the secret on the local agent only. Called by the script <see cref="ScriptName"/> on each agent.
+		/// </summary>
+		/// <param name="action"><see cref="SaveAction"/> or <see cref="DeleteAction"/>.</param>
+		/// <param name="tenantId">The Azure AD tenant identifier.</param>
+		/// <param name="clientId">The client (application) identifier.</param>
+		/// <param name="clientSecret">The client secret; ignored for <see cref="DeleteAction"/>.</param>
+		/// <exception cref="ArgumentException">Thrown when an argument is invalid or the action is unknown.</exception>
+		public void ApplyOnThisAgent(string action, string tenantId, string clientId, string clientSecret)
+		{
+			var key = SharePointSecrets.ClientSecret(tenantId, clientId);
+
+			if (String.Equals(action, DeleteAction, StringComparison.OrdinalIgnoreCase))
+			{
+				_store.Delete(key);
+			}
+			else if (String.IsNullOrEmpty(action) || String.Equals(action, SaveAction, StringComparison.OrdinalIgnoreCase))
+			{
+				if (String.IsNullOrEmpty(clientSecret))
+				{
+					throw new ArgumentException("The client secret cannot be null or empty.", nameof(clientSecret));
+				}
+
+				_store.Save(key, clientSecret);
+			}
+			else
+			{
+				throw new ArgumentException($"Unknown action '{action}'. Expected '{SaveAction}' or '{DeleteAction}'.", nameof(action));
+			}
 		}
 
 		/// <summary>
@@ -110,15 +177,9 @@
 			return _store.Exists(SharePointSecrets.ClientSecret(tenantId, clientId));
 		}
 
-		/// <summary>
-		/// Deletes the client secret of the SharePoint app registration. Does nothing if none is saved.
-		/// </summary>
-		/// <param name="tenantId">The Azure AD tenant identifier.</param>
-		/// <param name="clientId">The client (application) identifier.</param>
-		/// <exception cref="ArgumentException">Thrown when <paramref name="tenantId"/> or <paramref name="clientId"/> is not a valid GUID.</exception>
-		public void DeleteSharePointClientSecret(string tenantId, string clientId)
+		private IAgentSecretDistributor GetDistributor()
 		{
-			_store.Delete(SharePointSecrets.ClientSecret(tenantId, clientId));
+			return _distributor ?? throw new InvalidOperationException("No DataMiner connection is available to reach the other agents.");
 		}
 	}
 }

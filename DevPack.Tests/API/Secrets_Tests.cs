@@ -14,32 +14,47 @@
 		private const string ClientId = "bbbbbbbb-0000-0000-0000-000000000002";
 
 		[TestMethod]
-		public void SaveSharePointClientSecret_StoresUnderTenantAndClient()
+		public void ApplyOnThisAgent_Save_StoresUnderTenantAndClient()
 		{
 			var store = new InMemorySecretStore();
 			var secrets = new Secrets(store);
 
-			secrets.SaveSharePointClientSecret(TenantId, ClientId, "my-secret");
+			secrets.ApplyOnThisAgent(Secrets.SaveAction, TenantId, ClientId, "my-secret");
 
 			store.Read(SharePointSecrets.ClientSecret(TenantId, ClientId)).Should().Be("my-secret");
 			secrets.HasSharePointClientSecret(TenantId, ClientId).Should().BeTrue();
 		}
 
 		[TestMethod]
-		public void DeleteSharePointClientSecret_RemovesSecret()
+		public void ApplyOnThisAgent_Delete_RemovesSecret()
 		{
 			var secrets = new Secrets(new InMemorySecretStore());
-			secrets.SaveSharePointClientSecret(TenantId, ClientId, "my-secret");
+			secrets.ApplyOnThisAgent(Secrets.SaveAction, TenantId, ClientId, "my-secret");
 
+			secrets.ApplyOnThisAgent(Secrets.DeleteAction, TenantId, ClientId, null);
+
+			secrets.HasSharePointClientSecret(TenantId, ClientId).Should().BeFalse();
+		}
+
+		[TestMethod]
+		public void SaveAndDeleteSharePointClientSecret_RunOnAllAgents()
+		{
+			var distributor = new Moq.Mock<IAgentSecretDistributor>();
+			var store = new InMemorySecretStore();
+			var secrets = new Secrets(store, distributor.Object);
+
+			secrets.SaveSharePointClientSecret(TenantId, ClientId, "my-secret");
 			secrets.DeleteSharePointClientSecret(TenantId, ClientId);
 
+			distributor.Verify(d => d.Execute(Secrets.SaveAction, TenantId, ClientId, "my-secret"), Moq.Times.Once());
+			distributor.Verify(d => d.Execute(Secrets.DeleteAction, TenantId, ClientId, null), Moq.Times.Once());
 			secrets.HasSharePointClientSecret(TenantId, ClientId).Should().BeFalse();
 		}
 
 		[TestMethod]
 		public void SaveSharePointClientSecret_InvalidInput_Throws()
 		{
-			var secrets = new Secrets(new InMemorySecretStore());
+			var secrets = new Secrets(new InMemorySecretStore(), new Moq.Mock<IAgentSecretDistributor>().Object);
 
 			((Action)(() => secrets.SaveSharePointClientSecret("x", ClientId, "s"))).Should().Throw<ArgumentException>();
 			((Action)(() => secrets.SaveSharePointClientSecret(TenantId, ClientId, string.Empty))).Should().Throw<ArgumentException>();

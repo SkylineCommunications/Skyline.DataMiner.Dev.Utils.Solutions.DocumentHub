@@ -35,17 +35,29 @@
 		/// <exception cref="ArgumentException">Thrown when <paramref name="tenantId"/> or <paramref name="clientId"/> is not a valid GUID.</exception>
 		internal static SecretKey ClientSecret(string tenantId, string clientId)
 		{
-			if (!Guid.TryParse(tenantId, out Guid tenant) || tenant == Guid.Empty)
+			return ClientSecret(ParseId(tenantId, nameof(tenantId), "tenant"), ParseId(clientId, nameof(clientId), "client"));
+		}
+
+		/// <summary>
+		/// Validates the tenant and client identifiers as stored in a SharePoint configuration.
+		/// </summary>
+		/// <param name="tenantId">The Azure AD tenant identifier, as a GUID string.</param>
+		/// <param name="clientId">The client (application) identifier, as a GUID string.</param>
+		/// <exception cref="ArgumentException">Thrown when <paramref name="tenantId"/> or <paramref name="clientId"/> is not a valid, non-empty GUID.</exception>
+		internal static void ValidateIds(string tenantId, string clientId)
+		{
+			ParseId(tenantId, nameof(tenantId), "tenant");
+			ParseId(clientId, nameof(clientId), "client");
+		}
+
+		private static Guid ParseId(string value, string paramName, string label)
+		{
+			if (!Guid.TryParse(value, out Guid id) || id == Guid.Empty)
 			{
-				throw new ArgumentException("The tenant ID must be a valid GUID.", nameof(tenantId));
+				throw new ArgumentException($"The {label} ID must be a valid GUID.", paramName);
 			}
 
-			if (!Guid.TryParse(clientId, out Guid client) || client == Guid.Empty)
-			{
-				throw new ArgumentException("The client ID must be a valid GUID.", nameof(clientId));
-			}
-
-			return ClientSecret(tenant, client);
+			return id;
 		}
 	}
 }

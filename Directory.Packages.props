@@ -12,6 +12,7 @@
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageVersion Include="Skyline.DataMiner.CICD.CSharpAnalysis.Analyzer" Version="2.1.2" />
     <PackageVersion Include="Skyline.DataMiner.Core.AppPackageInstaller" Version="4.0.0" />
+    <PackageVersion Include="Skyline.DataMiner.Core.DataMinerSystem.Common" Version="1.2.1.1" />
     <PackageVersion Include="Skyline.DataMiner.Dev.Automation" Version="10.6.3.1" />
     <PackageVersion Include="Skyline.DataMiner.Dev.Common" Version="10.6.3.1" />
     <PackageVersion Include="StyleCop.Analyzers" Version="1.1.118" />
@@ -21,6 +22,7 @@
     <PackageVersion Include="Skyline.DataMiner.Utils.DOM" Version="10.5.2.8" />
     <PackageVersion Include="Skyline.DataMiner.Utils.SecureCoding" Version="3.0.1" />
     <PackageVersion Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="3.0.1" />
+    <PackageVersion Include="System.Collections.Immutable" Version="5.0.0" />
     <PackageVersion Include="System.Drawing.Common" Version="10.0.1" />
   </ItemGroup>
 </Project>

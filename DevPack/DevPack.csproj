@@ -32,10 +32,12 @@
     <PackageReference Include="Azure.Identity" />
     <PackageReference Include="Microsoft.Graph" />
     <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="Skyline.DataMiner.Core.DataMinerSystem.Common" />
     <PackageReference Include="Skyline.DataMiner.Dev.Common" />
     <PackageReference Include="Skyline.DataMiner.SDM" />
     <PackageReference Include="Skyline.DataMiner.SDM.SourceGenerator.Runtime" OutputItemType="Analyzer" ReferenceoutputAssembly="false" />
     <PackageReference Include="Skyline.DataMiner.Utils.DOM" />
+    <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Drawing.Common" />
     <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers">
       <PrivateAssets>all</PrivateAssets>
@@ -45,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="DevPack.Tests" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
   </ItemGroup>
   <Import Project="..\SharedMappers\SharedMappers.projitems" Label="Shared" />
   <!-- Can be used to set the location of your local nuget store to copy to -->

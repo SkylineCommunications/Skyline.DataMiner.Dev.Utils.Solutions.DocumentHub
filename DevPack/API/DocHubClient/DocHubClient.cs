@@ -18,7 +18,7 @@
 		public DocHubClient(IConnection connection)
 		{
 			Files = new Files(connection);
-			Secrets = new Secrets();
+			Secrets = new Secrets(connection);
 		}
 
 		/// <summary>

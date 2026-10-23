@@ -1,4 +1,4 @@
-namespace DevPack.Tests.API
+﻿namespace DevPack.Tests.API
 {
 	using System;
 	using System.IO;
@@ -9,8 +9,8 @@ namespace DevPack.Tests.API
 	[TestClass]
 	public class DpapiFileSecretStore_Tests
 	{
-		private string _root;
-		private DpapiFileSecretStore _store;
+		private string _root = null!;
+		private DpapiFileSecretStore _store = null!;
 
 		[TestInitialize]
 		public void Setup()
