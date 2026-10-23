@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient
+namespace Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient
 {
 	using System;
 	using Azure.Identity;
@@ -20,7 +20,7 @@
 		/// Name of the Automation script executed on every agent to save or delete a secret locally.
 		/// The script only needs to call <see cref="ApplyOnThisAgent"/> with its parameters.
 		/// </summary>
-		public const string ScriptName = "SLC-DH-AS-SaveClientSecret";
+		public const string ScriptName = "SLC-DH-AS-ManageSharePointSecret";
 
 		/// <summary>Action value that saves the secret.</summary>
 		public const string SaveAction = "Save";

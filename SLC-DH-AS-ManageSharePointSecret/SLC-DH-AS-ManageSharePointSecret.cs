@@ -1,10 +1,10 @@
-﻿/*
+/*
 ***********************************************
 *  Copyright (c), Skyline Communications NV.  *
 ***********************************************
 */
 
-namespace SLC_DH_AS_SaveClientSecret
+namespace SLC_DH_AS_ManageSharePointSecret
 {
 	using System;
 	using Skyline.DataMiner.Automation;
