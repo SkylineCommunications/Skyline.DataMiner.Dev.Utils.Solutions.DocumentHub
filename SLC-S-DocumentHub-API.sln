@@ -28,7 +28,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevPack.GQI", "DevPack.GQI\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SLC-DH-AS-ManageSharePointSecret", "SLC-DH-AS-ManageSharePointSecret\SLC-DH-AS-ManageSharePointSecret.csproj", "{CF133D26-9A1B-4204-BBD5-DBB91FFDC2CA}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{F1439A36-5968-4858-AB51-49E66BDFA6A2}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AutomationScripts", "AutomationScripts", "{F1439A36-5968-4858-AB51-49E66BDFA6A2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
