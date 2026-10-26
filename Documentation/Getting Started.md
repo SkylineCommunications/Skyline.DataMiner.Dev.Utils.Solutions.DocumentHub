@@ -162,6 +162,32 @@ var bucket = helper.DocumentBuckets.Create(new DocumentBucket
 });
 ```
 
+#### Client Secret
+
+The Azure AD client secret is **not** part of the SharePoint configuration and is never stored in DOM. It is stored encrypted (DPAPI) on the DataMiner Agent under `C:\Skyline DataMiner\Security\DocumentHub\sharepoint\<tenantId>\<clientId>.dat`, so every app registration of a tenant has its own secret.
+
+Secrets are write-only through `DocHubClient.Secrets`: they can be validated, saved, checked and deleted, but never read back.
+
+```csharp
+var client = engine.GetDocHubClient();
+
+// Optionally validate a new secret before saving it (the secret is not stored)
+if (client.Secrets.IsSharePointConnected(marketingConfig, clientSecret))
+{
+    client.Secrets.SaveSharePointClientSecret(marketingConfig.TenantID, marketingConfig.ClientID, clientSecret);
+}
+
+// Check whether a secret is saved, and whether the saved secret still works
+bool hasSecret = client.Secrets.HasSharePointClientSecret(marketingConfig.TenantID, marketingConfig.ClientID);
+bool connected = client.Secrets.IsSharePointConnected(marketingConfig);
+
+// Remove the secret
+client.Secrets.DeleteSharePointClientSecret(marketingConfig.TenantID, marketingConfig.ClientID);
+```
+
+> **Note**
+> `TenantID` and `ClientID` must be valid GUIDs.
+
 ### DOM Sources
 
 DOM Sources configure DOM-based storage by specifying the module where file attachments are stored.

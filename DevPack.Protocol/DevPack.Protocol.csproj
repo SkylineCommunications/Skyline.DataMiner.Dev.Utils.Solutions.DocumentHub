@@ -1,4 +1,5 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
@@ -6,8 +7,8 @@
     <AssemblyName>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub.Protocol</AssemblyName>
     <PackageId>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub.Protocol</PackageId>
     <RootNamespace>Skyline.DataMiner.Solutions.DocumentHub.Protocol</RootNamespace>
-    <PackageVersion>1.1.2</PackageVersion>
-    <Version>1.1.2</Version>
+    <PackageVersion>1.2.1</PackageVersion>
+    <Version>1.2.1</Version>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -22,13 +23,11 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/SkylineCommunications/Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub</RepositoryUrl>
   </PropertyGroup>
-
   <ItemGroup>
     <None Include="README.md" Pack="true" PackagePath="" />
     <None Include="LICENSE.txt" Pack="true" PackagePath="" />
     <None Include="nuget\Icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
-  
   <ItemGroup>
     <PackageReference Include="Skyline.DataMiner.CICD.CSharpAnalysis.Analyzer">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -39,16 +38,12 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
-  
   <ItemGroup>
     <ProjectReference Include="..\DevPack\DevPack.csproj" />
   </ItemGroup>
-
   <!-- Can be used to set the location of your local nuget store to copy to -->
   <Import Project="../Directory.Build.props.user" Condition="Exists('../Directory.Build.props.user')" />
-
   <Target Name="CopyNuGetPackage" AfterTargets="Pack" Condition="'$(NuGetStorePath)' != '' and '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <Copy SourceFiles="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg" DestinationFolder="$(NuGetStorePath)\$(PackageId)" />
   </Target>
-  
 </Project>

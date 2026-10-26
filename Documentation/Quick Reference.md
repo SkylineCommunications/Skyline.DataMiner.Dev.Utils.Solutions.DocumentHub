@@ -126,6 +126,20 @@ var bucket = helper.DocumentBuckets.Create(new DocumentBucket
 });
 ```
 
+### SharePoint Client Secrets
+
+Stored encrypted on the agent (`sharepoint\<tenantId>\<clientId>.dat`), never in DOM, and never readable through the API.
+
+```csharp
+var client = engine.GetDocHubClient();
+
+bool valid = client.Secrets.IsSharePointConnected(config1, clientSecret); // test without saving
+client.Secrets.SaveSharePointClientSecret(config1.TenantID, config1.ClientID, clientSecret);
+bool exists = client.Secrets.HasSharePointClientSecret(config1.TenantID, config1.ClientID);
+bool connected = client.Secrets.IsSharePointConnected(config1); // test the saved secret
+client.Secrets.DeleteSharePointClientSecret(config1.TenantID, config1.ClientID);
+```
+
 ### DOM Sources
 
 ```csharp
