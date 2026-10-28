@@ -237,7 +237,7 @@
 		internal static string ResolveLocalDirectory(string relativePath)
 		{
 			var directory = relativePath ?? string.Empty;
-			directory = directory.TrimStart('/', '\\');
+			directory = directory.TrimStart('/', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar);
 
 			return string.IsNullOrEmpty(directory)
 				? WebFileManagerRoot
