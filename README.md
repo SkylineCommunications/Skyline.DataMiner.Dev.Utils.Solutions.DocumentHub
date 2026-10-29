@@ -39,7 +39,7 @@ The `DevPack.Tests` project contains unit tests using an in-memory DOM mock (`Do
 | Area                       | Test Classes                                                                                  | Tests |
 |----------------------------|-----------------------------------------------------------------------------------------------|-------|
 | **API - DocHubClient**     | `DocHubClient_Tests`                                                                          | 3     |
-| **API - Files Upload**     | `Files_UploadFile_Tests`                                                                      | 8     |
+| **API - Files Upload**     | `Files_UploadFile_Tests`                                                                      | 16    |
 | **API - Files Read**       | `Files_ReadFiles_Tests`                                                                       | 5     |
 | **API - Files Delete**     | `Files_DeleteFile_Tests`                                                                      | 6     |
 | **API - Files Search**     | `Files_SearchFiles_Tests`                                                                     | 5     |
@@ -50,7 +50,7 @@ The `DevPack.Tests` project contains unit tests using an in-memory DOM mock (`Do
 | **SDM - DomSource**        | `DomSourceDomRepository_CRUD_Tests`, `DomSourceDomRepository_FilterTests_Tests`               | 13    |
 | **SDM - DocumentBucket**   | `DocumentBucketDomRepository_CRUD_Tests`, `DocumentBucketDomRepository_FilterTests_Tests`     | 26    |
 
-**Total: 118 tests** (includes 3 parameterized test methods)
+**Total: 126 tests** (includes 6 parameterized test methods)
 
 ### SDM Repository Tests
 
