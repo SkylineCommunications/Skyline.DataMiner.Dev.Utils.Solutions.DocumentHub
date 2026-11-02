@@ -39,19 +39,20 @@ The `DevPack.Tests` project contains unit tests using an in-memory DOM mock (`Do
 | Area                       | Test Classes                                                                                  | Tests |
 |----------------------------|-----------------------------------------------------------------------------------------------|-------|
 | **API - DocHubClient**     | `DocHubClient_Tests`                                                                          | 3     |
-| **API - Files Upload**     | `Files_UploadFile_Tests`                                                                      | 8     |
+| **API - Files Upload**     | `Files_UploadFile_Tests`                                                                      | 16    |
 | **API - Files Read**       | `Files_ReadFiles_Tests`                                                                       | 5     |
 | **API - Files Delete**     | `Files_DeleteFile_Tests`                                                                      | 6     |
 | **API - Files Search**     | `Files_SearchFiles_Tests`                                                                     | 5     |
 | **API - File Download**    | `Files_DownloadFile_Tests`                                                                    | 9     |
 | **API - File Validator**   | `FileValidator_ValidateAndSanitizeFile_Tests`                                                 | 19    |
 | **API - File Adapters**    | `FileInfoAdapter_GetRelativePath_Tests`                                                       | 11    |
-| **API - Secrets**          | `SecretKey_Tests`, `DpapiFileSecretStore_Tests`, `Secrets_Tests`                              | 37    |
+| **API - Secrets**          | `SecretKey_Tests`, `DpapiFileSecretStore_Tests`, `Secrets_Tests`                              | 38    |
 | **SDM - SharePoint**       | `SharepointDomRepository_CRUD_Tests`, `SharepointDomRepository_FilterTests_Tests`             | 13    |
 | **SDM - DomSource**        | `DomSourceDomRepository_CRUD_Tests`, `DomSourceDomRepository_FilterTests_Tests`               | 13    |
 | **SDM - DocumentBucket**   | `DocumentBucketDomRepository_CRUD_Tests`, `DocumentBucketDomRepository_FilterTests_Tests`     | 26    |
 
-**Total: 155 tests** (includes 4 parameterized test methods)
+
+**Total: 164 tests** (includes 9 parameterized test methods)
 
 ### SDM Repository Tests
 

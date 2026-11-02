@@ -4,9 +4,11 @@ namespace DevPack.Tests.API
 	using System.IO;
 	using FluentAssertions;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Helpers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup;
+	using Skyline.DataMiner.Utils.SecureCoding.SecureIO;
 
 	[TestClass]
 	public class Files_UploadFile_Tests
@@ -28,6 +30,25 @@ namespace DevPack.Tests.API
 			{
 				File.Delete(_testFilePath);
 			}
+		}
+
+		[DataTestMethod]
+		[DataRow(null, "")]
+		[DataRow("", "")]
+		[DataRow("/", "")]
+		[DataRow("Memories/2026", @"Memories\2026")]
+		[DataRow("/Memories/2026", @"Memories\2026")]
+		[DataRow(@"Memories\2026", @"Memories\2026")]
+		[DataRow(@"Memories\2026/October", @"Memories\2026\October")]
+		[DataRow(@"Memories/2026/October", @"Memories\2026\October")]
+		public void ResolveLocalDirectory_ShouldProduceSecureWindowsBasePath(string? relativePath, string expectedDirectory)
+		{
+			var directory = LocalHandler.ResolveLocalDirectory(relativePath!);
+			var expected = Path.Combine(LocalHandler.WebFileManagerRoot, expectedDirectory);
+
+			directory.Should().Be(expected);
+			SecurePath.ConstructSecurePath(directory, "photo.jpg")
+				.ToString().Should().Be(Path.Combine(expected, "photo.jpg"));
 		}
 
 		#region UploadFile - Null Bucket Validation
