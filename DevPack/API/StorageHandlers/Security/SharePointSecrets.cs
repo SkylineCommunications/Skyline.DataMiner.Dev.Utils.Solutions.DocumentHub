@@ -1,4 +1,4 @@
-﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API.Security
+namespace Skyline.DataMiner.Solutions.DocumentHub.API.Security
 {
 	using System;
 
@@ -21,7 +21,7 @@
 		/// <param name="clientId">The client (application) identifier registered in Azure AD.</param>
 		/// <returns>
 		/// A <see cref="SecretKey"/> with source <c>sharepoint</c>, scope <paramref name="tenantId"/>
-		/// and name <paramref name="clientId"/>, which maps to <c>sharepoint\&lt;tenantId&gt;\&lt;clientId&gt;.dat</c> in the file-based store.
+		/// and name <paramref name="clientId"/>, which maps to <c>sharepoint\{tenantId}\{clientId}.dat</c> in the file-based store.
 		/// One file per app registration, so a tenant can have several.
 		/// </returns>
 		internal static SecretKey ClientSecret(Guid tenantId, Guid clientId) => new SecretKey(Source, clientId.ToString("D"), tenantId.ToString("D"));
