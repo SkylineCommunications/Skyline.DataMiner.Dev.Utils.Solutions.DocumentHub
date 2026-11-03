@@ -2,8 +2,10 @@
   "solution": {
     "path": "SLC-S-DocumentHub-API.sln",
     "projects": [
+      "DevPack.Installer\\DevPack.Installer.csproj",
+      "DevPack\\DevPack.csproj",
       "SharedMappers\\SharedMappers.shproj",
-      "DevPack.Installer\\DevPack.Installer.csproj"
+      "SLC-DH-AS-ManageSharePointSecret\\SLC-DH-AS-ManageSharePointSecret.csproj"
     ]
   }
 }

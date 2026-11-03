@@ -18,7 +18,14 @@
 		public DocHubClient(IConnection connection)
 		{
 			Files = new Files(connection);
+			Secrets = new Secrets(connection);
 		}
+
+		/// <summary>
+		/// Gets access to write-only secret operations, such as saving the SharePoint client secret.
+		/// Saved secrets can never be read back.
+		/// </summary>
+		public Secrets Secrets { get; }
 
 		/// <summary>
 		/// Gets or sets access to document file operations such as upload, download, and read.
