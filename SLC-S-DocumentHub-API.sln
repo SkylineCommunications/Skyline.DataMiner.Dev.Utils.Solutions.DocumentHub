@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Code Analysis", "Code Analy
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedMappers", "SharedMappers\SharedMappers.shproj", "{0C843C63-2D8E-40C3-9BA1-186C66F0C372}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharedSecurity", "SharedSecurity\SharedSecurity.shproj", "{7F3A1C2E-5B64-4D8A-9E21-3C6B0F9D4A55}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevPack.Tests", "DevPack.Tests\DevPack.Tests.csproj", "{9C487DBA-A22C-4E07-AD05-A849A2E2E4DB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevPack.Automation", "DevPack.Automation\DevPack.Automation.csproj", "{6E59D74E-9A3E-4F64-AEF1-146BDF8C8AC0}"
@@ -137,6 +139,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		SharedMappers\SharedMappers.projitems*{0c843c63-2d8e-40c3-9ba1-186c66f0c372}*SharedItemsImports = 13
+		SharedSecurity\SharedSecurity.projitems*{7f3a1c2e-5b64-4d8a-9e21-3c6b0f9d4a55}*SharedItemsImports = 13
+		SharedSecurity\SharedSecurity.projitems*{19efbb1b-ff5e-82dc-c5e6-dbd18a726a59}*SharedItemsImports = 5
+		SharedSecurity\SharedSecurity.projitems*{cf133d26-9a1b-4204-bbd5-dbb91ffdc2ca}*SharedItemsImports = 5
 		SharedMappers\SharedMappers.projitems*{19efbb1b-ff5e-82dc-c5e6-dbd18a726a59}*SharedItemsImports = 5
 		SharedMappers\SharedMappers.projitems*{cbb917d1-b759-4965-86d2-79e99bbc1635}*SharedItemsImports = 5
 	EndGlobalSection

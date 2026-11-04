@@ -32,7 +32,7 @@ namespace DevPack.Tests.API
 			}
 		}
 
-		[DataTestMethod]
+		[TestMethod]
 		[DataRow(null, "")]
 		[DataRow("", "")]
 		[DataRow("/", "")]

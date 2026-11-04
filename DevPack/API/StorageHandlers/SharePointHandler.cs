@@ -1014,12 +1014,8 @@
 				},
 			};
 
-			DebugLog($"Request: from={context.From} size={context.PageSize} region={args.Region ?? "<null>"} query=\"{fullQuery}\"");
-
 			var response = await _graphClient.Search.Query.PostAsQueryPostResponseAsync(body);
 			var container = response?.Value?.FirstOrDefault()?.HitsContainers?.FirstOrDefault();
-
-			DebugLog($"Response: total={container?.Total?.ToString() ?? "<null>"} hits={container?.Hits?.Count ?? 0} moreResultsAvailable={container?.MoreResultsAvailable}");
 
 			context.SearchStarted = true;
 			context.MoreResultsAvailable = container?.MoreResultsAvailable == true;
@@ -1041,23 +1037,6 @@
 			if (container?.Hits == null)
 				return;
 
-			DebugLog($"CollectSearchFiles: allowedExtensions={(allowedExtensions == null ? "<null>" : string.Join(",", allowedExtensions))} allowedParentIds={context.AllowedParentIds?.Count ?? 0} hitCount={container.Hits.Count}");
-
-			int hitIndex = 0;
-			foreach (var h in container.Hits)
-			{
-				var asDriveItem = h.Resource as DriveItem;
-				var name = asDriveItem?.Name;
-				var parentId = asDriveItem?.ParentReference?.Id;
-				var inScope = context.AllowedParentIds == null
-					|| (parentId != null && context.AllowedParentIds.Contains(parentId));
-
-				DebugLog(
-					$"  hit[{hitIndex}] driveItemCast={asDriveItem != null} name={name ?? "<null>"} " +
-					$"parentId={parentId ?? "<null>"} inScope={inScope} hitId={h.HitId}");
-				hitIndex++;
-			}
-
 			var files = container.Hits
 				.Select(h => h.Resource as DriveItem)
 				.Where(i => i != null
@@ -1070,8 +1049,6 @@
 								|| allowedExtensions.Contains(Path.GetExtension(i.Name).TrimStart('.'))))
 				.ToList();
 
-			DebugLog($"  -> {files.Count} hit(s) kept after filtering");
-
 			foreach (var file in files)
 			{
 				if (collected.Count < context.PageSize)
@@ -1082,30 +1059,6 @@
 				{
 					context.PageRemainderBuffer.Enqueue(file);
 				}
-			}
-		}
-
-		/// <summary>
-		/// Appends a debug line to <c>C:\Skyline DataMiner\Logging\DocumentHub_Search.txt</c>.
-		/// </summary>
-		/// <remarks>
-		/// Ad-hoc file logger for the SharePoint search path; the handler runs inside the
-		/// DataMiner process where <c>Console.WriteLine</c> goes nowhere. Wrapped in a
-		/// try/catch so a failing log write can never break the caller. Remove or gate behind
-		/// a flag before shipping.
-		/// </remarks>
-		private static void DebugLog(string message)
-		{
-			try
-			{
-				const string logPath = @"C:\Skyline DataMiner\Logging\DocumentHub_Search.txt";
-				var line = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff", System.Globalization.CultureInfo.InvariantCulture)
-					+ " " + message + Environment.NewLine;
-				File.AppendAllText(logPath, line);
-			}
-			catch
-			{
-				// Never let logging break the caller.
 			}
 		}
 
