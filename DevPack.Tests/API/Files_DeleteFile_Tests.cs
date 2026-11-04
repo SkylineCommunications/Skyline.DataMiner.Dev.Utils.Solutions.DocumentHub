@@ -101,13 +101,10 @@ namespace DevPack.Tests.API
 			var testFile = Path.Combine(testDir, "delete_me.txt");
 			File.WriteAllText(testFile, "to be deleted");
 
-			// Use LocalHandler directly with an absolute path in UploadPath.
-			// Path.Combine with an absolute second argument returns that absolute path,
-			// so ResolveLocalDirectory will resolve to our temp directory.
-			var handler = new LocalHandler();
+			var handler = new LocalHandler(testDir);
 			var data = new Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs.DeleteData
 			{
-				Bucket = new DocumentBucket { StorageType = StorageType.Local, UploadPath = testDir },
+				Bucket = new DocumentBucket { StorageType = StorageType.Local, UploadPath = string.Empty },
 				Name = "delete_me.txt",
 			};
 

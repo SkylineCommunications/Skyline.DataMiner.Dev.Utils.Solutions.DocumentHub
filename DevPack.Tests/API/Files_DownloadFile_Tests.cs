@@ -90,7 +90,7 @@
 			File.WriteAllText(destinationPath, "old content");
 			var file = new FileInfoAdapter { fileInfo = new FileInfo(sourcePath) };
 
-			new LocalHandler().DownloadFile(file, destinationPath);
+			new LocalHandler(testDirectory).DownloadFile(file, destinationPath);
 
 			File.ReadAllText(destinationPath).Should().Be("local content");
 			DownloadTemporaryFiles().Should().BeEmpty();
@@ -103,7 +103,7 @@
 			var destinationPath = Path.Combine(testDirectory, "destination.txt");
 			var file = new FileInfoAdapter { fileInfo = new FileInfo(sourcePath) };
 
-			Action act = () => new LocalHandler().DownloadFile(file, destinationPath);
+			Action act = () => new LocalHandler(testDirectory).DownloadFile(file, destinationPath);
 
 			act.Should().Throw<FileNotFoundException>();
 			File.Exists(destinationPath).Should().BeFalse();

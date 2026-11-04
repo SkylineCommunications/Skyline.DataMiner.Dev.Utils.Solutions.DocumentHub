@@ -83,7 +83,7 @@
 		/// Gets the directory containing the file, relative to the storage root.
 		/// </summary>
 		/// <returns>
-		/// For local storage: relative path from WebFileManager root (e.g., "docs/technical").
+		/// For local storage: relative path from the Public root (e.g., "docs/technical").
 		/// For SharePoint: relative path from the document library root.
 		/// For DOM: an empty string.
 		/// </returns>

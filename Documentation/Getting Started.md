@@ -119,6 +119,28 @@ The DocumentHub solution supports three storage backends:
 - `StorageType.SharePoint` – integration with SharePoint Online via Microsoft Graph. Multiple SharePoint configurations are supported, allowing buckets to connect to different sites or document libraries.
 - `StorageType.DOM` – files attached directly to DOM instances.
 
+#### Local storage paths
+
+Local bucket upload paths are relative to `C:\Skyline DataMiner\Webpages\Public`.
+An empty path or `/` selects the Public root and lists files recursively, including
+`Icons` and `WebFileManager`. An upload path of `Icons` targets `Public\Icons`.
+Existing extension and filename filters still apply. Web paths remain relative to
+Webpages, e.g., `/Public/Icons/image.png`.
+
+**Upgrade compatibility:** Earlier builds resolved relative paths under
+`Public\WebFileManager`. Files are not moved and bucket configurations are not rewritten.
+To keep a non-root bucket targeting its previous folder, explicitly prefix its upload
+path with `WebFileManager` (e.g., `reports` becomes `WebFileManager/reports`).
+To keep a bucket restricted to the old root, use `WebFileManager`; the default empty-path
+bucket intentionally covers all of Public instead. Existing absolute paths inside Public
+remain supported. Paths outside Public, alternate data streams, and filesystem reparse
+points (including junctions and symbolic links) are rejected.
+
+Uploads and existence checks use the same root as listing. Downloads validate the source
+against Public; their caller-supplied destination is not a storage bucket path.
+Deletion accepts a bucket-relative path or the full path returned by a listed local file
+and verifies that it remains inside the bucket.
+
 ### SharePoint Configurations
 
 SharePoint configurations hold the Azure AD credentials and site information needed to connect to SharePoint Online document libraries. Multiple configurations are supported, allowing different document buckets to connect to different SharePoint sites or libraries.

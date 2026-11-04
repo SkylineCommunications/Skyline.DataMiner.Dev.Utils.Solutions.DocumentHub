@@ -10,7 +10,6 @@
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
-	using Skyline.DataMiner.Utils.SecureCoding.SecureIO;
 
 	/// <summary>
 	/// Handles file and image storage on the local filesystem.
@@ -23,9 +22,11 @@
 	internal class LocalHandler : IStorageHandler, IDeletableStorageHandler
 	{
 		/// <summary>
-		/// Root path for the DataMiner WebFileManager local storage.
+		/// Root path for publicly accessible local DataMiner files.
 		/// </summary>
-		internal const string WebFileManagerRoot = @"C:\Skyline DataMiner\Webpages\Public\WebFileManager";
+		internal const string PublicRoot = WebpagesRoot + @"\Public";
+
+		private readonly string publicRoot;
 
 		/// <summary>
 		/// Root path for the DataMiner Webpages folder, used to compute web-resolvable paths.
@@ -36,7 +37,15 @@
 		/// Initializes a new instance of the <see cref="LocalHandler"/> class.
 		/// </summary>
 		public LocalHandler()
+			: this(PublicRoot)
 		{
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="LocalHandler"/> class with an isolated storage root.</summary>
+		/// <param name="publicRoot">The Public directory used for file operations.</param>
+		internal LocalHandler(string publicRoot)
+		{
+			this.publicRoot = Path.GetFullPath(publicRoot).TrimEnd('\\', '/');
 		}
 
 		/// <summary>
@@ -51,7 +60,7 @@
 			if (!(file is FileInfoAdapter))
 				throw new ArgumentException("LocalHandler requires a local DocumentHub file.", nameof(file));
 
-			var sourcePath = file.GetFilePath();
+			var sourcePath = ResolveContainedPath(this.publicRoot, file.GetFilePath());
 			if (string.IsNullOrWhiteSpace(sourcePath))
 				throw new ArgumentException("The local file does not contain a source path.", nameof(file));
 			if (!File.Exists(sourcePath))
@@ -76,7 +85,7 @@
 			if (!(data is WebFileExistsData args))
 				throw new ArgumentException("LocalHandler requires WebFileFileExistsData.", nameof(data));
 
-			string filePath = SecurePath.ConstructSecurePath(ResolveLocalDirectory(args.Directory), args.Name);
+			string filePath = ResolveContainedPath(ResolveLocalDirectory(args.Directory, this.publicRoot), args.Name);
 			return File.Exists(filePath);
 		}
 
@@ -88,6 +97,7 @@
 		/// <param name="name">The desired filename (without extension).</param>
 		public void UploadImage(Bitmap image, string directory, string name)
 		{
+			directory = ResolveLocalDirectory(directory, this.publicRoot);
 			// Ensure the target directory exists
 			if (!Directory.Exists(directory))
 			{
@@ -95,7 +105,7 @@
 			}
 
 			// Construct the full file path and save the image as JPEG
-			string filePath = SecurePath.ConstructSecurePath(directory, $"{name}.jpeg");
+			string filePath = ResolveContainedPath(directory, $"{name}.jpeg");
 			image.Save(filePath);
 		}
 
@@ -122,7 +132,7 @@
 				throw new FileNotFoundException($"Source file not found: '{filePath}'", filePath);
 
 			// Resolve the full target directory from the bucket's relative upload path
-			var targetDirectory = ResolveLocalDirectory(bucket.UploadPath);
+			var targetDirectory = ResolveLocalDirectory(bucket.UploadPath, this.publicRoot);
 
 			// Ensure the target directory exists
 			if (!Directory.Exists(targetDirectory))
@@ -131,13 +141,13 @@
 			}
 
 			// Combine directory and target filename
-			string targetPath = SecurePath.ConstructSecurePath(targetDirectory, name);
+			string targetPath = ResolveContainedPath(targetDirectory, name);
 
 			// Copy the file to the target location (overwrite if exists)
 			File.Copy(filePath, targetPath, overwrite: true);
 
 			// Return the web-resolvable path of the uploaded file.
-			return '/' + FileInfoAdapter.GetRelativePath(targetPath, WebpagesRoot);
+			return '/' + FileInfoAdapter.GetRelativePath(targetPath, Path.GetDirectoryName(this.publicRoot));
 		}
 
 		/// <summary>
@@ -157,8 +167,8 @@
 			if (string.IsNullOrWhiteSpace(data.Name))
 				throw new ArgumentException("File name cannot be null or empty.", nameof(data));
 
-			var directory = ResolveLocalDirectory(data.Bucket?.UploadPath);
-			var filePath = Path.Combine(directory, data.Name);
+			var directory = ResolveLocalDirectory(data.Bucket?.UploadPath, this.publicRoot);
+			var filePath = ResolveContainedPath(directory, data.Name);
 
 			if (!File.Exists(filePath))
 				throw new FileNotFoundException($"The file '{data.Name}' was not found.", filePath);
@@ -217,34 +227,73 @@
 			return await Task.FromResult(ReadFiles(data));
 		}
 
+#pragma warning disable SLC_SC0002 // Canonicalized paths are checked against the storage root after combination.
 		/// <summary>
-		/// Reads files from the local file system using a paged enumerator.
-		/// Supports optional bucket-based paths and filename filtering.
-		/// </summary>
-		/// <param name="data">"
-		/// The storage handler data containing bucket, filter, and context.
-		/// </param>
-		/// <returns>
-		/// A list of <see cref="IDocHubFile"/> representing the files in the current page.
-		/// </returns>
-
-#pragma warning disable SLC_SC0002 // Avoid using 'System.IO.Path.Combine' - unexpected behavior when using SecurePath construction
-		/// <summary>
-		/// Resolves a relative upload path to the full local directory under <see cref="WebFileManagerRoot"/>.
+		/// Resolves an upload path to a directory confined to <see cref="PublicRoot"/>.
 		/// </summary>
 		/// <param name="relativePath">A relative path (may be null, empty, or have leading slashes).</param>
 		/// <returns>The full local directory path.</returns>
 		internal static string ResolveLocalDirectory(string relativePath)
 		{
-			var directory = relativePath ?? string.Empty;
-			directory = directory.TrimStart('/', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar);
-
-			return string.IsNullOrEmpty(directory)
-				? WebFileManagerRoot
-				: Path.Combine(WebFileManagerRoot, directory);
+			return ResolveLocalDirectory(relativePath, PublicRoot);
 		}
-#pragma warning restore SLC_SC0002 // Avoid using 'System.IO.Path.Combine'
 
+		private static string ResolveLocalDirectory(string relativePath, string root)
+		{
+			var directory = (relativePath ?? string.Empty).Replace('/', '\\');
+			if (directory.StartsWith(@"\\", StringComparison.Ordinal))
+				throw new ArgumentException("Network and device paths are not supported.", nameof(relativePath));
+
+			// A single leading slash is the existing bucket notation for a Public-relative path.
+			if (directory.StartsWith(@"\", StringComparison.Ordinal))
+				directory = directory.Substring(1);
+
+			return ResolveContainedPath(root, directory);
+		}
+
+		private static string ResolveContainedPath(string root, string path)
+		{
+			if (path == null)
+				throw new ArgumentNullException(nameof(path));
+
+			path = path.Replace('/', '\\');
+			if (path.StartsWith(@"\\", StringComparison.Ordinal)
+				|| (path.IndexOf(':') >= 0 && (!Path.IsPathRooted(path) || path.Length < 3 || path[2] != '\\'))
+				|| path.IndexOf(':', Math.Min(2, path.Length)) >= 0)
+				throw new ArgumentException("Network, device, and alternate stream paths are not supported.", nameof(path));
+
+			var fullPath = Path.GetFullPath(Path.Combine(root, path));
+			if (!fullPath.Equals(root, StringComparison.OrdinalIgnoreCase)
+				&& !fullPath.StartsWith(root + "\\", StringComparison.OrdinalIgnoreCase))
+				throw new ArgumentException("Local file paths must remain inside the storage root.", nameof(path));
+
+			// Do not follow junctions or symbolic links that could redirect access outside Public.
+			for (var current = fullPath; current != null; current = Path.GetDirectoryName(current))
+			{
+				if ((File.Exists(current) || Directory.Exists(current))
+					&& (File.GetAttributes(current) & FileAttributes.ReparsePoint) != 0)
+					throw new IOException("Local storage does not support reparse points.");
+			}
+
+			return fullPath;
+		}
+
+		private static IEnumerable<FileInfo> EnumerateFiles(string root)
+		{
+			foreach (var file in Directory.EnumerateFiles(root))
+				yield return new FileInfo(ResolveContainedPath(root, file));
+
+			foreach (var directory in Directory.EnumerateDirectories(root))
+			{
+				foreach (var file in EnumerateFiles(ResolveContainedPath(root, directory)))
+					yield return file;
+			}
+		}
+#pragma warning restore SLC_SC0002
+
+		/// <summary>Reads one filtered page of files within the bucket's directory.</summary>
+		/// <param name="data">The bucket, filter, and paging context.</param>
+		/// <returns>The next page of local files.</returns>
 		private List<IDocHubFile> ReadPage(ReadData data)
 		{
 			// Validate input data
@@ -263,9 +312,9 @@
 				throw new ArgumentException("LocalHandler requires LocalPageContext.", nameof(context));
 
 			// Apply bucket upload path before enumeration starts
-			if (bucket != null && localContext.FileEnumerator == null)
+			if (localContext.FileEnumerator == null)
 			{
-				localContext.CurrentRoot = ResolveLocalDirectory(bucket.UploadPath);
+				localContext.CurrentRoot = ResolveLocalDirectory(bucket?.UploadPath, this.publicRoot);
 			}
 
 			// Initialize file enumeration if not already created
@@ -276,9 +325,7 @@
 					return new List<IDocHubFile>();
 
 				// Enumerate all files recursively
-				var files = Directory
-					.EnumerateFiles(localContext.CurrentRoot, "*.*", SearchOption.AllDirectories)
-					.Select(f => new FileInfo(f));
+				var files = EnumerateFiles(localContext.CurrentRoot);
 
 				// Apply allowed extensions filter from bucket
 				if (bucket != null && !string.IsNullOrEmpty(bucket.Extensions))
@@ -308,11 +355,12 @@
 			var result = new List<IDocHubFile>();
 
 			while (result.Count < localContext.PageSize &&
-				   localContext.FileEnumerator.MoveNext())
+				   localContext.TryReadNext(out var file))
 			{
 				result.Add(new FileInfoAdapter
 				{
-					fileInfo = localContext.FileEnumerator.Current,
+					fileInfo = file,
+					publicRoot = this.publicRoot,
 				});
 			}
 
