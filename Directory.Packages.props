@@ -13,7 +13,8 @@
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageVersion Include="Skyline.DataMiner.CICD.CSharpAnalysis.Analyzer" Version="2.1.2" />
     <PackageVersion Include="Skyline.DataMiner.Core.AppPackageInstaller" Version="4.0.0" />
-    <PackageVersion Include="Skyline.DataMiner.Core.DataMinerSystem.Common" Version="1.2.1.1" />
+    <!-- Avoid Channels 10 / AsyncInterfaces 10 conflicting with the UDAPI toolkit's DI 8 runtime. -->
+    <PackageVersion Include="Skyline.DataMiner.Core.DataMinerSystem.Common" Version="1.2.0.3" />
     <PackageVersion Include="Skyline.DataMiner.Dev.Automation" Version="10.6.3.1" />
     <PackageVersion Include="Skyline.DataMiner.Dev.Common" Version="10.6.3.1" />
     <PackageVersion Include="StyleCop.Analyzers" Version="1.1.118" />
