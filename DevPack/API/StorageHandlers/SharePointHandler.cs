@@ -10,6 +10,7 @@
 	using Microsoft.Graph;
 	using Microsoft.Graph.Models;
 	using Microsoft.Graph.Models.ODataErrors;
+	using Microsoft.Kiota.Abstractions;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM;
@@ -859,7 +860,8 @@
 			// End-of-traversal
 			if (spContext.SearchStarted
 				&& !spContext.MoreResultsAvailable
-				&& spContext.PageRemainderBuffer.Count == 0)
+				&& spContext.PageRemainderBuffer.Count == 0
+				&& spContext.PendingPage == null)
 			{
 				return new List<IDocHubFile>();
 			}
@@ -876,7 +878,11 @@
 				? new HashSet<string>(bucket.Extensions.Split(','), StringComparer.OrdinalIgnoreCase)
 				: null;
 
-			var collected = new List<DriveItem>(spContext.PageSize);
+			// Retain the logical page until URL resolution succeeds so retries do not skip files.
+			if (spContext.PendingPage == null)
+				spContext.PendingPage = new List<DriveItem>(spContext.PageSize);
+
+			var collected = spContext.PendingPage;
 
 			// Drain any leftovers from the previous logical page first
 			while (collected.Count < spContext.PageSize && spContext.PageRemainderBuffer.TryDequeue(out var buffered))
@@ -895,6 +901,8 @@
 				CollectSearchFiles(allowedExtensions, spContext, collected, container);
 			}
 
+			await ResolveSearchFileUrlsAsync(collected);
+
 			var result = new List<IDocHubFile>(collected.Count);
 			foreach (var item in collected)
 			{
@@ -904,7 +912,63 @@
 				});
 			}
 
+			spContext.PendingPage = null;
 			return result;
+		}
+
+		private async Task ResolveSearchFileUrlsAsync(IList<DriveItem> items)
+		{
+			if (items.Count == 0)
+				return;
+
+			// The SDK splits the metadata lookups into batches of at most 20 requests.
+			var batch = new BatchRequestContentCollection(_graphClient);
+			var requests = new Dictionary<string, DriveItem>();
+			foreach (var item in items)
+			{
+				var requestId = await batch.AddBatchRequestStepAsync(CreateSearchFileMetadataRequest(item));
+				requests.Add(requestId, item);
+			}
+
+			var response = await _graphClient.Batch.PostAsync(batch);
+			foreach (var request in requests)
+			{
+				var resolved = await response.GetResponseByIdAsync<DriveItem>(request.Key);
+				if (string.IsNullOrWhiteSpace(resolved?.WebUrl))
+					throw new InvalidOperationException($"SharePoint returned no file URL for search result '{request.Value.Name}'.");
+
+				request.Value.WebUrl = resolved.WebUrl;
+			}
+		}
+
+		private RequestInformation CreateSearchFileMetadataRequest(DriveItem item)
+		{
+			var listId = item.SharepointIds?.ListId
+				?? item.ParentReference?.SharepointIds?.ListId
+				?? item.ListItem?.SharepointIds?.ListId;
+			var listItemId = item.SharepointIds?.ListItemId
+				?? item.ParentReference?.SharepointIds?.ListItemId
+				?? item.ListItem?.SharepointIds?.ListItemId;
+
+			if (!string.IsNullOrWhiteSpace(listId) && !string.IsNullOrWhiteSpace(listItemId))
+			{
+				return _graphClient
+					.Sites[item.ParentReference?.SiteId ?? _site.Id]
+					.Lists[listId]
+					.Items[listItemId]
+					.DriveItem
+					.ToGetRequestInformation(cfg => cfg.QueryParameters.Select = new[] { "webUrl" });
+			}
+
+			if (!string.IsNullOrWhiteSpace(item.Id))
+			{
+				return _graphClient
+					.Drives[item.ParentReference?.DriveId ?? _drive.Id]
+					.Items[item.Id]
+					.ToGetRequestInformation(cfg => cfg.QueryParameters.Select = new[] { "webUrl" });
+			}
+
+			throw new InvalidOperationException($"SharePoint search result '{item.Name}' has no identifiers for resolving its file URL.");
 		}
 
 		/// <summary>
@@ -1038,7 +1102,14 @@
 				return;
 
 			var files = container.Hits
-				.Select(h => h.Resource as DriveItem)
+				.Select(h =>
+				{
+					var item = h.Resource as DriveItem;
+					if (item != null && string.IsNullOrWhiteSpace(item.Id))
+						item.Id = h.HitId;
+
+					return item;
+				})
 				.Where(i => i != null
 							&& i.Folder == null
 							&& !string.IsNullOrEmpty(i.Name)

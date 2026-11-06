@@ -61,6 +61,11 @@
 		public HashSet<string> AllowedParentIds { get; internal set; }
 
 		/// <summary>
+		/// Gets or sets the logical page retained until file URL resolution succeeds.
+		/// </summary>
+		internal List<DriveItem> PendingPage { get; set; }
+
+		/// <summary>
 		/// Checks if there are more pages left.
 		/// </summary>
 		/// <returns>
@@ -70,7 +75,8 @@
 		{
 			return !SearchStarted
 				|| MoreResultsAvailable
-				|| PageRemainderBuffer.Count > 0;
+				|| PageRemainderBuffer.Count > 0
+				|| (PendingPage != null && PendingPage.Count > 0);
 		}
 	}
 }

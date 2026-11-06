@@ -324,6 +324,8 @@ var page = client.Files.SearchFiles(spBucket, "quarterly report", config);
 
 > **Note**: Search is only supported for `StorageType.SharePoint` buckets. The query is passed straight through to Microsoft Graph as a KQL query.
 
+Search results resolve their file URLs through additional batched Graph metadata requests. This ensures that `GetWebPath()` and `GetFilePath()` return the actual file URL rather than a SharePoint item-details page, so image thumbnails and source links behave like unfiltered results. This also applies when `ReadFiles` receives a SharePoint KQL filter. If a metadata lookup fails, the error is propagated and the pending page is retained in the paging context for retry.
+
 ## Basic Usage
 
 Once you have instances of the `DocHubClient` and `IDocumentHubApiHelper`, you can start using their features.
