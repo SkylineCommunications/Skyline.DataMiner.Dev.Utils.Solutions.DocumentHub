@@ -1,7 +1,6 @@
 namespace Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient
 {
 	using System;
-	using Azure.Identity;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Security;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
@@ -18,14 +17,14 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient
 	{
 		/// <summary>
 		/// Name of the Automation script executed on every agent to save or delete a secret locally.
-		/// The script only needs to call <see cref="ApplyOnThisAgent"/> with its parameters.
+		/// The script is shipped by the DocumentHub Storage Installer and is self-contained (it does not reference this DLL).
 		/// </summary>
 		public const string ScriptName = "SLC-DH-AS-ManageSharePointSecret";
 
-		/// <summary>Action value that saves the secret.</summary>
+		/// <summary>Value of the script's <c>Action</c> parameter that saves the secret.</summary>
 		public const string SaveAction = "Save";
 
-		/// <summary>Action value that deletes the secret.</summary>
+		/// <summary>Value of the script's <c>Action</c> parameter that deletes the secret.</summary>
 		public const string DeleteAction = "Delete";
 
 		private readonly ISecretStore _store;
@@ -90,7 +89,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient
 				throw new ArgumentException("The client secret cannot be null or empty.", nameof(clientSecret));
 			}
 
-			var credential = new ClientSecretCredential(sharePoint.TenantID, sharePoint.ClientID, clientSecret);
+			var credential = SharePointCredentialProvider.CreateCredential(sharePoint.TenantID, sharePoint.ClientID, clientSecret);
 			return SharePointConnectionTester.IsConnected(sharePoint, credential);
 		}
 
@@ -132,37 +131,6 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient
 		{
 			SharePointSecrets.ValidateIds(tenantId, clientId);
 			return GetDistributor().Execute(DeleteAction, tenantId, clientId, null);
-		}
-
-		/// <summary>
-		/// Saves or deletes the secret on the local agent only. Called by the script <see cref="ScriptName"/> on each agent.
-		/// </summary>
-		/// <param name="action"><see cref="SaveAction"/> or <see cref="DeleteAction"/>.</param>
-		/// <param name="tenantId">The Azure AD tenant identifier.</param>
-		/// <param name="clientId">The client (application) identifier.</param>
-		/// <param name="clientSecret">The client secret; ignored for <see cref="DeleteAction"/>.</param>
-		/// <exception cref="ArgumentException">Thrown when an argument is invalid or the action is unknown.</exception>
-		public void ApplyOnThisAgent(string action, string tenantId, string clientId, string clientSecret)
-		{
-			var key = SharePointSecrets.ClientSecret(tenantId, clientId);
-
-			if (String.Equals(action, DeleteAction, StringComparison.OrdinalIgnoreCase))
-			{
-				_store.Delete(key);
-			}
-			else if (String.IsNullOrEmpty(action) || String.Equals(action, SaveAction, StringComparison.OrdinalIgnoreCase))
-			{
-				if (String.IsNullOrEmpty(clientSecret))
-				{
-					throw new ArgumentException("The client secret cannot be null or empty.", nameof(clientSecret));
-				}
-
-				_store.Save(key, clientSecret);
-			}
-			else
-			{
-				throw new ArgumentException($"Unknown action '{action}'. Expected '{SaveAction}' or '{DeleteAction}'.", nameof(action));
-			}
 		}
 
 		/// <summary>

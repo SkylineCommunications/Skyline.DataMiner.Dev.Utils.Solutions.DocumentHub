@@ -2,8 +2,8 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API.Security
 {
 	using System;
 	using System.IO;
-	using Azure.Core;
-	using Azure.Identity;
+	using Microsoft.Identity.Client;
+	using Microsoft.Kiota.Abstractions.Authentication;
 
 	/// <summary>
 	/// Creates the Azure AD credential used to authenticate against a SharePoint configuration.
@@ -31,17 +31,41 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API.Security
 		}
 
 		/// <summary>
-		/// Creates a client-secret credential for the given app registration.
+		/// Creates a client-secret authentication provider for the given app registration.
 		/// </summary>
-		/// <param name="tenantId">The Azure AD tenant identifier, as stored in the SharePoint configuration.</param>
-		/// <param name="clientId">The client (application) identifier, as stored in the SharePoint configuration.</param>
-		/// <returns>A credential that can acquire tokens; it does not expose the secret.</returns>
-		/// <exception cref="ArgumentException">Thrown when <paramref name="tenantId"/> or <paramref name="clientId"/> is not a valid GUID.</exception>
-		/// <exception cref="FileNotFoundException">Thrown when the secret exists neither in the secret store nor in the legacy secret file.</exception>
-		/// <exception cref="System.Security.Cryptography.CryptographicException">Thrown when the secret exists but cannot be decrypted.</exception>
-		internal TokenCredential CreateCredential(string tenantId, string clientId)
+		/// <param name="tenantId">The tenant identifier.</param>
+		/// <param name="clientId">The application identifier.</param>
+		/// <param name="clientSecret">The candidate secret, consumed without saving or exposing it.</param>
+		/// <returns>A Task-based Graph authentication provider backed by MSAL.</returns>
+		internal static IAuthenticationProvider CreateCredential(string tenantId, string clientId, string clientSecret)
 		{
-			return new ClientSecretCredential(tenantId, clientId, GetSecret(SharePointSecrets.ClientSecret(tenantId, clientId)));
+			SharePointSecrets.ValidateIds(tenantId, clientId);
+			if (string.IsNullOrEmpty(clientSecret))
+			{
+				throw new ArgumentException("The client secret cannot be null or empty.", nameof(clientSecret));
+			}
+
+			var application = ConfidentialClientApplicationBuilder.Create(clientId)
+				.WithTenantId(tenantId)
+				.WithClientSecret(clientSecret)
+				.WithClientCapabilities(new[] { "cp1" })
+				.Build();
+
+			return new BaseBearerTokenAuthenticationProvider(new SharePointAccessTokenProvider(application));
+		}
+
+		/// <summary>
+		/// Creates a client-secret authentication provider using the saved secret.
+		/// </summary>
+		/// <param name="tenantId">The tenant identifier.</param>
+		/// <param name="clientId">The application identifier.</param>
+		/// <returns>A provider that acquires tokens without exposing the secret.</returns>
+		/// <exception cref="ArgumentException">Thrown for invalid identifiers.</exception>
+		/// <exception cref="FileNotFoundException">Thrown when no saved or legacy secret exists.</exception>
+		/// <exception cref="System.Security.Cryptography.CryptographicException">Thrown when decryption fails.</exception>
+		internal IAuthenticationProvider CreateCredential(string tenantId, string clientId)
+		{
+			return CreateCredential(tenantId, clientId, GetSecret(SharePointSecrets.ClientSecret(tenantId, clientId)));
 		}
 
 		private string GetSecret(SecretKey key)

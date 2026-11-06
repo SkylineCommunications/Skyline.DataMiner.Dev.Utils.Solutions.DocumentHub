@@ -2,10 +2,10 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API.Security
 {
 	using System;
 	using System.Linq;
-	using Azure.Core;
-	using Azure.Identity;
 	using Microsoft.Graph;
 	using Microsoft.Graph.Models.ODataErrors;
+	using Microsoft.Identity.Client;
+	using Microsoft.Kiota.Abstractions.Authentication;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 
 	/// <summary>
@@ -19,7 +19,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API.Security
 		/// <param name="sharePoint">The SharePoint configuration to check.</param>
 		/// <param name="credential">The credential to authenticate with.</param>
 		/// <returns><c>true</c> if authentication succeeds and the document library exists; otherwise, <c>false</c>.</returns>
-		internal static bool IsConnected(SharePointConfiguration sharePoint, TokenCredential credential)
+		internal static bool IsConnected(SharePointConfiguration sharePoint, IAuthenticationProvider credential)
 		{
 			if (sharePoint == null)
 			{
@@ -45,7 +45,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API.Security
 				return drives?.Value != null
 					&& drives.Value.Any(d => d.Name != null && d.Name.Equals(sharePoint.DocumentLibraryName, StringComparison.OrdinalIgnoreCase));
 			}
-			catch (AuthenticationFailedException)
+			catch (MsalException)
 			{
 				return false;
 			}

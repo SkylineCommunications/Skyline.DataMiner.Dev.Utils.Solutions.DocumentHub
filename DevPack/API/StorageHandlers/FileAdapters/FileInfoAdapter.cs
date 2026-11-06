@@ -4,10 +4,12 @@
 	using System.IO;
 	using System.Security.AccessControl;
 	using System.Security.Principal;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers;
 
 	internal class FileInfoAdapter : IDocHubFile
 	{
 		internal FileInfo fileInfo;
+		internal string publicRoot = LocalHandler.PublicRoot;
 
 		public static string GetRelativePath(string fullPath, string partToRemove)
 		{
@@ -55,7 +57,7 @@
 
 		public string GetWebPath()
 		{
-			return '/' + GetRelativePath(fileInfo.FullName, @"C:\Skyline DataMiner\Webpages");
+			return '/' + GetRelativePath(fileInfo.FullName, Path.GetDirectoryName(publicRoot));
 		}
 
 		public string GetFile()
@@ -115,7 +117,7 @@
 
 		public string GetDirectory()
 		{
-			return GetRelativePath(fileInfo.DirectoryName, @"C:\Skyline DataMiner\Webpages\Public\WebFileManager");
+			return GetRelativePath(fileInfo.DirectoryName, publicRoot);
 		}
 
 		public string GetModule()

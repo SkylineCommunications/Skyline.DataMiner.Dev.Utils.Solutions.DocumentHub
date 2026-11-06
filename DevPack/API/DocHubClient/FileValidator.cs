@@ -43,6 +43,48 @@
 				throw new ArgumentNullException(nameof(fileName));
 		}
 
+		/// <summary>
+		/// Rejects a file name that the storage backends cannot accept, with a message that names the offending
+		/// characters instead of the raw "Illegal characters in path." thrown by <see cref="Path"/>.
+		/// Directory separators are tolerated because <see cref="SanitizeFileName"/> strips directory parts.
+		/// </summary>
+		/// <param name="name">The file name to check.</param>
+		/// <param name="subject">
+		/// How the message refers to the name, e.g. <c>"The new name"</c> for a caller-supplied rename or
+		/// <c>"The file name"</c> when the uploaded file's own name is used.
+		/// </param>
+		/// <exception cref="ArgumentException">Thrown when <paramref name="name"/> contains invalid characters, has no file part, or ends with a dot or space.</exception>
+		internal static void ValidateFileName(string name, string subject = "The new name")
+		{
+			if (string.IsNullOrWhiteSpace(name))
+				return;
+
+			string trimmed = name.Trim();
+			char[] disallowed = Path.GetInvalidFileNameChars()
+				.Where(c => c != Path.DirectorySeparatorChar && c != Path.AltDirectorySeparatorChar)
+				.ToArray();
+
+			var invalid = trimmed.Where(c => Array.IndexOf(disallowed, c) >= 0).Distinct().ToList();
+			if (invalid.Count > 0)
+			{
+				var printable = invalid.Where(c => !char.IsControl(c)).Select(c => c.ToString()).ToList();
+				throw new ArgumentException(printable.Count > 0
+					? $"{subject} contains characters that are not allowed: {string.Join(" ", printable)}"
+					: $"{subject} contains characters that are not allowed.");
+			}
+
+			string leaf = Path.GetFileName(trimmed);
+			if (leaf.Length == 0)
+			{
+				throw new ArgumentException($"{subject} must contain a file name.");
+			}
+
+			if (leaf.EndsWith(".", StringComparison.Ordinal) || leaf.EndsWith(" ", StringComparison.Ordinal))
+			{
+				throw new ArgumentException($"{subject} cannot end with a dot or a space.");
+			}
+		}
+
 		internal UploadData ValidateAndSanitizeFile(DocumentBucket bucket, string filePath, string name = null)
 		{
 			ValidateBaseParameters(bucket, filePath);
@@ -137,9 +179,12 @@
 			if (string.IsNullOrWhiteSpace(name))
 			{
 				name = Path.GetFileNameWithoutExtension(filePath);
+				ValidateFileName(name, "The file name");
 			}
 			else
 			{
+				ValidateFileName(name, "The new name");
+
 				// Sanitize name: extract just the filename without any directory parts
 				name = Path.GetFileName(name);
 				name = Path.GetFileNameWithoutExtension(name);
