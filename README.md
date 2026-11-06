@@ -68,7 +68,7 @@ The `DevPack.Tests` project contains unit tests using an in-memory DOM mock (`Do
 | **API - Local Public Storage** | `LocalHandler_Tests`                                                                                   | 19    |
 | **API - Files Search**         | `Files_SearchFiles_Tests`                                                                              | 5     |
 | **API - File Download**        | `Files_DownloadFile_Tests`                                                                             | 9     |
-| **API - File Validator**       | `FileValidator_ValidateAndSanitizeFile_Tests`                                                          | 19    |
+| **API - File Validator**       | `FileValidator_ValidateAndSanitizeFile_Tests`, `FileValidator_FileName_Tests`                          | 38    |
 | **API - File Adapters**        | `FileInfoAdapter_GetRelativePath_Tests`                                                                | 11    |
 | **API - Secrets**              | `SecretKey_Tests`, `DpapiFileSecretStore_Tests`, `Secrets_Tests`, `ManageSharePointSecretScript_Tests` | 42    |
 | **SharePoint authentication**  | `SharePointDependency_Tests`                                                                           | 12    |
@@ -77,7 +77,7 @@ The `DevPack.Tests` project contains unit tests using an in-memory DOM mock (`Do
 | **SDM - DocumentBucket**       | `DocumentBucketDomRepository_CRUD_Tests`, `DocumentBucketDomRepository_FilterTests_Tests`              | 26    |
 
 
-**Total: 199 tests**
+**Total: 218 tests**
 
 ### SDM Repository Tests
 
@@ -93,6 +93,15 @@ API tests validate parameter handling:
 - Storage type restrictions (e.g., DOM storage with qualifier overload)
 - DomSource module validation
 - Bucket type restrictions for the search functionality
+
+### File Name Validation Tests
+
+`FileValidator_FileName_Tests` covers the user-facing checks applied to the name a file is stored under (the uploaded file's own name, or the optional new name supplied by the caller):
+- Characters the storage backends reject (`< > : " | ? *` and control characters) are reported with a message that lists the offending characters, instead of the raw .NET "Illegal characters in path."
+- The message subject follows the source of the name: "The new name …" for a rename, "The file name …" for the original file name
+- Directory separators are tolerated (directory parts are stripped), but a name consisting only of a directory is rejected
+- Names ending in a dot are rejected; surrounding whitespace is trimmed
+- Null, empty, whitespace-only, spaced and non-ASCII names are accepted
 
 ### File Adapter Tests
 
