@@ -32,7 +32,7 @@ namespace DevPack.Tests.API
 			}
 		}
 
-		[DataTestMethod]
+		[TestMethod]
 		[DataRow(null, "")]
 		[DataRow("", "")]
 		[DataRow("/", "")]
@@ -44,7 +44,7 @@ namespace DevPack.Tests.API
 		public void ResolveLocalDirectory_ShouldProduceSecureWindowsBasePath(string? relativePath, string expectedDirectory)
 		{
 			var directory = LocalHandler.ResolveLocalDirectory(relativePath!);
-			var expected = Path.Combine(LocalHandler.WebFileManagerRoot, expectedDirectory);
+			var expected = Path.Combine(LocalHandler.PublicRoot, expectedDirectory);
 
 			directory.Should().Be(expected);
 			SecurePath.ConstructSecurePath(directory, "photo.jpg")

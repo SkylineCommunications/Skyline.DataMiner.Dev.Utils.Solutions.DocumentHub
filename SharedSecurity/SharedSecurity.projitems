@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>7f3a1c2e-5b64-4d8a-9e21-3c6b0f9d4a55</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>SharedSecurity</Import_RootNamespace>
+  </PropertyGroup>
+  <!--
+    Secret-storage primitives shared between the DevPack and SLC-DH-AS-ManageSharePointSecret.
+    The script compiles these sources directly so it needs no reference to the DevPack DLL, while
+    both sides agree on the secret file layout, entropy and encryption. Keep this list BCL-only.
+  -->
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)DataProtector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DpapiFileSecretStore.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ISecretStore.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SecretKey.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SharePointSecrets.cs" />
+  </ItemGroup>
+</Project>

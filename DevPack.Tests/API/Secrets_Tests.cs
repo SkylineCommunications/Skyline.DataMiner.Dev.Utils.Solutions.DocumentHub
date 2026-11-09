@@ -14,26 +14,15 @@
 		private const string ClientId = "bbbbbbbb-0000-0000-0000-000000000002";
 
 		[TestMethod]
-		public void ApplyOnThisAgent_Save_StoresUnderTenantAndClient()
+		public void HasSharePointClientSecret_ReflectsStore()
 		{
 			var store = new InMemorySecretStore();
 			var secrets = new Secrets(store);
-
-			secrets.ApplyOnThisAgent(Secrets.SaveAction, TenantId, ClientId, "my-secret");
-
-			store.Read(SharePointSecrets.ClientSecret(TenantId, ClientId)).Should().Be("my-secret");
-			secrets.HasSharePointClientSecret(TenantId, ClientId).Should().BeTrue();
-		}
-
-		[TestMethod]
-		public void ApplyOnThisAgent_Delete_RemovesSecret()
-		{
-			var secrets = new Secrets(new InMemorySecretStore());
-			secrets.ApplyOnThisAgent(Secrets.SaveAction, TenantId, ClientId, "my-secret");
-
-			secrets.ApplyOnThisAgent(Secrets.DeleteAction, TenantId, ClientId, null);
-
 			secrets.HasSharePointClientSecret(TenantId, ClientId).Should().BeFalse();
+
+			store.Save(SharePointSecrets.ClientSecret(TenantId, ClientId), "my-secret");
+
+			secrets.HasSharePointClientSecret(TenantId, ClientId).Should().BeTrue();
 		}
 
 		[TestMethod]

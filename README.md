@@ -19,6 +19,29 @@ Depending on your project type, one of the following additional packages is also
 > **Note**
 > This library targets `.NET Framework 4.8`.
 
+### Authentication dependency compatibility
+
+SharePoint uses MSAL (`Microsoft.Identity.Client`) client-credentials authentication through
+Kiota's Task-based bearer-token provider. Saved-secret checks, candidate-secret checks, and
+file operations share this implementation. Each provider reuses its MSAL app token cache,
+requests `https://graph.microsoft.com/.default`, and sends bearer tokens only to the HTTPS
+Graph host. Claims challenges and cancellation are forwarded to MSAL.
+
+The executing authentication path does not use Azure.Identity or Azure.Core's
+`TokenCredential.GetTokenAsync`/`ValueTask<T>` contract, avoiding its assembly-identity
+conflict with DataMiner's authentication dependencies. Graph can still include Azure
+packages transitively; their presence does not mean this credential path is used.
+No changes to DataMiner-owned DLLs or executable configuration are required.
+`SharePointDependency_Tests` covers token acquisition with mocked OAuth responses, caching,
+claims, cancellation, trusted-host restrictions, and the absence of direct Azure references.
+
+After rebuilding an unpublished package without changing its version, remove only that
+package version from the global NuGet cache and the consuming packaging projects' local
+`packages` folders, then restore and rebuild. Deploying a new package does not unload
+assemblies already loaded by the Agent; an Agent still running an earlier DevPack may
+need a process restart to pick up the replacement.
+Do not delete shared DLL folders indiscriminately, as other solutions may depend on them.
+
 ## Documentation
 
 | Document                                              | Description                                                                  |
@@ -36,23 +59,25 @@ The `DevPack.Tests` project contains unit tests using an in-memory DOM mock (`Do
 
 ### Test Coverage
 
-| Area                       | Test Classes                                                                                  | Tests |
-|----------------------------|-----------------------------------------------------------------------------------------------|-------|
-| **API - DocHubClient**     | `DocHubClient_Tests`                                                                          | 3     |
-| **API - Files Upload**     | `Files_UploadFile_Tests`                                                                      | 16    |
-| **API - Files Read**       | `Files_ReadFiles_Tests`                                                                       | 5     |
-| **API - Files Delete**     | `Files_DeleteFile_Tests`                                                                      | 6     |
-| **API - Files Search**     | `Files_SearchFiles_Tests`                                                                     | 5     |
-| **API - File Download**    | `Files_DownloadFile_Tests`                                                                    | 9     |
-| **API - File Validator**   | `FileValidator_ValidateAndSanitizeFile_Tests`                                                 | 19    |
-| **API - File Adapters**    | `FileInfoAdapter_GetRelativePath_Tests`                                                       | 11    |
-| **API - Secrets**          | `SecretKey_Tests`, `DpapiFileSecretStore_Tests`, `Secrets_Tests`                              | 38    |
-| **SDM - SharePoint**       | `SharepointDomRepository_CRUD_Tests`, `SharepointDomRepository_FilterTests_Tests`             | 13    |
-| **SDM - DomSource**        | `DomSourceDomRepository_CRUD_Tests`, `DomSourceDomRepository_FilterTests_Tests`               | 13    |
-| **SDM - DocumentBucket**   | `DocumentBucketDomRepository_CRUD_Tests`, `DocumentBucketDomRepository_FilterTests_Tests`     | 26    |
+| Area                           | Test Classes                                                                                           | Tests |
+|--------------------------------|--------------------------------------------------------------------------------------------------------|-------|
+| **API - DocHubClient**         | `DocHubClient_Tests`                                                                                   | 3     |
+| **API - Files Upload**         | `Files_UploadFile_Tests`                                                                               | 16    |
+| **API - Files Read**           | `Files_ReadFiles_Tests`                                                                                | 5     |
+| **API - Files Delete**         | `Files_DeleteFile_Tests`                                                                               | 6     |
+| **API - Local Public Storage** | `LocalHandler_Tests`                                                                                   | 19    |
+| **API - Files Search**         | `Files_SearchFiles_Tests`                                                                              | 5     |
+| **API - File Download**        | `Files_DownloadFile_Tests`                                                                             | 9     |
+| **API - File Validator**       | `FileValidator_ValidateAndSanitizeFile_Tests`, `FileValidator_FileName_Tests`                          | 38    |
+| **API - File Adapters**        | `FileInfoAdapter_GetRelativePath_Tests`                                                                | 11    |
+| **API - Secrets**              | `SecretKey_Tests`, `DpapiFileSecretStore_Tests`, `Secrets_Tests`, `ManageSharePointSecretScript_Tests` | 42    |
+| **SharePoint authentication**  | `SharePointDependency_Tests`                                                                           | 12    |
+| **SDM - SharePoint**           | `SharepointDomRepository_CRUD_Tests`, `SharepointDomRepository_FilterTests_Tests`                      | 13    |
+| **SDM - DomSource**            | `DomSourceDomRepository_CRUD_Tests`, `DomSourceDomRepository_FilterTests_Tests`                        | 13    |
+| **SDM - DocumentBucket**       | `DocumentBucketDomRepository_CRUD_Tests`, `DocumentBucketDomRepository_FilterTests_Tests`              | 26    |
 
 
-**Total: 164 tests** (includes 9 parameterized test methods)
+**Total: 218 tests**
 
 ### SDM Repository Tests
 
@@ -68,6 +93,15 @@ API tests validate parameter handling:
 - Storage type restrictions (e.g., DOM storage with qualifier overload)
 - DomSource module validation
 - Bucket type restrictions for the search functionality
+
+### File Name Validation Tests
+
+`FileValidator_FileName_Tests` covers the user-facing checks applied to the name a file is stored under (the uploaded file's own name, or the optional new name supplied by the caller):
+- Characters the storage backends reject (`< > : " | ? *` and control characters) are reported with a message that lists the offending characters, instead of the raw .NET "Illegal characters in path."
+- The message subject follows the source of the name: "The new name …" for a rename, "The file name …" for the original file name
+- Directory separators are tolerated (directory parts are stripped), but a name consisting only of a directory is rejected
+- Names ending in a dot are rejected; surrounding whitespace is trimmed
+- Null, empty, whitespace-only, spaced and non-ASCII names are accepted
 
 ### File Adapter Tests
 

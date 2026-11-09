@@ -497,7 +497,8 @@
 		/// Must use <see cref="StorageType.Local"/> storage.
 		/// </param>
 		/// <param name="fileName">
-		/// The name of the file to delete (including extension).
+		/// The bucket-relative file path (including extension), or the full path of a listed local file.
+		/// Full paths must remain inside the bucket's directory.
 		/// </param>
 		/// <exception cref="ArgumentNullException">
 		/// Thrown when <paramref name="bucket"/> or <paramref name="fileName"/> is null.

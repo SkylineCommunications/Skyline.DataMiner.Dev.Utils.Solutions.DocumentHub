@@ -25,11 +25,13 @@
 		/// </summary>
 		public IEnumerator<FileInfo> FileEnumerator { get; internal set; }
 
+		private FileInfo nextFile;
+
 		/// <summary>
 		/// Gets the root directory currently being enumerated.
 		/// Used to detect changes in scope and reinitialize enumeration when needed.
 		/// </summary>
-		public string CurrentRoot { get; internal set; } = LocalHandler.WebFileManagerRoot;
+		public string CurrentRoot { get; internal set; } = LocalHandler.PublicRoot;
 
 		/// <summary>
 		/// Checks if theres more pages left.
@@ -39,7 +41,27 @@
 		/// </returns>
 		public override bool HasNextPage()
 		{
-			return FileEnumerator != null && FileEnumerator.MoveNext();
+			if (nextFile != null)
+				return true;
+
+			if (FileEnumerator == null || !FileEnumerator.MoveNext())
+				return false;
+
+			nextFile = FileEnumerator.Current;
+			return true;
+		}
+
+		internal bool TryReadNext(out FileInfo file)
+		{
+			if (!HasNextPage())
+			{
+				file = null;
+				return false;
+			}
+
+			file = nextFile;
+			nextFile = null;
+			return true;
 		}
 	}
 }
