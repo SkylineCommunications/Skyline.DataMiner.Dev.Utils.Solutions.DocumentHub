@@ -1,4 +1,6 @@
-﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API
+﻿using Skyline.DataMiner.Utils.SecureCoding.SecureIO;
+
+namespace Skyline.DataMiner.Solutions.DocumentHub.API
 {
 	using System;
 	using System.Collections.Generic;
@@ -344,12 +346,21 @@
 				// Add attachments
 				while (page.AttachmentIndex < attachments.Count && results.Count < pageSize)
 				{
-					results.Add(new DomFileAdapter
+					var filename = attachments[page.AttachmentIndex];
+					var fileInfo = new FileInfo(SecurePath.ConstructSecurePath(
+						DomInstanceCrudHelperComponent.DomInstanceAttachmentBaseFilePath,
+						domHelper.ModuleId,
+						instance.ID.ToAttachmentString(),
+						filename));
+
+					results.Add(new DomFileAdapter(fileInfo)
 					{
-						Filename = attachments[page.AttachmentIndex++],
+						Filename = filename,
 						Module = domHelper.ModuleId,
 						Instance = instance,
 					});
+
+					page.AttachmentIndex++;
 				}
 
 				// If all attachments consumed → move to next instance
