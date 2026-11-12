@@ -12,6 +12,11 @@
 	/// operations.
 	/// Implementations may provide additional methods or properties for interacting with the document
 	/// structure.
+	/// <para>
+	/// Files returned by DocumentHub require on-Agent filesystem access for size, creation time, and
+	/// Windows file owner metadata. The owner is not necessarily the uploader, and the creation time
+	/// belongs to the stored attachment file rather than the DOM instance or original document.
+	/// </para>
 	/// </remarks>
 	public interface IDocHubDomFile : IDocHubFile
 	{
@@ -19,6 +24,16 @@
 
 	internal class DomFileAdapter : IDocHubDomFile
 	{
+		private readonly FileInfoAdapter metadata;
+
+		internal DomFileAdapter(FileInfo fileInfo)
+		{
+			metadata = new FileInfoAdapter
+			{
+				fileInfo = fileInfo ?? throw new ArgumentNullException(nameof(fileInfo)),
+			};
+		}
+
 		internal DomInstance Instance { get; set; }
 
 		internal string Module { get; set; }
@@ -27,12 +42,12 @@
 
 		public DateTime GetCreatedAt()
 		{
-			return DateTime.MinValue.ToUniversalTime();
+			return metadata.GetCreatedAt();
 		}
 
 		public string GetCreatedBy()
 		{
-			return string.Empty;
+			return metadata.GetCreatedBy();
 		}
 
 		public string GetDirectory()
@@ -82,7 +97,7 @@
 
 		public string GetSize()
 		{
-			return string.Empty;
+			return metadata.GetSize();
 		}
 	}
 }

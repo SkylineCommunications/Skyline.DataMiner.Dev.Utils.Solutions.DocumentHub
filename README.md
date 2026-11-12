@@ -69,7 +69,8 @@ The `DevPack.Tests` project contains unit tests using an in-memory DOM mock (`Do
 | **API - Files Search**         | `Files_SearchFiles_Tests`                                                                              | 5     |
 | **API - File Download**        | `Files_DownloadFile_Tests`                                                                             | 9     |
 | **API - File Validator**       | `FileValidator_ValidateAndSanitizeFile_Tests`, `FileValidator_FileName_Tests`                          | 38    |
-| **API - File Adapters**        | `FileInfoAdapter_GetRelativePath_Tests`                                                                | 11    |
+| **API - File Adapters**        | `FileInfoAdapter_GetRelativePath_Tests`, `DomFileAdapter_Tests`                                        | 17    |
+| **API - DOM Attachment Paths** | `DomAttachmentsHandler_Tests`                                                                         | 7     |
 | **API - Secrets**              | `SecretKey_Tests`, `DpapiFileSecretStore_Tests`, `Secrets_Tests`, `ManageSharePointSecretScript_Tests` | 42    |
 | **SharePoint authentication**  | `SharePointDependency_Tests`                                                                           | 12    |
 | **SDM - SharePoint**           | `SharepointDomRepository_CRUD_Tests`, `SharepointDomRepository_FilterTests_Tests`                      | 13    |
@@ -77,7 +78,7 @@ The `DevPack.Tests` project contains unit tests using an in-memory DOM mock (`Do
 | **SDM - DocumentBucket**       | `DocumentBucketDomRepository_CRUD_Tests`, `DocumentBucketDomRepository_FilterTests_Tests`              | 26    |
 
 
-**Total: 218 tests**
+**Total: 231 tests**
 
 ### SDM Repository Tests
 
@@ -111,6 +112,11 @@ API tests validate parameter handling:
 - Directory-boundary safety (e.g., `C:\Web` does not match `C:\Web2`)
 - Path-equals-root and trailing-separator handling
 - Case-insensitive matching and null/empty input handling
+
+`DomFileAdapter_Tests` covers DOM attachment metadata using local files:
+- Size, UTC creation time, and Windows owner parity with local-storage metadata
+- Unchanged DOM identity and empty directory/path values
+- Missing-file size errors and null metadata input validation
 
 ### Secret Store Tests
 
