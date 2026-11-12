@@ -1,6 +1,4 @@
-﻿using Skyline.DataMiner.Utils.SecureCoding.SecureIO;
-
-namespace Skyline.DataMiner.Solutions.DocumentHub.API
+﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API
 {
 	using System;
 	using System.Collections.Generic;
@@ -9,6 +7,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API
 	using System.Threading.Tasks;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Apps.DataMinerObjectModel;
+	using Skyline.DataMiner.Net.Apps.Modules;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
@@ -19,6 +18,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.DomSource;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Validation;
+	using Skyline.DataMiner.Utils.SecureCoding.SecureIO;
 
 	/// <summary>
 	/// Storage handler for reading, paging, and uploading files from DOM instances.
@@ -291,6 +291,23 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API
 			return domHelper.DomInstances.Attachments.Get(instance.ID, filename);
 		}
 
+		internal string GetAttachmentRootPath(string moduleId)
+		{
+			var settingsHelper = new ModuleSettingsHelper(_connection.HandleMessages);
+			var settings = settingsHelper.ModuleSettings
+				.Read(ModuleSettingsExposers.ModuleId.Equal(moduleId))
+				.SingleOrDefault()
+				?? throw new InvalidOperationException($"Could not find module settings for DOM module '{moduleId}'.");
+
+			var networkSharePath = settings.DomManagerSettings?.DomInstanceNetworkAttachmentSettings?.NetworkSharePath;
+			return string.IsNullOrEmpty(networkSharePath)
+				? SecurePath.ConstructSecurePath(DomInstanceCrudHelperComponent.DomInstanceAttachmentBaseFilePath, moduleId)
+				: SecurePath.ConstructSecurePath(
+					networkSharePath,
+					DomInstanceCrudHelperComponent.DomInstanceAttachmentBaseFolderName,
+					moduleId);
+		}
+
 		#endregion
 
 		#region Private Methods
@@ -318,6 +335,8 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API
 		/// </summary>
 		private void ReadFromModule(DomHelper domHelper, DOMPageData page, string filter, List<IDocHubFile> results, int pageSize)
 		{
+			var attachmentRootPath = GetAttachmentRootPath(domHelper.ModuleId);
+
 			while (results.Count < pageSize)
 			{
 				var instances = page.PagingHelper.GetCurrentPage()?.ToList();
@@ -348,8 +367,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API
 				{
 					var filename = attachments[page.AttachmentIndex];
 					var fileInfo = new FileInfo(SecurePath.ConstructSecurePath(
-						DomInstanceCrudHelperComponent.DomInstanceAttachmentBaseFilePath,
-						domHelper.ModuleId,
+						attachmentRootPath,
 						instance.ID.ToAttachmentString(),
 						filename));
 
