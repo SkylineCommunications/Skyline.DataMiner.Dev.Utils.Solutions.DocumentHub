@@ -19,6 +19,13 @@ Depending on your project type, one of the following additional packages is also
 > **Note**
 > This library targets `.NET Framework 4.8`.
 
+Version 1.3 requires DataMiner **10.6.10 / 10.7.0** for native Automation
+credentials. Source management is administrator-only. SharePoint secrets use
+source-scoped Credentials Library entries declared on the DocumentHub scripts that
+call `engine.GetCredential`; DOM shares use native username/password credentials. There are no normal
+DPAPI writes or fallbacks. Existing installations require the explicit, per-agent
+[credential migration](Documentation/CredentialStorage.md) before resuming use.
+
 ### Authentication dependency compatibility
 
 SharePoint uses MSAL (`Microsoft.Identity.Client`) client-credentials authentication through
@@ -48,6 +55,7 @@ Do not delete shared DLL folders indiscriminately, as other solutions may depend
 | ----------------------------------------------------- | ---------------------------------------------------------------------------- |
 | [Getting Started](Documentation/Getting%20Started.md) | Installation, prerequisites, and basic usage                                 |
 | [Quick Reference](Documentation/Quick%20Reference.md) | Common code snippets for file operations, repositories, and storage backends |
+| [Credential storage](Documentation/CredentialStorage.md) | Verified APIs, permissions, deterministic references, migration and integration prerequisites |
 
 External resources:
 
@@ -70,14 +78,14 @@ The `DevPack.Tests` project contains unit tests using an in-memory DOM mock (`Do
 | **API - File Download**        | `Files_DownloadFile_Tests`                                                                             | 9     |
 | **API - File Validator**       | `FileValidator_ValidateAndSanitizeFile_Tests`, `FileValidator_FileName_Tests`                          | 38    |
 | **API - File Adapters**        | `FileInfoAdapter_GetRelativePath_Tests`                                                                | 11    |
-| **API - Secrets**              | `SecretKey_Tests`, `DpapiFileSecretStore_Tests`, `Secrets_Tests`, `ManageSharePointSecretScript_Tests` | 42    |
+| **API - Native credentials / migration** | `SecretKey_Tests`, `DpapiFileSecretStore_Tests`, `Secrets_Tests`, `ManageSharePointSecretScript_Tests`, `NativeCredentialMessaging_Tests` | 81 |
 | **SharePoint authentication**  | `SharePointDependency_Tests`                                                                           | 12    |
 | **SDM - SharePoint**           | `SharepointDomRepository_CRUD_Tests`, `SharepointDomRepository_FilterTests_Tests`                      | 13    |
 | **SDM - DomSource**            | `DomSourceDomRepository_CRUD_Tests`, `DomSourceDomRepository_FilterTests_Tests`                        | 13    |
 | **SDM - DocumentBucket**       | `DocumentBucketDomRepository_CRUD_Tests`, `DocumentBucketDomRepository_FilterTests_Tests`              | 26    |
 
 
-**Total: 218 tests**
+**Total: 257 tests**
 
 ### SDM Repository Tests
 
@@ -112,17 +120,17 @@ API tests validate parameter handling:
 - Path-equals-root and trailing-separator handling
 - Case-insensitive matching and null/empty input handling
 
-### Secret Store Tests
+### Native Credential and Migration Tests
 
-`SecretKey_Tests`, `DpapiFileSecretStore_Tests` and `Secrets_Tests` cover the storage of secrets (e.g., the SharePoint client secret):
-- Secret key path building (`<source>\[<scope>\...]<name>.dat`, e.g. `sharepoint\<tenantId>\<clientId>.dat`) and segment validation (no path traversal)
-- Save/read round trip, with the secret never stored as plain text
-- Atomic replace of an existing secret without leftover temporary files
-- Missing secret handling, `Exists` and `Delete` behavior, and null argument validation
-- Isolation between scopes, and a secret file copied to another key failing to decrypt
-- Tenant/client ID validation for SharePoint client secrets
-- The public `DocHubClient.Secrets` API being write-only (no member returns a secret, no secret store types are exposed)
-- The in-memory store used as a test double
+Focused tests cover deterministic IDs/names, repeated/concurrent saves, rotation
+without copying redacted fields, individual script assignment/readback, permission
+denial, source/organization isolation, source removal, message/error-response
+parity, scoped paging/search, native DOM credentials and recoverable
+DPAPI migration. Synthetic migration fixtures exercise Windows DPAPI; normal
+DPAPI writes are rejected.
+
+SLNet/DOM/Automation execution is mocked. These checks do not replace a real
+DataMiner/gRPC/Graph integration run; see the credential guide for prerequisites.
 
 ### Running Tests
 

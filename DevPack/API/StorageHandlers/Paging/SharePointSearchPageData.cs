@@ -68,6 +68,9 @@
 		/// </returns>
 		public override bool HasNextPage()
 		{
+			if (NativeHasMore.HasValue)
+				return NativeHasMore.Value;
+
 			return !SearchStarted
 				|| MoreResultsAvailable
 				|| PageRemainderBuffer.Count > 0;

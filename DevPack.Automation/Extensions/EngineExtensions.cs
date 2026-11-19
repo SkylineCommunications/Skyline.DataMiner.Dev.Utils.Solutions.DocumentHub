@@ -42,7 +42,7 @@
                 throw new ArgumentNullException(nameof(engine), "Engine cannot be null.");
             }
 
-            return engine.GetUserConnection().GetDocHubClient();
+            return ((IEngine)engine).GetDocHubClient();
         }
     }
 }

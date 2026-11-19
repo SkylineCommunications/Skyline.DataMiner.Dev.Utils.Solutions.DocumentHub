@@ -1,21 +1,19 @@
 namespace Skyline.DataMiner.Solutions.DocumentHub.API.Security
 {
 	using System;
+	using System.Collections.Generic;
 	using System.Diagnostics.CodeAnalysis;
 	using System.IO;
-	using System.Security.AccessControl;
-	using System.Security.Principal;
 	using System.Text;
 
-	/// <summary>
-	/// Stores secrets as DPAPI (machine scope) encrypted files below a root folder.
-	/// </summary>
+	/// <summary>Migration-only reader for files written by older DocumentHub versions. Never used during normal retrieval.</summary>
 	[SuppressMessage("Usage", "SLC_SC0002:File operation usage detected without secure path construction or validation", Justification = "Paths are built only from the fixed root folder and a SecretKey, whose storage type and GUID scope are not free text and whose name is restricted to [a-z0-9_-]+. No caller-supplied path segment can reach the file system.")]
 	internal sealed class DpapiFileSecretStore : ISecretStore
 	{
 		internal const string DefaultRootPath = @"C:\Skyline DataMiner\Security\DocumentHub";
 
 		private readonly string _rootPath;
+		private readonly Dictionary<string, string> _snapshots = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
 		internal DpapiFileSecretStore(string rootPath = DefaultRootPath)
 		{
@@ -27,112 +25,82 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API.Security
 			_rootPath = rootPath;
 		}
 
+		internal bool GlobalExists => File.Exists(Path.Combine(_rootPath, "graphsecret.dat"));
+
 		public void Save(SecretKey key, string value)
 		{
-			if (key == null)
-			{
-				throw new ArgumentNullException(nameof(key));
-			}
-
-			if (string.IsNullOrEmpty(value))
-			{
-				throw new ArgumentException("Secret value cannot be null or empty.", nameof(value));
-			}
-
-			string path = GetPath(key);
-			string tempPath = path + ".tmp";
-			string encrypted = DPAPIHelper.Encrypt(value, GetEntropy(key));
-
-			CreateRestrictedDirectory(Path.GetDirectoryName(path));
-			File.WriteAllText(tempPath, encrypted);
-
-			// Atomic replace so readers never see a partially written file.
-			if (File.Exists(path))
-			{
-				File.Replace(tempPath, path, null);
-			}
-			else
-			{
-				File.Move(tempPath, path);
-			}
+			throw new NotSupportedException("Legacy DPAPI storage is read-only. Provision a native credential instead.");
 		}
 
 		public string Read(SecretKey key)
 		{
-			if (key == null)
-			{
-				throw new ArgumentNullException(nameof(key));
-			}
-
-			string path = GetPath(key);
-			if (!File.Exists(path))
-			{
-				throw new FileNotFoundException($"Secret '{key}' not found.", path);
-			}
-
-			return DPAPIHelper.Decrypt(File.ReadAllText(path), GetEntropy(key));
+			return ReadPath(GetPath(key), Encoding.UTF8.GetBytes(key.Entropy));
 		}
 
-		public bool Exists(SecretKey key)
+		public bool Exists(SecretKey key) => File.Exists(GetPath(key));
+
+		public void Delete(SecretKey key) => DeleteSnapshot(GetPath(key));
+
+		internal string ReadGlobal() => ReadPath(Path.Combine(_rootPath, "graphsecret.dat"), null);
+
+		internal void DeleteGlobal() => DeleteSnapshot(Path.Combine(_rootPath, "graphsecret.dat"));
+
+		private static void RejectReparsePoints(string path)
+		{
+			if (File.Exists(path) && (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0)
+				throw new IOException("Legacy migration does not follow reparse points.");
+
+			for (var directory = new DirectoryInfo(Path.GetDirectoryName(path)); directory != null; directory = directory.Parent)
+			{
+				if (directory.Exists && (directory.Attributes & FileAttributes.ReparsePoint) != 0)
+					throw new IOException("Legacy migration does not follow reparse points.");
+			}
+		}
+
+		private string ReadPath(string path, byte[] entropy)
+		{
+			RejectReparsePoints(path);
+			if (File.Exists(path + ".tmp"))
+				throw new IOException("An unfinished legacy write exists. Stop the old DocumentHub version before migrating.");
+
+			var encrypted = File.ReadAllText(path);
+			var secret = DPAPIHelper.Decrypt(encrypted, entropy);
+			_snapshots[path] = encrypted;
+			return secret;
+		}
+
+		private void DeleteSnapshot(string path)
+		{
+			if (!_snapshots.TryGetValue(path, out var encrypted))
+				throw new InvalidOperationException("The legacy file was not read and verified by this migration.");
+
+			RejectReparsePoints(path);
+			var retired = path + "." + Guid.NewGuid().ToString("N") + ".migrated";
+			File.Move(path, retired);
+			try
+			{
+				if (File.ReadAllText(retired) != encrypted)
+					throw new IOException("The legacy file changed during migration. The encrypted file has been retained.");
+
+				File.Delete(retired);
+			}
+			catch
+			{
+				if (!File.Exists(path) && File.Exists(retired))
+					File.Move(retired, path);
+				throw;
+			}
+
+			if (File.Exists(path) || File.Exists(path + ".tmp"))
+				throw new IOException("Another legacy write was detected. Stop the old version and repeat migration.");
+		}
+
+		private string GetPath(SecretKey key)
 		{
 			if (key == null)
-			{
 				throw new ArgumentNullException(nameof(key));
-			}
 
-			return File.Exists(GetPath(key));
+			return Path.Combine(_rootPath, key.RelativePath);
 		}
-
-		public void Delete(SecretKey key)
-		{
-			if (key == null)
-			{
-				throw new ArgumentNullException(nameof(key));
-			}
-
-			string path = GetPath(key);
-			if (File.Exists(path))
-			{
-				File.Delete(path);
-			}
-		}
-
-		private static byte[] GetEntropy(SecretKey key) => Encoding.UTF8.GetBytes(key.Entropy);
-
-		/// <summary>
-		/// Creates the folder (and any missing parent folders) so that only SYSTEM, the local Administrators and the
-		/// current account can access it. Inheritance from the parent is disabled. Existing folders are left unchanged.
-		/// </summary>
-		private static void CreateRestrictedDirectory(string directory)
-		{
-			if (Directory.Exists(directory))
-			{
-				return;
-			}
-
-			var security = new DirectorySecurity();
-			security.SetAccessRuleProtection(true, false);
-
-			var allowed = new[]
-			{
-				new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null),
-				new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null),
-				WindowsIdentity.GetCurrent().User,
-			};
-
-			foreach (var sid in allowed)
-			{
-				security.AddAccessRule(new FileSystemAccessRule(
-					sid,
-					FileSystemRights.FullControl,
-					InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
-					PropagationFlags.None,
-					AccessControlType.Allow));
-			}
-
-			Directory.CreateDirectory(directory, security);
-		}
-
-		private string GetPath(SecretKey key) => Path.Combine(_rootPath, key.RelativePath);
 	}
 }

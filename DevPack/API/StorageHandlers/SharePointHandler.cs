@@ -10,18 +10,12 @@
 	using Microsoft.Graph;
 	using Microsoft.Graph.Models;
 	using Microsoft.Graph.Models.ODataErrors;
-	using Skyline.DataMiner.Net;
-	using Skyline.DataMiner.Net.Messages.SLDataGateway;
-	using Skyline.DataMiner.SDM;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.FileAdapters;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Paging;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Security;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
-	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
-	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointConfiguration;
-	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Validation;
 	using File = System.IO.File;
 
 	/// <summary>
@@ -41,7 +35,7 @@
 	/// <example>
 	/// Typical usage:
 	/// <code>
-	/// var handler = new SharePointHandler(helpers, connection);
+	/// var handler = new SharePointHandler(configuration, () => engine.GetCredential(credentialName).GetToken());
 	/// var files = handler.ReadFiles(new WebFileReadData { Bucket = bucket });
 	/// </code>
 	/// </example>
@@ -50,19 +44,9 @@
 		#region Globals
 
 		/// <summary>
-		/// SharePoint DOM repository used to retrieve configurations from DataMiner Object Model.
-		/// </summary>
-		private readonly IRepository<SharePointConfiguration> _sharePointRepository;
-
-		/// <summary>
 		/// SharePoint configuration retrieved from the Document Hub configuration model.
 		/// </summary>
 		private readonly SharePointConfiguration _sharePoint;
-
-		/// <summary>
-		/// Creates the Azure AD credential; the client secret never leaves it.
-		/// </summary>
-		private readonly SharePointCredentialProvider _credentialProvider;
 
 		/// <summary>
 		/// Microsoft Graph client used for SharePoint API operations.
@@ -90,51 +74,20 @@
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SharePointHandler"/> class.
 		/// </summary>
-		/// <param name="connection">
-		/// An active DataMiner connection used to communicate with the system.
+		/// <param name="configuration">The caller-visible source already verified for this bucket.</param>
+		/// <param name="getSecret">
+		/// Retrieves the source's credential as declared by the running Automation script.
 		/// </param>
-		/// <param name="bucket">
-		/// The <see cref="DocumentBucket"/> containing the storage type and related configuration for which this handler is being created.
-		/// </param>
-		/// <param name="secretReader">
-		/// The store used to retrieve the Azure AD client secret of the configured tenant and client
-		/// (see <see cref="SharePointSecrets.ClientSecret(Guid, Guid)"/>).
-		/// Optional; when <c>null</c>, a <see cref="DpapiFileSecretStore"/> using the default DocumentHub security folder is used.
-		/// If no secret exists for the configuration, the legacy <c>graphsecret.dat</c> file is used as a fallback.
-		/// </param>
-		/// <exception cref="ArgumentException">
-		/// Thrown when the bucket has no valid SharePoint reference, or when no SharePoint configuration tied to the bucket can be found.
-		/// </exception>
-		/// <exception cref="System.IO.FileNotFoundException">
-		/// Thrown when the client secret exists neither in the secret store nor in the legacy secret file.
-		/// </exception>
-		/// <exception cref="System.Security.Cryptography.CryptographicException">
-		/// Thrown when the client secret exists but cannot be decrypted, for example when it was saved on another machine.
+		/// <exception cref="InvalidOperationException">
+		/// Thrown when the consuming script's native credential is unavailable.
 		/// </exception>
 		/// <exception cref="NullReferenceException">
 		/// Thrown when the configured SharePoint document library cannot be found.
 		/// </exception>
-		internal SharePointHandler(IConnection connection, DocumentBucket bucket, ISecretReader secretReader = null)
+		internal SharePointHandler(SharePointConfiguration configuration, Func<string> getSecret)
 		{
-			_sharePointRepository = new SharePointConfigurationDomRepository(connection);
-			_credentialProvider = new SharePointCredentialProvider(secretReader);
-
-			// Defensive check to avoid reinitialization
-			if (_graphClient != null && _drive != null)
-				return;
-
-			if (!bucket.SharePointConfiguration.IsValidReference(out Guid identifierGuid))
-			{
-				throw new ArgumentException($"The provided {nameof(bucket)} does not have a SharePoint reference.");
-			}
-
-			// Retrieve SharePoint configuration from DOM
-			var sharePointFilter = SharePointConfigurationExposers.Identifier.Equal(identifierGuid.ToString());
-			_sharePoint = _sharePointRepository.Read(sharePointFilter).FirstOrDefault()
-				?? throw new ArgumentException("No SharePoint configuration tied to the provided bucket could be found.", nameof(bucket));
-
-			// Create the credential; the client secret is handled inside the provider and never reaches this class
-			var credential = _credentialProvider.CreateCredential(_sharePoint.TenantID, _sharePoint.ClientID);
+			_sharePoint = configuration ?? throw new ArgumentNullException(nameof(configuration));
+			var credential = new SharePointCredentialProvider(getSecret).CreateCredential(_sharePoint.TenantID, _sharePoint.ClientID);
 
 			// Initialize Graph client
 			_graphClient = new GraphServiceClient(credential);
