@@ -33,6 +33,11 @@
 		{
 		}
 
+		internal Files(IConnection connection, Func<string, string> scriptCredentials)
+			: this(connection, (caller, bucket) => StorageHandlerFactory.Create(caller, bucket, scriptCredentials))
+		{
+		}
+
 		internal Files(IConnection connection, Func<IConnection, DocumentBucket, IStorageHandler> storageHandlerFactory)
 		{
 			_connection = connection ?? throw new ArgumentNullException(nameof(connection));
@@ -469,7 +474,7 @@
 
 			config = config ?? new SearchFilesConfiguration();
 
-			var storageHandler = StorageHandlerFactory.Create(_connection, bucket);
+			var storageHandler = _storageHandlerFactory(_connection, bucket);
 
 			if (!(storageHandler is ISearchableStorageHandler searchable))
 				throw new NotSupportedException($"Search is not supported for storage type '{bucket.StorageType}'.");

@@ -19,6 +19,13 @@ Depending on your project type, one of the following additional packages is also
 > **Note**
 > This library targets `.NET Framework 4.8`.
 
+Version 1.3 requires DataMiner **10.6.10 / 10.7.0** for native Automation
+credentials. Source management is administrator-only. SharePoint secrets use
+source-scoped Credentials Library entries declared on the DocumentHub scripts that
+call `engine.GetCredential`; DOM shares use native username/password credentials. There are no normal
+DPAPI writes or fallbacks. Existing installations require the explicit, per-agent
+[credential migration](Documentation/CredentialStorage.md) before resuming use.
+
 ### Authentication dependency compatibility
 
 SharePoint uses MSAL (`Microsoft.Identity.Client`) client-credentials authentication through
@@ -48,6 +55,7 @@ Do not delete shared DLL folders indiscriminately, as other solutions may depend
 | ----------------------------------------------------- | ---------------------------------------------------------------------------- |
 | [Getting Started](Documentation/Getting%20Started.md) | Installation, prerequisites, and basic usage                                 |
 | [Quick Reference](Documentation/Quick%20Reference.md) | Common code snippets for file operations, repositories, and storage backends |
+| [Credential storage](Documentation/CredentialStorage.md) | Verified APIs, permissions, deterministic references, migration and integration prerequisites |
 
 External resources:
 
