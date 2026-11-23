@@ -78,15 +78,16 @@ The `DevPack.Tests` project contains unit tests using an in-memory DOM mock (`Do
 | **API - File Download**        | `Files_DownloadFile_Tests`                                                                             | 9     |
 | **API - File Validator**       | `FileValidator_ValidateAndSanitizeFile_Tests`, `FileValidator_FileName_Tests`                          | 38    |
 | **API - File Adapters**        | `FileInfoAdapter_GetRelativePath_Tests`, `DomFileAdapter_Tests`                                        | 17    |
-| **API - DOM Attachment Paths** | `DomAttachmentsHandler_Tests`                                                                         | 7     |
-| **API - Secrets**              | `SecretKey_Tests`, `DpapiFileSecretStore_Tests`, `Secrets_Tests`, `ManageSharePointSecretScript_Tests` | 42    |
+| **API - DOM Attachment Paths** | `DomAttachmentsHandler_Tests`                                                                          | 7     |
+| **API - Secrets**              | `SecretKey_Tests`, `DpapiFileSecretStore_Tests`, `Secrets_Tests`, `ManageSharePointSecretScript_Tests` | 49    |
+| **API - Credentials Manager**  | `NativeCredentialMessaging_Tests`                                                                      | 34    |
 | **SharePoint authentication**  | `SharePointDependency_Tests`                                                                           | 12    |
 | **SDM - SharePoint**           | `SharepointDomRepository_CRUD_Tests`, `SharepointDomRepository_FilterTests_Tests`                      | 13    |
 | **SDM - DomSource**            | `DomSourceDomRepository_CRUD_Tests`, `DomSourceDomRepository_FilterTests_Tests`                        | 13    |
 | **SDM - DocumentBucket**       | `DocumentBucketDomRepository_CRUD_Tests`, `DocumentBucketDomRepository_FilterTests_Tests`              | 26    |
 
 
-**Total: 231 tests**
+**Total: 272 tests**
 
 ### SDM Repository Tests
 
