@@ -1,13 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
+    <LangVersion>8.0</LangVersion>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <AssemblyName>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub</AssemblyName>
     <RootNamespace>Skyline.DataMiner.Solutions.DocumentHub</RootNamespace>
     <PackageId>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub</PackageId>
-    <PackageVersion>1.2.1</PackageVersion>
-    <Version>1.2.1</Version>
+    <PackageVersion>2.0.0</PackageVersion>
+    <Version>2.0.0</Version>
+    <DocumentHubValidateRuntime>true</DocumentHubValidateRuntime>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -29,7 +31,11 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Identity.Client" />
-    <PackageReference Include="Microsoft.Graph" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.IdentityModel.Abstractions" />
+    <PackageReference Include="Microsoft.Kiota.Abstractions" />
+    <PackageReference Include="Microsoft.Kiota.Http.HttpClientLibrary" />
+    <PackageReference Include="Microsoft.Kiota.Serialization.Json" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="Skyline.DataMiner.Core.DataMinerSystem.Common" />
     <PackageReference Include="Skyline.DataMiner.Dev.Common" />
@@ -38,6 +44,8 @@
     <PackageReference Include="Skyline.DataMiner.Utils.DOM" />
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Drawing.Common" />
+    <PackageReference Include="System.Text.Json" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" />
     <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

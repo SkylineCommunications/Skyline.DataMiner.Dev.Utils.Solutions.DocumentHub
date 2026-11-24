@@ -1,0 +1,69 @@
+<Project>
+  <PropertyGroup Condition="'$(DocumentHubValidateRuntime)' == 'true' and '$(NoBuild)' == 'true'">
+    <BuildProjectReferences>false</BuildProjectReferences>
+  </PropertyGroup>
+  <UsingTask TaskName="CheckDocumentHubRuntime" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <RuntimeFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System" />
+      <Using Namespace="System.IO" />
+      <Using Namespace="System.Collections.Generic" />
+      <Code Type="Method" Language="cs"><![CDATA[
+        public override bool Execute()
+        {
+        const long maximumBytes = 20971520;
+        var checkedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        long largestSize = 0;
+        string largestName = "";
+        foreach (var item in RuntimeFiles)
+        {
+            var path = Path.GetFullPath(item.ItemSpec);
+            if (!String.Equals(Path.GetExtension(path), ".dll", StringComparison.OrdinalIgnoreCase) || !checkedPaths.Add(path))
+                continue;
+
+            if (!File.Exists(path))
+            {
+                Log.LogError("DocumentHub runtime DLL is missing: {0}. Build before packing.", path);
+                continue;
+            }
+
+            var file = new FileInfo(path);
+            if (String.Equals(file.Name, "Microsoft.Graph.dll", StringComparison.OrdinalIgnoreCase) ||
+                String.Equals(file.Name, "Microsoft.Graph.Core.dll", StringComparison.OrdinalIgnoreCase) ||
+                String.Equals(file.Name, "Microsoft.Kiota.Authentication.Azure.dll", StringComparison.OrdinalIgnoreCase))
+                Log.LogError("DocumentHub must not distribute the full Graph SDK or Azure authentication provider: {0}", path);
+
+            if (file.Length > maximumBytes)
+                Log.LogError("DocumentHub runtime DLL '{0}' is {1} bytes; the synchronization limit is {2} bytes (20 MiB).", path, file.Length, maximumBytes);
+
+            if (file.Length > largestSize)
+            {
+                largestSize = file.Length;
+                largestName = file.Name;
+            }
+        }
+        if (checkedPaths.Count == 0)
+            Log.LogError("No DocumentHub runtime DLLs were resolved for size validation.");
+        if (!Log.HasLoggedErrors)
+            Log.LogMessage(Microsoft.Build.Framework.MessageImportance.High,
+                "DocumentHub runtime: checked {0} DLLs against {1} bytes; largest is {2} ({3} bytes).",
+                checkedPaths.Count, maximumBytes, largestName, largestSize);
+        return !Log.HasLoggedErrors;
+        }
+      ]]></Code>
+    </Task>
+  </UsingTask>
+  <Target Name="ValidateDocumentHubRuntime"
+          AfterTargets="Build"
+          BeforeTargets="GenerateNuspec"
+          DependsOnTargets="ResolveReferences;ResolvePackageAssets"
+          Condition="'$(DocumentHubValidateRuntime)' == 'true' and '$(DesignTimeBuild)' != 'true'">
+    <ItemGroup>
+      <_DocumentHubRuntimeDll Remove="@(_DocumentHubRuntimeDll)" />
+      <_DocumentHubRuntimeDll Include="$(TargetPath);@(ReferenceCopyLocalPaths);@(RuntimeCopyLocalItems);@(NativeCopyLocalItems);@(RuntimeTargetsCopyLocalItems)" />
+    </ItemGroup>
+    <CheckDocumentHubRuntime RuntimeFiles="@(_DocumentHubRuntimeDll)" />
+  </Target>
+</Project>

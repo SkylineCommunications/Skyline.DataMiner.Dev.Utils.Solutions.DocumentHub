@@ -7,9 +7,6 @@
 	using System.IO;
 	using System.Linq;
 	using System.Threading.Tasks;
-	using Microsoft.Graph;
-	using Microsoft.Graph.Models;
-	using Microsoft.Graph.Models.ODataErrors;
 	using Microsoft.Kiota.Abstractions;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
@@ -19,6 +16,8 @@
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Security;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.Graph.Generated;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.Graph.Generated.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointConfiguration;
@@ -37,7 +36,7 @@
 	/// </para>
 	/// </remarks>
 	/// <seealso cref="IStorageHandler"/>
-	/// <seealso cref="GraphServiceClient"/>
+	/// <seealso cref="DocumentHubGraphClient"/>
 	/// <seealso cref="SharePointPageData"/>
 	/// <example>
 	/// Typical usage:
@@ -68,7 +67,7 @@
 		/// <summary>
 		/// Microsoft Graph client used for SharePoint API operations.
 		/// </summary>
-		private readonly GraphServiceClient _graphClient;
+		private readonly DocumentHubGraphClient _graphClient;
 
 		/// <summary>
 		/// SharePoint site resolved from the configured Site URL.
@@ -138,15 +137,13 @@
 			var credential = _credentialProvider.CreateCredential(_sharePoint.TenantID, _sharePoint.ClientID);
 
 			// Initialize Graph client
-			_graphClient = new GraphServiceClient(credential);
+			_graphClient = DocumentHubGraphClient.Create(credential);
 
 			// Build site URI components
 			var uri = new UriBuilder("https://" + _sharePoint.SiteURL).Uri;
-			string hostname = uri.Host;
-			string path = uri.AbsolutePath;
 
 			// Resolve SharePoint site
-			_site = _graphClient.Sites[$"{hostname}:{path}"]
+			_site = _graphClient.SiteByPath(uri)
 				.GetAsync()
 				.GetAwaiter()
 				.GetResult();
@@ -442,9 +439,7 @@
 				else
 				{
 					folder = await _graphClient
-						.Drives[_drive.Id]
-						.Root
-						.ItemWithPath(trimmedPath)
+						.ItemByPath(_drive.Id, trimmedPath)
 						.GetAsync();
 				}
 
@@ -535,7 +530,7 @@
 		/// so they are returned on the next call rather than being lost.
 		/// </remarks>
 		/// <param name="filter">
-		/// Optional substring filter applied to <see cref="BaseItem.Name"/> of the <see cref="DriveItem"/> object. (case-insensitive).
+		/// Optional substring filter applied to <see cref="DriveItem.Name"/>. (case-insensitive).
 		/// Pass <c>null</c> or empty to skip name filtering.
 		/// </param>
 		/// <param name="allowedExtensions">
@@ -636,9 +631,7 @@
 			try
 			{
 				var searchResponse = await _graphClient
-					.Drives[_drive.Id]
-					.Root
-					.ItemWithPath($"{directory}/{name}")
+					.ItemByPath(_drive.Id, $"{directory}/{name}")
 					.GetAsync();
 
 				return searchResponse != null && searchResponse.File != null;
@@ -684,10 +677,7 @@
 					}
 
 					item = await _graphClient
-							.Drives[_drive.Id]
-							.Root
-							.ItemWithPath(pathPart)
-							.Content
+							.ContentByPath(_drive.Id, pathPart)
 							.PutAsync(stream);
 
 					return item?.WebUrl;
@@ -733,10 +723,7 @@
 					}
 
 					var item = await _graphClient
-						.Drives[_drive.Id]
-						.Root
-						.ItemWithPath(path)
-						.Content
+						.ContentByPath(_drive.Id, path)
 						.PutAsync(jpegStream);
 				}
 			}
@@ -774,9 +761,7 @@
 				{
 					// Check if folder exists
 					await _graphClient
-						.Drives[_drive.Id]
-						.Root
-						.ItemWithPath(currentPath)
+						.ItemByPath(_drive.Id, currentPath)
 						.GetAsync();
 				}
 				catch (ODataError ex) when (ex.ResponseStatusCode == (int)System.Net.HttpStatusCode.NotFound)
@@ -802,10 +787,7 @@
 					else
 					{
 						await _graphClient
-							.Drives[_drive.Id]
-							.Root
-							.ItemWithPath(parentPath)
-							.Children
+							.ChildrenByPath(_drive.Id, parentPath)
 							.PostAsync(folder);
 					}
 				}
@@ -916,29 +898,9 @@
 			return result;
 		}
 
-		private async Task ResolveSearchFileUrlsAsync(IList<DriveItem> items)
+		private Task ResolveSearchFileUrlsAsync(IList<DriveItem> items)
 		{
-			if (items.Count == 0)
-				return;
-
-			// The SDK splits the metadata lookups into batches of at most 20 requests.
-			var batch = new BatchRequestContentCollection(_graphClient);
-			var requests = new Dictionary<string, DriveItem>();
-			foreach (var item in items)
-			{
-				var requestId = await batch.AddBatchRequestStepAsync(CreateSearchFileMetadataRequest(item));
-				requests.Add(requestId, item);
-			}
-
-			var response = await _graphClient.Batch.PostAsync(batch);
-			foreach (var request in requests)
-			{
-				var resolved = await response.GetResponseByIdAsync<DriveItem>(request.Key);
-				if (string.IsNullOrWhiteSpace(resolved?.WebUrl))
-					throw new InvalidOperationException($"SharePoint returned no file URL for search result '{request.Value.Name}'.");
-
-				request.Value.WebUrl = resolved.WebUrl;
-			}
+			return _graphClient.ResolveFileUrlsAsync(items, CreateSearchFileMetadataRequest);
 		}
 
 		private RequestInformation CreateSearchFileMetadataRequest(DriveItem item)
@@ -1001,9 +963,7 @@
 			}
 
 			var folder = await _graphClient
-				.Drives[_drive.Id]
-				.Root
-				.ItemWithPath(trimmedPath)
+				.ItemByPath(_drive.Id, trimmedPath)
 				.GetAsync();
 
 			if (folder == null || folder.Folder == null)
@@ -1063,7 +1023,7 @@
 			// express "everything under this folder" reliably for driveItem hits.
 			var fullQuery = "(" + context.ScopingClause + ") AND (" + args.Query + ")";
 
-			var body = new Microsoft.Graph.Search.Query.QueryPostRequestBody
+			var body = new SearchRequestBody
 			{
 				Requests = new List<SearchRequest>
 				{
@@ -1078,7 +1038,7 @@
 				},
 			};
 
-			var response = await _graphClient.Search.Query.PostAsQueryPostResponseAsync(body);
+			var response = await _graphClient.Search.Query.PostAsync(body);
 			var container = response?.Value?.FirstOrDefault()?.HitsContainers?.FirstOrDefault();
 
 			context.SearchStarted = true;

@@ -14,7 +14,7 @@
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup;
-	using DriveItem = Microsoft.Graph.Models.DriveItem;
+	using DriveItem = Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.Graph.Generated.Models.DriveItem;
 
 	[TestClass]
 	public class Files_DownloadFile_Tests

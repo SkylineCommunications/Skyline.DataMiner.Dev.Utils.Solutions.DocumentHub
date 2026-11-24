@@ -2,7 +2,7 @@
 {
 	using System.Collections.Concurrent;
 	using System.Collections.Generic;
-	using Microsoft.Graph.Models;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.Graph.Generated.Models;
 
 	/// <summary>
 	/// Paging context used when reading files from SharePoint storage.
@@ -16,7 +16,7 @@
 		/// <summary>
 		/// Gets the buffer for DriveItems that did not fit into the current logical page.
 		/// </summary>
-		public ConcurrentQueue<DriveItem> PageRemainderBuffer { get; } = new ConcurrentQueue<DriveItem>();
+		internal ConcurrentQueue<DriveItem> PageRemainderBuffer { get; } = new ConcurrentQueue<DriveItem>();
 
 		/// <summary>
 		/// Gets the identifiers of folders that still need to be traversed.

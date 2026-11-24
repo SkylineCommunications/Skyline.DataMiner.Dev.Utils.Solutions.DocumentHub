@@ -2,7 +2,7 @@
 {
 	using System.Collections.Concurrent;
 	using System.Collections.Generic;
-	using Microsoft.Graph.Models;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.Graph.Generated.Models;
 
 	/// <summary>
 	/// Paging context used when searching files in SharePoint storage via the Microsoft Graph
@@ -27,7 +27,7 @@
 		/// Gets the buffer for DriveItems that were retrieved from Microsoft Search but did not
 		/// fit into the previous logical page.
 		/// </summary>
-		public ConcurrentQueue<DriveItem> PageRemainderBuffer { get; } = new ConcurrentQueue<DriveItem>();
+		internal ConcurrentQueue<DriveItem> PageRemainderBuffer { get; } = new ConcurrentQueue<DriveItem>();
 
 		/// <summary>
 		/// Gets the next result offset (Microsoft Search <c>from</c> parameter).

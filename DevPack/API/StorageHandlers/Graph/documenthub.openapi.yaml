@@ -1,0 +1,501 @@
+openapi: 3.0.3
+info:
+  title: DocumentHub SharePoint client
+  version: 1.0.0
+  description: >
+    The Microsoft Graph v1.0 operations and response fields used by DocumentHub.
+    This is a deliberately limited client contract, not the full Graph schema.
+externalDocs:
+  url: https://learn.microsoft.com/en-us/graph/api/overview
+servers:
+  - url: https://graph.microsoft.com/v1.0
+paths:
+  /sites/{site-id}:
+    parameters:
+      - $ref: '#/components/parameters/site-id'
+    get:
+      operationId: sites.get
+      responses:
+        '200':
+          description: Site metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Site'
+        '4XX':
+          $ref: '#/components/responses/GraphError'
+        '5XX':
+          $ref: '#/components/responses/GraphError'
+  /sites/{site-id}/drives:
+    parameters:
+      - $ref: '#/components/parameters/site-id'
+    get:
+      operationId: sites.drives.list
+      responses:
+        '200':
+          description: Document libraries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DriveCollectionResponse'
+        '4XX':
+          $ref: '#/components/responses/GraphError'
+        '5XX':
+          $ref: '#/components/responses/GraphError'
+  /sites/{site-id}/lists/{list-id}/items/{listItem-id}/driveItem:
+    parameters:
+      - $ref: '#/components/parameters/site-id'
+      - name: list-id
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: listItem-id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: sites.lists.items.getDriveItem
+      parameters:
+        - $ref: '#/components/parameters/select'
+      responses:
+        '200':
+          $ref: '#/components/responses/DriveItem'
+        '4XX':
+          $ref: '#/components/responses/GraphError'
+        '5XX':
+          $ref: '#/components/responses/GraphError'
+  /drives/{drive-id}/root:
+    parameters:
+      - $ref: '#/components/parameters/drive-id'
+    get:
+      operationId: drives.getRoot
+      responses:
+        '200':
+          $ref: '#/components/responses/DriveItem'
+        '4XX':
+          $ref: '#/components/responses/GraphError'
+        '5XX':
+          $ref: '#/components/responses/GraphError'
+  /drives/{drive-id}/items/{driveItem-id}:
+    parameters:
+      - $ref: '#/components/parameters/drive-id'
+      - $ref: '#/components/parameters/driveItem-id'
+    get:
+      operationId: drives.items.get
+      parameters:
+        - $ref: '#/components/parameters/select'
+      responses:
+        '200':
+          $ref: '#/components/responses/DriveItem'
+        '4XX':
+          $ref: '#/components/responses/GraphError'
+        '5XX':
+          $ref: '#/components/responses/GraphError'
+  /drives/{drive-id}/items/{driveItem-id}/children:
+    parameters:
+      - $ref: '#/components/parameters/drive-id'
+      - $ref: '#/components/parameters/driveItem-id'
+    get:
+      operationId: drives.items.children.list
+      parameters:
+        - $ref: '#/components/parameters/select'
+        - name: $top
+          in: query
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: Children of a folder
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DriveItemCollectionResponse'
+        '4XX':
+          $ref: '#/components/responses/GraphError'
+        '5XX':
+          $ref: '#/components/responses/GraphError'
+    post:
+      operationId: drives.items.children.create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DriveItem'
+      responses:
+        '201':
+          $ref: '#/components/responses/DriveItem'
+        '4XX':
+          $ref: '#/components/responses/GraphError'
+        '5XX':
+          $ref: '#/components/responses/GraphError'
+  /drives/{drive-id}/items/{driveItem-id}/content:
+    parameters:
+      - $ref: '#/components/parameters/drive-id'
+      - $ref: '#/components/parameters/driveItem-id'
+    get:
+      operationId: drives.items.download
+      responses:
+        '200':
+          description: File content after following the preauthenticated redirect
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '4XX':
+          $ref: '#/components/responses/GraphError'
+        '5XX':
+          $ref: '#/components/responses/GraphError'
+    put:
+      operationId: drives.items.upload
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          $ref: '#/components/responses/DriveItem'
+        '201':
+          $ref: '#/components/responses/DriveItem'
+        '4XX':
+          $ref: '#/components/responses/GraphError'
+        '5XX':
+          $ref: '#/components/responses/GraphError'
+  /search/query:
+    post:
+      operationId: search.query
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequestBody'
+      responses:
+        '200':
+          description: Search response pages
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponseBody'
+        '4XX':
+          $ref: '#/components/responses/GraphError'
+        '5XX':
+          $ref: '#/components/responses/GraphError'
+  /$batch:
+    post:
+      operationId: batch.post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchRequestBody'
+      responses:
+        '200':
+          description: Individually status-checked metadata responses, correlated by ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchResponseBody'
+        '4XX':
+          $ref: '#/components/responses/GraphError'
+        '5XX':
+          $ref: '#/components/responses/GraphError'
+components:
+  parameters:
+    site-id:
+      name: site-id
+      in: path
+      required: true
+      schema:
+        type: string
+    drive-id:
+      name: drive-id
+      in: path
+      required: true
+      schema:
+        type: string
+    driveItem-id:
+      name: driveItem-id
+      in: path
+      required: true
+      schema:
+        type: string
+    select:
+      name: $select
+      in: query
+      style: form
+      explode: false
+      schema:
+        type: array
+        items:
+          type: string
+  responses:
+    DriveItem:
+      description: File or folder metadata
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DriveItem'
+    GraphError:
+      description: Graph error
+      x-ms-error-response: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ODataError'
+  schemas:
+    Site:
+      type: object
+      properties:
+        id:
+          type: string
+    Drive:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+    DriveCollectionResponse:
+      type: object
+      properties:
+        '@odata.nextLink':
+          type: string
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/Drive'
+    SearchResource:
+      type: object
+      required:
+        - '@odata.type'
+      discriminator:
+        propertyName: '@odata.type'
+        mapping:
+          '#microsoft.graph.driveItem': '#/components/schemas/DriveItem'
+      properties:
+        '@odata.type':
+          type: string
+    DriveItem:
+      allOf:
+        - $ref: '#/components/schemas/SearchResource'
+        - type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            webUrl:
+              type: string
+            size:
+              type: integer
+              format: int64
+            createdDateTime:
+              type: string
+              format: date-time
+            createdBy:
+              $ref: '#/components/schemas/IdentitySet'
+            file:
+              $ref: '#/components/schemas/FileFacet'
+            folder:
+              $ref: '#/components/schemas/Folder'
+            parentReference:
+              $ref: '#/components/schemas/ItemReference'
+            sharepointIds:
+              $ref: '#/components/schemas/SharepointIds'
+            listItem:
+              $ref: '#/components/schemas/ListItem'
+    IdentitySet:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/Identity'
+    Identity:
+      type: object
+      properties:
+        displayName:
+          type: string
+    FileFacet:
+      type: object
+      properties:
+        mimeType:
+          type: string
+    Folder:
+      type: object
+      properties:
+        childCount:
+          type: integer
+          format: int32
+    ItemReference:
+      type: object
+      properties:
+        id:
+          type: string
+        path:
+          type: string
+        driveId:
+          type: string
+        siteId:
+          type: string
+        sharepointIds:
+          $ref: '#/components/schemas/SharepointIds'
+    SharepointIds:
+      type: object
+      properties:
+        listId:
+          type: string
+        listItemId:
+          type: string
+    ListItem:
+      type: object
+      properties:
+        sharepointIds:
+          $ref: '#/components/schemas/SharepointIds'
+    DriveItemCollectionResponse:
+      type: object
+      properties:
+        '@odata.nextLink':
+          type: string
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/DriveItem'
+    SearchRequestBody:
+      type: object
+      properties:
+        requests:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchRequest'
+    SearchRequest:
+      type: object
+      properties:
+        entityTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityType'
+        query:
+          $ref: '#/components/schemas/SearchQuery'
+        from:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        region:
+          type: string
+    EntityType:
+      type: string
+      enum: [driveItem]
+    SearchQuery:
+      type: object
+      properties:
+        queryString:
+          type: string
+    SearchResponseBody:
+      type: object
+      properties:
+        value:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchResponse'
+    SearchResponse:
+      type: object
+      properties:
+        hitsContainers:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchHitsContainer'
+    SearchHitsContainer:
+      type: object
+      properties:
+        moreResultsAvailable:
+          type: boolean
+        hits:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchHit'
+    SearchHit:
+      type: object
+      properties:
+        hitId:
+          type: string
+        resource:
+          $ref: '#/components/schemas/SearchResource'
+    BatchRequestBody:
+      type: object
+      properties:
+        requests:
+          type: array
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/BatchRequest'
+    BatchRequest:
+      type: object
+      properties:
+        id:
+          type: string
+        method:
+          type: string
+        url:
+          type: string
+    BatchResponseBody:
+      type: object
+      properties:
+        responses:
+          type: array
+          items:
+            $ref: '#/components/schemas/BatchResponse'
+    BatchResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: integer
+          format: int32
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+        body:
+          $ref: '#/components/schemas/MetadataResponse'
+    MetadataResponse:
+      type: object
+      properties:
+        webUrl:
+          type: string
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+    ODataError:
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+    ErrorDetail:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+          x-ms-primary-error-message: true
+        innerError:
+          $ref: '#/components/schemas/InnerError'
+    InnerError:
+      type: object
+      properties:
+        request-id:
+          type: string
+        client-request-id:
+          type: string
+        date:
+          type: string

@@ -2,10 +2,10 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API.Security
 {
 	using System;
 	using System.Linq;
-	using Microsoft.Graph;
-	using Microsoft.Graph.Models.ODataErrors;
 	using Microsoft.Identity.Client;
 	using Microsoft.Kiota.Abstractions.Authentication;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.Graph.Generated;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.Graph.Generated.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 
 	/// <summary>
@@ -28,10 +28,10 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API.Security
 
 			try
 			{
-				var graphClient = new GraphServiceClient(credential);
+				using var graphClient = DocumentHubGraphClient.Create(credential);
 
 				var uri = new UriBuilder("https://" + sharePoint.SiteURL).Uri;
-				var site = graphClient.Sites[$"{uri.Host}:{uri.AbsolutePath}"]
+				var site = graphClient.SiteByPath(uri)
 					.GetAsync()
 					.GetAwaiter()
 					.GetResult();

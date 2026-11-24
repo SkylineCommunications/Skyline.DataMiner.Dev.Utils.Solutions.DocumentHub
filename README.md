@@ -29,8 +29,11 @@ Graph host. Claims challenges and cancellation are forwarded to MSAL.
 
 The executing authentication path does not use Azure.Identity or Azure.Core's
 `TokenCredential.GetTokenAsync`/`ValueTask<T>` contract, avoiding its assembly-identity
-conflict with DataMiner's authentication dependencies. Graph can still include Azure
-packages transitively; their presence does not mean this credential path is used.
+conflict with DataMiner's authentication dependencies. The focused client uses Kiota's
+HTTP and JSON runtime packages, not the full Microsoft.Graph SDK, Graph.Core, or the
+Kiota Azure authentication package. MSAL and both authentication providers are unchanged.
+Shared runtime versions previously supplied transitively by Graph are retained explicitly
+to avoid dependency downgrades when restoring the smaller package.
 No changes to DataMiner-owned DLLs or executable configuration are required.
 `SharePointDependency_Tests` covers token acquisition with mocked OAuth responses, caching,
 claims, cancellation, trusted-host restrictions, and the absence of direct Azure references.
@@ -41,6 +44,42 @@ package version from the global NuGet cache and the consuming packaging projects
 assemblies already loaded by the Agent; an Agent still running an earlier DevPack may
 need a process restart to pick up the replacement.
 Do not delete shared DLL folders indiscriminately, as other solutions may depend on them.
+
+### Version 2 migration and DLL size
+
+Version 2 replaces the full Graph SDK with an internal Kiota-generated client for the
+existing SharePoint site/library lookups, file/folder operations, recursive paging,
+KQL search, and batched file-URL resolution. Local and DOM storage are unchanged.
+SharePoint deletion and resumable uploads have not been added.
+
+Upgrade the core, Automation, Protocol, and GQI NuGet libraries together and rebuild
+consumers. `SharePointPageData.PageRemainderBuffer` and
+`SharePointSearchPageData.PageRemainderBuffer` are now internal. Consumers must use
+the public paging-context APIs instead of reading or changing these buffers.
+The high-level file APIs remain unchanged, but existing binaries that depend on
+Graph model types or these removed public members are not compatible.
+
+Build and pack targets reject each shipping DLL larger than **20,971,520 bytes
+(20 MiB)** and reject reintroduction of the full Graph SDK. This includes resolved
+runtime dependencies, not only the DocumentHub DLL or the compressed NuGet size.
+MSAL remains a supported dependency and is checked against the same size limit.
+
+### Regenerating the Graph client
+
+The small OpenAPI definition and generated C# sources are checked in under
+`DevPack\API\StorageHandlers\Graph`. Normal builds do not run Kiota or download a schema.
+After updating the API definition, run this command from the repository root:
+
+```powershell
+.\DevPack\API\StorageHandlers\Graph\Generate-Client.ps1
+```
+
+The script restores the pinned local Kiota tool and regenerates only the `Generated`
+directory. Do not hand-edit its C# files or `kiota-lock.json`.
+The handwritten partial client supplies Graph's site/file path aliases and batches
+metadata GETs in groups of at most 20. Inner batch failures are surfaced, even when
+the outer HTTP status is 200; the handler retains the pending search page for a retry.
+OAuth remains implemented by MSAL, not by this generated client.
 
 ## Documentation
 
