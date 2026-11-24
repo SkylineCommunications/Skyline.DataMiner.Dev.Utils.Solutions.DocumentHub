@@ -94,31 +94,38 @@ External resources:
 
 ## Unit Tests
 
-The `DevPack.Tests` project contains unit tests using an in-memory DOM mock (`DomSLNetMessageHandler`).
+The `DevPack.Tests` project contains an in-memory DOM mock (`DomSLNetMessageHandler`), temporary local files,
+and mocked HTTP responses for MSAL and Kiota; no live DataMiner or SharePoint connection is required.
 
 ### Test Coverage
 
-| Area                           | Test Classes                                                                                           | Tests |
-|--------------------------------|--------------------------------------------------------------------------------------------------------|-------|
-| **API - DocHubClient**         | `DocHubClient_Tests`                                                                                   | 3     |
-| **API - Files Upload**         | `Files_UploadFile_Tests`                                                                               | 16    |
-| **API - Files Read**           | `Files_ReadFiles_Tests`                                                                                | 5     |
-| **API - Files Delete**         | `Files_DeleteFile_Tests`                                                                               | 6     |
-| **API - Local Public Storage** | `LocalHandler_Tests`                                                                                   | 19    |
-| **API - Files Search**         | `Files_SearchFiles_Tests`                                                                              | 5     |
-| **API - File Download**        | `Files_DownloadFile_Tests`                                                                             | 9     |
-| **API - File Validator**       | `FileValidator_ValidateAndSanitizeFile_Tests`, `FileValidator_FileName_Tests`                          | 38    |
-| **API - File Adapters**        | `FileInfoAdapter_GetRelativePath_Tests`, `DomFileAdapter_Tests`                                        | 17    |
-| **API - DOM Attachment Paths** | `DomAttachmentsHandler_Tests`                                                                         | 7     |
-| **API - Secrets**              | `SecretKey_Tests`, `DpapiFileSecretStore_Tests`, `Secrets_Tests`, `ManageSharePointSecretScript_Tests` | 42    |
-| **SharePoint authentication**  | `SharePointDependency_Tests`                                                                           | 12    |
-| **SharePoint Kiota client**    | `KiotaClient_Tests`                                                                                    | 7     |
-| **SDM - SharePoint**           | `SharepointDomRepository_CRUD_Tests`, `SharepointDomRepository_FilterTests_Tests`                      | 13    |
-| **SDM - DomSource**            | `DomSourceDomRepository_CRUD_Tests`, `DomSourceDomRepository_FilterTests_Tests`                        | 13    |
-| **SDM - DocumentBucket**       | `DocumentBucketDomRepository_CRUD_Tests`, `DocumentBucketDomRepository_FilterTests_Tests`              | 26    |
-
-
-**Total: 238 tests**
+| Area | Test class | Test cases |
+| --- | --- | ---: |
+| API - DocHubClient | `DocHubClient_Tests` | 3 |
+| API - Files Upload | `Files_UploadFile_Tests` | 16 |
+| API - Files Read | `Files_ReadFiles_Tests` | 5 |
+| API - Files Delete | `Files_DeleteFile_Tests` | 6 |
+| API - Local Public Storage | `LocalHandler_Tests` | 19 |
+| API - Files Search | `Files_SearchFiles_Tests` | 5 |
+| API - File Download | `Files_DownloadFile_Tests` | 9 |
+| API - File Validation | `FileValidator_ValidateAndSanitizeFile_Tests` | 19 |
+| API - File Name Validation | `FileValidator_FileName_Tests` | 19 |
+| API - Local File Adapter | `FileInfoAdapter_GetRelativePath_Tests` | 11 |
+| API - DOM File Adapter | `DomFileAdapter_Tests` | 6 |
+| API - DOM Attachment Paths | `DomAttachmentsHandler_Tests` | 7 |
+| API - Secret Keys | `SecretKey_Tests` | 22 |
+| API - Encrypted Secret Storage | `DpapiFileSecretStore_Tests` | 10 |
+| API - Secrets | `Secrets_Tests` | 5 |
+| API - Secret Management Script | `ManageSharePointSecretScript_Tests` | 5 |
+| SharePoint Authentication | `SharePointDependency_Tests` | 12 |
+| SharePoint Kiota Client | `KiotaClient_Tests` | 7 |
+| SDM - SharePoint CRUD | `SharepointDomRepository_CRUD_Tests` | 6 |
+| SDM - SharePoint Filters | `SharepointDomRepository_FilterTests_Tests` | 7 |
+| SDM - DomSource CRUD | `DomSourceDomRepository_CRUD_Tests` | 6 |
+| SDM - DomSource Filters | `DomSourceDomRepository_FilterTests_Tests` | 7 |
+| SDM - DocumentBucket CRUD and Middleware | `DocumentBucketDomRepository_CRUD_Tests` | 16 |
+| SDM - DocumentBucket Filters | `DocumentBucketDomRepository_FilterTests_Tests` | 10 |
+| **Total** | **24 classes** | **238** |
 
 ### Kiota Client Tests
 
@@ -132,10 +139,13 @@ Existing MSAL authentication tests are unchanged.
 
 ### SDM Repository Tests
 
-Each repository test class covers:
-- **CRUD**: Create, Update, CreateOrUpdate, ReadPaged, DeleteSingle, DeleteBulk, Count
-- **Filters**: Equal, Contains, AND, OR, TRUE
-- **Middleware**: Path sanitization (DocumentBucket)
+The **SDM module cases** are split across **SharePoint**,
+**DomSource**, and **DocumentBucket**. Each module has separate CRUD
+and filter test classes:
+
+- **CRUD**: Create, Update, ReadPaged, DeleteSingle, DeleteBulk, and Count for all three modules; CreateOrUpdate for DocumentBucket.
+- **Filters**: Equality, substring matching, AND/OR combinations, and unfiltered TRUE queries for module-specific fields.
+- **Middleware**: DocumentBucket upload-path sanitization on both create and update, with parameterized inputs.
 
 ### API Tests
 
@@ -179,6 +189,10 @@ API tests validate parameter handling:
 - Tenant/client ID validation for SharePoint client secrets
 - The public `DocHubClient.Secrets` API being write-only (no member returns a secret, no secret store types are exposed)
 - The in-memory store used as a test double
+
+`ManageSharePointSecretScript_Tests` adds five cases for saving and deleting secrets,
+defaulting an empty action to Save, rejecting invalid input, and matching the
+script action constants to the DevPack contract.
 
 ### Running Tests
 
