@@ -168,6 +168,16 @@
 			_openDownloadStream = openDownloadStream ?? throw new ArgumentNullException(nameof(openDownloadStream));
 		}
 
+		/// <summary>Uses an existing client and resolved SharePoint configuration without performing discovery.</summary>
+		internal SharePointHandler(DocumentHubGraphClient graphClient, SharePointConfiguration sharePoint, Site site, Drive drive)
+		{
+			_graphClient = graphClient ?? throw new ArgumentNullException(nameof(graphClient));
+			_sharePoint = sharePoint ?? throw new ArgumentNullException(nameof(sharePoint));
+			_site = site ?? throw new ArgumentNullException(nameof(site));
+			_drive = drive ?? throw new ArgumentNullException(nameof(drive));
+			_openDownloadStream = OpenDownloadStream;
+		}
+
 		#endregion
 
 		#region Public

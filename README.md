@@ -112,12 +112,23 @@ The `DevPack.Tests` project contains unit tests using an in-memory DOM mock (`Do
 | **API - DOM Attachment Paths** | `DomAttachmentsHandler_Tests`                                                                         | 7     |
 | **API - Secrets**              | `SecretKey_Tests`, `DpapiFileSecretStore_Tests`, `Secrets_Tests`, `ManageSharePointSecretScript_Tests` | 42    |
 | **SharePoint authentication**  | `SharePointDependency_Tests`                                                                           | 12    |
+| **SharePoint Kiota client**    | `KiotaClient_Tests`                                                                                    | 7     |
 | **SDM - SharePoint**           | `SharepointDomRepository_CRUD_Tests`, `SharepointDomRepository_FilterTests_Tests`                      | 13    |
 | **SDM - DomSource**            | `DomSourceDomRepository_CRUD_Tests`, `DomSourceDomRepository_FilterTests_Tests`                        | 13    |
 | **SDM - DocumentBucket**       | `DocumentBucketDomRepository_CRUD_Tests`, `DocumentBucketDomRepository_FilterTests_Tests`              | 26    |
 
 
-**Total: 231 tests**
+**Total: 238 tests**
+
+### Kiota Client Tests
+
+The focused Kiota tests use mocked HTTP responses with the real generated client
+and JSON serialization. They cover encoded root/nested file operations, upload
+bytes and folder request bodies, search-result metadata, 20+1 metadata batching
+with out-of-order responses, search-page recovery after inner 403/429 failures,
+and binary downloads through Kiota's redirect middleware without forwarding the
+Graph bearer token. They require no live DataMiner or SharePoint connection.
+Existing MSAL authentication tests are unchanged.
 
 ### SDM Repository Tests
 
