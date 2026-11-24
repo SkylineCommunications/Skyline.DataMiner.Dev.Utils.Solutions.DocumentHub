@@ -8,8 +8,8 @@
     <DataMinerType>Package</DataMinerType>
     <GenerateDataMinerPackage>True</GenerateDataMinerPackage>
     <MinimumRequiredDmVersion>10.6.10.0 - 17716</MinimumRequiredDmVersion>
-    <PackageVersion>1.2.1</PackageVersion>
-    <Version>1.2.1</Version>
+    <PackageVersion>1.2.1-rc1</PackageVersion>
+    <Version>1.2.1-rc1</Version>
     <VersionComment>Source-scoped native credentials, least-privilege consumers and explicit legacy migration; no DPAPI fallback.</VersionComment>
     <!-- Do NOT fill in the Organization Token here. This points to either an Environment Variable skyline__sdk__dataminertoken holding the organization token or a Visual Studio User Secret holding the token. -->
     <CatalogPublishKeyName>skyline:sdk:dataminertoken</CatalogPublishKeyName>
