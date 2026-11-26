@@ -7,8 +7,8 @@
     <AssemblyName>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub</AssemblyName>
     <RootNamespace>Skyline.DataMiner.Solutions.DocumentHub</RootNamespace>
     <PackageId>Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub</PackageId>
-    <PackageVersion>2.0.0-rc1</PackageVersion>
-    <Version>2.0.0-rc1</Version>
+    <PackageVersion>2.0.0-rc3</PackageVersion>
+    <Version>2.0.0-rc3</Version>
     <DocumentHubValidateRuntime>true</DocumentHubValidateRuntime>
     <PackageTags>Skyline;DataMiner</PackageTags>
     <PackageProjectUrl>https://skyline.be</PackageProjectUrl>
