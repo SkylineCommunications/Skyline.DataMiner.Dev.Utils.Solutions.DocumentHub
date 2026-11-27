@@ -4,63 +4,69 @@ namespace DevPack.Tests.API
 	using FluentAssertions;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Security;
 	using Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup;
-	using Script = SLC_DH_AS_ManageSharePointSecret.Script;
 
-	/// <summary>
-	/// Tests the per-agent logic of <c>SLC-DH-AS-ManageSharePointSecret</c>, which is compiled in from the script source.
-	/// </summary>
 	[TestClass]
 	public class ManageSharePointSecretScript_Tests
 	{
-		private const string TenantId = "aaaaaaaa-0000-0000-0000-000000000001";
-		private const string ClientId = "bbbbbbbb-0000-0000-0000-000000000002";
-
 		[TestMethod]
-		public void Apply_Save_StoresUnderTenantAndClient()
+		[DataRow("Write")]
+		[DataRow("Assign")]
+		[DataRow("Connection")]
+		public void Migration_FailureRetainsLegacyFile(string stage)
 		{
-			var store = new InMemorySecretStore();
-
-			Script.Apply(store, Script.SaveAction, TenantId, ClientId, "my-secret");
-
-			store.Read(SharePointSecrets.ClientSecret(TenantId, ClientId)).Should().Be("my-secret");
+			var source = CredentialPlatformFake.Source();
+			var key = SharePointSecrets.ClientSecret(source.TenantID, source.ClientID);
+			var legacy = new InMemorySecretStore();
+			legacy.Save(key, "legacy-synthetic-secret");
+			var platform = new CredentialPlatformFake { FailureAt = stage };
+			var migration = new CredentialMigration(platform, legacy, c => stage != "Connection");
+			migration.Invoking(m => m.Migrate(new[] { source }, false)).Should().Throw<InvalidOperationException>();
+			legacy.Exists(key).Should().BeTrue();
 		}
 
 		[TestMethod]
-		public void Apply_EmptyAction_DefaultsToSave()
+		public void Migration_SharedLegacyPairIsRemovedOnlyAfterEverySourceIsVerified()
 		{
-			var store = new InMemorySecretStore();
-
-			Script.Apply(store, null, TenantId, ClientId, "my-secret");
-
-			store.Exists(SharePointSecrets.ClientSecret(TenantId, ClientId)).Should().BeTrue();
+			var first = CredentialPlatformFake.Source();
+			var second = CredentialPlatformFake.Source(Guid.NewGuid().ToString());
+			var key = SharePointSecrets.ClientSecret(first.TenantID, first.ClientID);
+			var legacy = new InMemorySecretStore();
+			legacy.Save(key, "legacy-synthetic-secret");
+			var platform = new CredentialPlatformFake();
+			var checkedSources = 0;
+			var migration = new CredentialMigration(platform, legacy, c =>
+			{
+				legacy.Exists(key).Should().BeTrue();
+				checkedSources++;
+				return c.Identifier != second.Identifier;
+			});
+			migration.Invoking(m => m.Migrate(new[] { first, second }, false)).Should().Throw<InvalidOperationException>();
+			legacy.Exists(key).Should().BeTrue();
+			checkedSources.Should().Be(2);
+			new CredentialMigration(platform, legacy, c => true).Migrate(new[] { first, second }, false).Should().Be(1);
+			legacy.Exists(key).Should().BeFalse();
+			platform.Credentials.Should().HaveCount(2);
 		}
 
 		[TestMethod]
-		public void Apply_Delete_RemovesSecret()
+		public void Migration_ExistingRotatedNativeSecretIsNeverReplacedWithLegacyValue()
 		{
-			var store = new InMemorySecretStore();
-			Script.Apply(store, Script.SaveAction, TenantId, ClientId, "my-secret");
-
-			Script.Apply(store, Script.DeleteAction, TenantId, ClientId, null);
-
-			store.Exists(SharePointSecrets.ClientSecret(TenantId, ClientId)).Should().BeFalse();
+			var source = CredentialPlatformFake.Source();
+			var platform = new CredentialPlatformFake();
+			new CredentialProvisioner(platform).Save(source, "rotated-native-secret");
+			var legacy = new InMemorySecretStore();
+			var key = SharePointSecrets.ClientSecret(source.TenantID, source.ClientID);
+			legacy.Save(key, "stale-legacy-secret");
+			new CredentialMigration(platform, legacy, c => true).Migrate(new[] { source }, false).Should().Be(1);
+			platform.Passwords[new SharePointCredentialReference(source).Id].Should().Be("rotated-native-secret");
+			platform.Writes.Should().ContainSingle();
 		}
 
 		[TestMethod]
-		public void Apply_InvalidInput_Throws()
+		public void Migration_MissingLegacyAndNativeSecretIsAnExplicitFailure()
 		{
-			var store = new InMemorySecretStore();
-
-			((Action)(() => Script.Apply(store, Script.SaveAction, TenantId, ClientId, string.Empty))).Should().Throw<ArgumentException>();
-			((Action)(() => Script.Apply(store, "Rotate", TenantId, ClientId, "s"))).Should().Throw<ArgumentException>();
-			((Action)(() => Script.Apply(store, Script.SaveAction, "x", ClientId, "s"))).Should().Throw<ArgumentException>();
-		}
-
-		[TestMethod]
-		public void ActionConstants_MatchDevPackContract()
-		{
-			Script.SaveAction.Should().Be(Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient.Secrets.SaveAction);
-			Script.DeleteAction.Should().Be(Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient.Secrets.DeleteAction);
+			var migration = new CredentialMigration(new CredentialPlatformFake(), new InMemorySecretStore(), c => true);
+			migration.Invoking(m => m.Migrate(new[] { CredentialPlatformFake.Source() }, false)).Should().Throw<InvalidOperationException>();
 		}
 	}
 }

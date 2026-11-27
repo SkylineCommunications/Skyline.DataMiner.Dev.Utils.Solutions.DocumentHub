@@ -103,16 +103,22 @@
 
 		public string GetCreatedBy()
 		{
-			// Retrieve file's security descriptor.
-			FileSecurity fileSecurity = fileInfo.GetAccessControl();
+			var security = fileInfo.GetAccessControl();
+			var ownerSid = (SecurityIdentifier)security.GetOwner(
+				typeof(SecurityIdentifier));
 
-			// Extract the owner identity.
-			IdentityReference owner = fileSecurity.GetOwner(typeof(NTAccount));
-
-			// Simplify domain\user format to just "user".
-			return owner.Value.Contains("\\")
-				? owner.Value.Split('\\')[1]
-				: owner.Value;
+			try
+			{
+				var account = (NTAccount)ownerSid.Translate(typeof(NTAccount));
+				var separator = account.Value.IndexOf('\\');
+				return separator >= 0
+					? account.Value.Substring(separator + 1)
+					: account.Value;
+			}
+			catch (IdentityNotMappedException)
+			{
+				return ownerSid.Value;
+			}
 		}
 
 		public string GetDirectory()

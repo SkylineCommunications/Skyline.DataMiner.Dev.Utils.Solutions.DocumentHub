@@ -86,34 +86,30 @@ var result = helper.DocumentBuckets.CreateOrUpdate(new[] { bucket1, bucket2 });
 ### SharePoint Configurations
 
 ```csharp
-// Create multiple configurations for different SharePoint sites
-var config1 = helper.SharePointConfigurations.Create(new SharePointConfiguration
+using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient;
+
+var sources = new SharePointSources(engine.GetUserConnection());
+// IDs are supplied by the administrator's form and reused on retries.
+var config1 = new SharePointConfiguration
 {
+    Identifier = sourceId,
     Name = "Marketing Site",
-    TenantID = "tenant-id",
-    ClientID = "client-id",
+    TenantID = organizationId,
+    ClientID = clientId,
     SiteURL = "https://contoso.sharepoint.com/sites/Marketing",
     DocumentLibraryName = "Shared Documents",
-});
-
-var config2 = helper.SharePointConfigurations.Create(new SharePointConfiguration
-{
-    Name = "Engineering Site",
-    TenantID = "tenant-id",
-    ClientID = "client-id",
-    SiteURL = "https://contoso.sharepoint.com/sites/Engineering",
-    DocumentLibraryName = "Technical Docs",
-});
+};
+sources.Save(config1, clientSecretFromNativePasswordControl);
 
 // Read all
 var configs = helper.SharePointConfigurations.ReadAll();
 
 // Update
 config1.DocumentLibraryName = "Archive";
-helper.SharePointConfigurations.Update(config1);
+sources.Save(config1, null); // Preserve the existing native secret.
 
-// Delete
-helper.SharePointConfigurations.Delete(config2);
+// Remove a different, unlinked source; retain its native credential.
+sources.Delete(unlinkedSourceId);
 
 // Link a SharePoint bucket to a specific configuration
 var bucket = helper.DocumentBuckets.Create(new DocumentBucket
@@ -128,16 +124,20 @@ var bucket = helper.DocumentBuckets.Create(new DocumentBucket
 
 ### SharePoint Client Secrets
 
-Stored encrypted on the agent (`sharepoint\<tenantId>\<clientId>.dat`), never in DOM, and never readable through the API.
+Stored in a source-scoped native Credentials Library entry, never ordinary DOM
+data or secret files. The DocumentHub scripts that reach SharePoint declare it
+under its library name and use `engine.GetCredential(name).GetToken()`.
+Management requires a DataMiner administrator
+and 10.6.10 / 10.7.0. See [Credential storage](CredentialStorage.md) for verified
+references, exact assignments and explicit legacy migration.
 
 ```csharp
 var client = engine.GetDocHubClient();
 
-bool valid = client.Secrets.IsSharePointConnected(config1, clientSecret); // test without saving
-client.Secrets.SaveSharePointClientSecret(config1.TenantID, config1.ClientID, clientSecret);
-bool exists = client.Secrets.HasSharePointClientSecret(config1.TenantID, config1.ClientID);
+bool valid = client.Secrets.IsSharePointConnected(config1, clientSecretFromNativePasswordControl); // transient candidate
+client.Secrets.SaveSharePointClientSecret(config1, clientSecretFromNativePasswordControl);
+bool exists = client.Secrets.HasSharePointClientSecret(config1);
 bool connected = client.Secrets.IsSharePointConnected(config1); // test the saved secret
-client.Secrets.DeleteSharePointClientSecret(config1.TenantID, config1.ClientID);
 ```
 
 ### DOM Sources

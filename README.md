@@ -19,6 +19,13 @@ Depending on your project type, one of the following additional packages is also
 > **Note**
 > This library targets `.NET Framework 4.8`.
 
+Version 1.3 requires DataMiner **10.6.10 / 10.7.0** for native Automation
+credentials. Source management is administrator-only. SharePoint secrets use
+source-scoped Credentials Library entries declared on the DocumentHub scripts that
+call `engine.GetCredential`; DOM shares use native username/password credentials. There are no normal
+DPAPI writes or fallbacks. Existing installations require the explicit, per-agent
+[credential migration](Documentation/CredentialStorage.md) before resuming use.
+
 ### Authentication dependency compatibility
 
 SharePoint uses MSAL (`Microsoft.Identity.Client`) client-credentials authentication through
@@ -48,6 +55,7 @@ Do not delete shared DLL folders indiscriminately, as other solutions may depend
 | ----------------------------------------------------- | ---------------------------------------------------------------------------- |
 | [Getting Started](Documentation/Getting%20Started.md) | Installation, prerequisites, and basic usage                                 |
 | [Quick Reference](Documentation/Quick%20Reference.md) | Common code snippets for file operations, repositories, and storage backends |
+| [Credential storage](Documentation/CredentialStorage.md) | Verified APIs, permissions, deterministic references, migration and integration prerequisites |
 
 External resources:
 
@@ -70,15 +78,16 @@ The `DevPack.Tests` project contains unit tests using an in-memory DOM mock (`Do
 | **API - File Download**        | `Files_DownloadFile_Tests`                                                                             | 9     |
 | **API - File Validator**       | `FileValidator_ValidateAndSanitizeFile_Tests`, `FileValidator_FileName_Tests`                          | 38    |
 | **API - File Adapters**        | `FileInfoAdapter_GetRelativePath_Tests`, `DomFileAdapter_Tests`                                        | 17    |
-| **API - DOM Attachment Paths** | `DomAttachmentsHandler_Tests`                                                                         | 7     |
-| **API - Secrets**              | `SecretKey_Tests`, `DpapiFileSecretStore_Tests`, `Secrets_Tests`, `ManageSharePointSecretScript_Tests` | 42    |
+| **API - DOM Attachment Paths** | `DomAttachmentsHandler_Tests`                                                                          | 7     |
+| **API - Secrets**              | `SecretKey_Tests`, `DpapiFileSecretStore_Tests`, `Secrets_Tests`, `ManageSharePointSecretScript_Tests` | 49    |
+| **API - Credentials Manager**  | `NativeCredentialMessaging_Tests`                                                                      | 34    |
 | **SharePoint authentication**  | `SharePointDependency_Tests`                                                                           | 12    |
 | **SDM - SharePoint**           | `SharepointDomRepository_CRUD_Tests`, `SharepointDomRepository_FilterTests_Tests`                      | 13    |
 | **SDM - DomSource**            | `DomSourceDomRepository_CRUD_Tests`, `DomSourceDomRepository_FilterTests_Tests`                        | 13    |
 | **SDM - DocumentBucket**       | `DocumentBucketDomRepository_CRUD_Tests`, `DocumentBucketDomRepository_FilterTests_Tests`              | 26    |
 
 
-**Total: 231 tests**
+**Total: 272 tests**
 
 ### SDM Repository Tests
 

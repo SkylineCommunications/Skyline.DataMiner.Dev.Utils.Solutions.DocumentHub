@@ -1,82 +1,103 @@
 namespace Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient
 {
 	using System;
+	using System.Collections.Generic;
+	using System.Linq;
 	using Skyline.DataMiner.Net;
+	using Skyline.DataMiner.Net.Messages.SLDataGateway;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Security;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
+	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointConfiguration;
 
-	/// <summary>
-	/// Manages the secrets DocumentHub needs to access external storage, such as the SharePoint client secret.
-	/// </summary>
-	/// <remarks>
-	/// Secrets are write-only: they can be saved, replaced, checked and deleted, but never read back.
-	/// They are stored encrypted on the DataMiner Agent (not in DOM) and are only used internally by DocumentHub
-	/// to authenticate against the storage.
-	/// </remarks>
+	/// <summary>Provisions native, source-scoped credentials. Secret values are never returned.</summary>
 	public class Secrets
 	{
-		/// <summary>
-		/// Name of the Automation script executed on every agent to save or delete a secret locally.
-		/// The script is shipped by the DocumentHub Storage Installer and is self-contained (it does not reference this DLL).
-		/// </summary>
+		/// <summary>The native credential administration and explicit migration script.</summary>
 		public const string ScriptName = "SLC-DH-AS-ManageSharePointSecret";
 
 		/// <summary>Value of the script's <c>Action</c> parameter that saves the secret.</summary>
+		[Obsolete("The script no longer accepts secret Save or Delete actions.")]
 		public const string SaveAction = "Save";
 
 		/// <summary>Value of the script's <c>Action</c> parameter that deletes the secret.</summary>
+		[Obsolete("The script no longer accepts secret Save or Delete actions.")]
 		public const string DeleteAction = "Delete";
 
-		private readonly ISecretStore _store;
-		private readonly IAgentSecretDistributor _distributor;
+		private readonly IConnection _connection;
+		private readonly NativeCredentialPlatform _platform;
+		private readonly Func<string, string> _scriptCredentials;
 
-		internal Secrets(IConnection connection)
-			: this(new DpapiFileSecretStore(), new AgentSecretDistributor(connection))
+		internal Secrets(IConnection connection, Func<string, string> scriptCredentials = null)
 		{
+			_connection = connection ?? throw new ArgumentNullException(nameof(connection));
+			_platform = new NativeCredentialPlatform(connection);
+			_scriptCredentials = scriptCredentials;
 		}
 
-		internal Secrets(ISecretStore store, IAgentSecretDistributor distributor = null)
+		/// <summary>Stores DOM attachment-service credentials, not Automation or connector-owned secrets.</summary>
+		/// <param name="sourceIdentifier">Immutable DOM source GUID.</param>
+		/// <param name="existingCredentialId">The source's persisted credential GUID, if any.</param>
+		/// <param name="username">New username, or empty to preserve an existing value.</param>
+		/// <param name="password">New password, or empty to preserve an existing value.</param>
+		/// <returns>The native credential GUID for the module's attachment settings.</returns>
+		public Guid SaveDomSourceCredential(string sourceIdentifier, string existingCredentialId, string username, string password)
 		{
-			_store = store ?? throw new ArgumentNullException(nameof(store));
-			_distributor = distributor;
+			var sourceId = SharePointCredentialReference.Parse(sourceIdentifier);
+			var id = string.IsNullOrEmpty(existingCredentialId)
+				? SharePointCredentialReference.CreateId("DomNetworkShare", sourceId)
+				: SharePointCredentialReference.Parse(existingCredentialId);
+			var name = "DocHub_" + sourceId.ToString("D");
+			var credentials = _platform.Read();
+			var existing = credentials.SingleOrDefault(c => c.Info.GUID == id);
+			if ((existing != null && (!(existing is UserNameAndPasswordCredential) || !string.Equals(existing.Info.Name, name, StringComparison.OrdinalIgnoreCase)))
+				|| credentials.Any(c => c.Info.GUID != id && string.Equals(c.Info.Name, name, StringComparison.OrdinalIgnoreCase)))
+				throw CredentialFailure.At("The DOM source credential reference is already in use.");
+			if (existing == null && (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password)))
+				throw CredentialFailure.At("A new DOM attachment credential requires a username and password.");
+
+			if (string.IsNullOrEmpty(username) && string.IsNullOrEmpty(password)
+				&& existing.Info.Name == name && existing.Info.Groups != null)
+				return id;
+
+			// SLNet replaces the groups on every update: an existing credential keeps its own, a new one gets the saving user's.
+			var groups = existing == null ? _platform.CallerGroups() : existing.Info.Groups?.ToList() ?? new List<int>();
+			var credential = new UserNameAndPasswordCredential(id, name, groups);
+			if (!string.IsNullOrEmpty(username))
+				credential.UserName = username;
+			if (!string.IsNullOrEmpty(password))
+				credential.Password = password;
+			_platform.Write(credential);
+			var saved = _platform.Read().SingleOrDefault(c => c.Info.GUID == id);
+			if (!(saved is UserNameAndPasswordCredential) || saved.Info.Name != name)
+				throw CredentialFailure.At("The DOM attachment credential could not be verified.");
+			return id;
 		}
 
-		/// <summary>
-		/// Checks whether the SharePoint configuration can log in with its saved client secret and reach its document library.
-		/// The secret is used internally and never returned.
-		/// </summary>
-		/// <param name="sharePoint">The SharePoint configuration (tenant ID, client ID, site URL and document library name).</param>
-		/// <returns>
-		/// <c>true</c> if authentication succeeds and the document library exists; <c>false</c> if no secret is saved,
-		/// the secret is wrong, or the site or library cannot be reached.
-		/// </returns>
+		/// <summary>Creates or updates a source credential and declares it on the DocumentHub scripts that use it.</summary>
+		/// <param name="configuration">Source metadata including its immutable identifier.</param>
+		/// <param name="clientSecret">New secret, or an empty value to preserve an existing native credential.</param>
+		/// <remarks>Uses the caller's SLNet permissions. A new credential gets the caller's DataMiner user groups; an existing one keeps its groups.</remarks>
+		public void SaveSharePointClientSecret(SharePointConfiguration configuration, string clientSecret)
+		{
+			new CredentialProvisioner(_platform).Save(configuration, clientSecret);
+		}
+
+		/// <summary>Checks the saved source with its native credential.</summary>
+		/// <param name="sharePoint">The saved source.</param>
+		/// <returns>Whether authentication and document-library access succeed.</returns>
 		/// <exception cref="ArgumentNullException">Thrown when <paramref name="sharePoint"/> is null.</exception>
-		/// <exception cref="ArgumentException">Thrown when the tenant ID or client ID is not a valid GUID.</exception>
+		/// <exception cref="InvalidOperationException">Thrown when the check could not be completed, for example when no credential is assigned.</exception>
 		public bool IsSharePointConnected(SharePointConfiguration sharePoint)
 		{
-			if (sharePoint == null)
-			{
-				throw new ArgumentNullException(nameof(sharePoint));
-			}
-
-			if (!_store.Exists(SharePointSecrets.ClientSecret(sharePoint.TenantID, sharePoint.ClientID)))
-			{
-				return false;
-			}
-
-			var credential = new SharePointCredentialProvider(_store).CreateCredential(sharePoint.TenantID, sharePoint.ClientID);
-			return SharePointConnectionTester.IsConnected(sharePoint, credential);
+			return ReadSharePointFlag(sharePoint, "Check");
 		}
 
-		/// <summary>
-		/// Checks whether the SharePoint configuration can log in with the given client secret, without saving it.
-		/// Use this to validate a secret before calling <see cref="SaveSharePointClientSecret"/>.
-		/// </summary>
-		/// <param name="sharePoint">The SharePoint configuration (tenant ID, client ID, site URL and document library name).</param>
-		/// <param name="clientSecret">The candidate client secret.</param>
-		/// <returns><c>true</c> if authentication succeeds and the document library exists; otherwise, <c>false</c>.</returns>
+		/// <summary>Checks an in-memory candidate without persisting it.</summary>
+		/// <param name="sharePoint">Source metadata.</param>
+		/// <param name="clientSecret">Candidate received through a password control or authenticated API request body, never a script parameter.</param>
+		/// <returns>Whether authentication and document-library access succeed.</returns>
 		/// <exception cref="ArgumentNullException">Thrown when <paramref name="sharePoint"/> is null.</exception>
-		/// <exception cref="ArgumentException">Thrown when <paramref name="clientSecret"/> is null or empty.</exception>
+		/// <exception cref="ArgumentException">Thrown when an identifier is not a valid GUID or <paramref name="clientSecret"/> is null or empty.</exception>
 		public bool IsSharePointConnected(SharePointConfiguration sharePoint, string clientSecret)
 		{
 			if (sharePoint == null)
@@ -84,70 +105,109 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient
 				throw new ArgumentNullException(nameof(sharePoint));
 			}
 
-			if (String.IsNullOrEmpty(clientSecret))
+			try
 			{
-				throw new ArgumentException("The client secret cannot be null or empty.", nameof(clientSecret));
+				var credential = SharePointCredentialProvider.CreateCredential(sharePoint.TenantID, sharePoint.ClientID, clientSecret);
+				return SharePointConnectionTester.IsConnected(sharePoint, credential);
 			}
-
-			var credential = SharePointCredentialProvider.CreateCredential(sharePoint.TenantID, sharePoint.ClientID, clientSecret);
-			return SharePointConnectionTester.IsConnected(sharePoint, credential);
+			catch (Exception error) when (!(error is ArgumentException))
+			{
+				throw CredentialFailure.At("The candidate could not authenticate or access the configured document library.", error);
+			}
 		}
 
-		/// <summary>
-		/// Saves the Azure AD client secret of a SharePoint app registration on every running agent of the cluster, replacing any existing one.
-		/// </summary>
-		/// <remarks>
-		/// Secrets are encrypted per machine, so the script <see cref="ScriptName"/> is executed on each agent to save it locally.
-		/// Agents that are not running are skipped and reported in the result; repeat the save once they are back.
-		/// </remarks>
-		/// <param name="tenantId">The Azure AD tenant identifier, as stored in the SharePoint configuration.</param>
-		/// <param name="clientId">The client (application) identifier, as stored in the SharePoint configuration.</param>
+		/// <summary>Checks supported retrieval without exposing the secret.</summary>
+		/// <param name="sharePoint">The saved source.</param>
+		/// <returns>Whether its declared native credential is non-empty.</returns>
+		/// <exception cref="ArgumentNullException">Thrown when <paramref name="sharePoint"/> is null.</exception>
+		/// <exception cref="InvalidOperationException">Thrown when the check could not be completed.</exception>
+		public bool HasSharePointClientSecret(SharePointConfiguration sharePoint)
+		{
+			return ReadSharePointFlag(sharePoint, "Has");
+		}
+
+		/// <summary>Migrates this agent's legacy files explicitly. Must run inside Automation on that agent.</summary>
+		/// <param name="includeUnscopedLegacyFile">Explicitly permits migration of graphsecret.dat when exactly one app registration exists.</param>
+		/// <returns>The number of legacy files removed after all required native consumers were verified.</returns>
+		public int MigrateLocalSharePointSecrets(bool includeUnscopedLegacyFile = false)
+		{
+			try
+			{
+				RequireManagementPermission();
+				var configurations = new SharePointConfigurationDomRepository(_connection)
+					.Read(new TRUEFilterElement<SharePointConfiguration>()).ToList();
+				return new CredentialMigration(_platform, new DpapiFileSecretStore(), IsSharePointConnected)
+					.Migrate(configurations, includeUnscopedLegacyFile);
+			}
+			catch (Exception error)
+			{
+				throw CredentialFailure.At("Legacy migration was not completed. Unverified legacy files were retained.", error);
+			}
+		}
+
+		/// <summary>The pair-only write API is no longer safe when sources use different client secrets.</summary>
+		/// <param name="tenantId">The Azure AD tenant identifier.</param>
+		/// <param name="clientId">The client (application) identifier.</param>
 		/// <param name="clientSecret">The client secret.</param>
-		/// <returns>The result per agent.</returns>
-		/// <exception cref="ArgumentException">
-		/// Thrown when <paramref name="tenantId"/> or <paramref name="clientId"/> is not a valid GUID, or <paramref name="clientSecret"/> is null or empty.
-		/// </exception>
-		/// <exception cref="InvalidOperationException">Thrown when the script <see cref="ScriptName"/> does not exist.</exception>
+		/// <returns>Nothing: this overload always throws <see cref="NotSupportedException"/>.</returns>
+		[Obsolete("Use SaveSharePointClientSecret(configuration, clientSecret) with an immutable source identifier.")]
 		public ClusterSecretResult SaveSharePointClientSecret(string tenantId, string clientId, string clientSecret)
 		{
-			if (String.IsNullOrEmpty(clientSecret))
-			{
-				throw new ArgumentException("The client secret cannot be null or empty.", nameof(clientSecret));
-			}
-
-			SharePointSecrets.ValidateIds(tenantId, clientId);
-			return GetDistributor().Execute(SaveAction, tenantId, clientId, clientSecret);
+			throw new NotSupportedException("A source identifier is required. Use the source-scoped native credential API.");
 		}
 
-		/// <summary>
-		/// Deletes the client secret of the SharePoint app registration on every running agent of the cluster.
-		/// </summary>
+		/// <summary>Automatic deletion is intentionally unsupported because other scripts may reference the credential.</summary>
 		/// <param name="tenantId">The Azure AD tenant identifier.</param>
 		/// <param name="clientId">The client (application) identifier.</param>
-		/// <returns>The result per agent.</returns>
-		/// <exception cref="ArgumentException">Thrown when <paramref name="tenantId"/> or <paramref name="clientId"/> is not a valid GUID.</exception>
-		/// <exception cref="InvalidOperationException">Thrown when the script <see cref="ScriptName"/> does not exist.</exception>
+		/// <returns>Nothing: this method always throws <see cref="NotSupportedException"/>.</returns>
+		[Obsolete("Native credentials are retained on source removal. Review references in the Credentials Library before deleting.")]
 		public ClusterSecretResult DeleteSharePointClientSecret(string tenantId, string clientId)
 		{
-			SharePointSecrets.ValidateIds(tenantId, clientId);
-			return GetDistributor().Execute(DeleteAction, tenantId, clientId, null);
+			throw new NotSupportedException("Native credentials must not be deleted by tenant/client pair. Review all source and script references first.");
 		}
 
-		/// <summary>
-		/// Checks whether a client secret is saved for the SharePoint app registration. The secret itself is not returned.
-		/// </summary>
+		/// <summary>The pair-only lookup cannot distinguish isolated source credentials.</summary>
 		/// <param name="tenantId">The Azure AD tenant identifier.</param>
 		/// <param name="clientId">The client (application) identifier.</param>
-		/// <returns><c>true</c> if a secret is saved; otherwise, <c>false</c>.</returns>
-		/// <exception cref="ArgumentException">Thrown when <paramref name="tenantId"/> or <paramref name="clientId"/> is not a valid GUID.</exception>
+		/// <returns>Nothing: this overload always throws <see cref="NotSupportedException"/>.</returns>
+		[Obsolete("Use HasSharePointClientSecret(configuration).")]
 		public bool HasSharePointClientSecret(string tenantId, string clientId)
 		{
-			return _store.Exists(SharePointSecrets.ClientSecret(tenantId, clientId));
+			throw new NotSupportedException("A source identifier is required. Use the source-scoped native credential API.");
 		}
 
-		private IAgentSecretDistributor GetDistributor()
+		/// <summary>Checks administrative access before performing agent-local operations not authorized by SLNet.</summary>
+		internal void RequireManagementPermission() => _platform.RequireAdministrator("This agent-local operation requires an unrestricted DataMiner administrator.");
+
+		private bool ReadSharePointFlag(SharePointConfiguration sharePoint, string operation)
 		{
-			return _distributor ?? throw new InvalidOperationException("No DataMiner connection is available to reach the other agents.");
+			if (sharePoint == null)
+			{
+				throw new ArgumentNullException(nameof(sharePoint));
+			}
+
+			var id = SharePointCredentialReference.Parse(sharePoint.Identifier);
+
+			// A script that declares the source's credential checks it itself; other callers ask the DocumentHub script that does.
+			var secret = _scriptCredentials?.Invoke(new SharePointCredentialReference(sharePoint).Name);
+			if (!string.IsNullOrEmpty(secret))
+			{
+				try
+				{
+					return operation == "Has"
+						|| SharePointConnectionTester.IsConnected(sharePoint, SharePointCredentialProvider.CreateCredential(sharePoint.TenantID, sharePoint.ClientID, secret));
+				}
+				catch (Exception error)
+				{
+					throw CredentialFailure.At("The source could not be checked with the credential this script declares.", error);
+				}
+			}
+
+			var result = SharePointScriptTransport.Execute(_connection, new SharePointScriptRequest { Operation = operation, SourceId = id.ToString("D") });
+			if (!bool.TryParse(result.Value, out var value))
+				throw CredentialFailure.At("The credential-consuming script returned no valid result.");
+
+			return value;
 		}
 	}
 }

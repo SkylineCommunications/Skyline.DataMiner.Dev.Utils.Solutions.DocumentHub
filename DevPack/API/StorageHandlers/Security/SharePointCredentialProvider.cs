@@ -1,7 +1,6 @@
 namespace Skyline.DataMiner.Solutions.DocumentHub.API.Security
 {
 	using System;
-	using System.IO;
 	using Microsoft.Identity.Client;
 	using Microsoft.Kiota.Abstractions.Authentication;
 
@@ -9,25 +8,15 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API.Security
 	/// Creates the Azure AD credential used to authenticate against a SharePoint configuration.
 	/// </summary>
 	/// <remarks>
-	/// The client secret is read and consumed inside this class only: it is handed straight to the credential and is
-	/// never returned, so no other code (public or internal) can obtain the secret value through it.
+	/// The caller supplies the authorized native retrieval mechanism. There is no file-store fallback.
 	/// </remarks>
 	internal sealed class SharePointCredentialProvider
 	{
-		private const string LegacySecretPath = @"C:\Skyline DataMiner\Security\DocumentHub\graphsecret.dat";
+		private readonly Func<string> _getSecret;
 
-		private readonly ISecretReader _secretReader;
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="SharePointCredentialProvider"/> class.
-		/// </summary>
-		/// <param name="secretReader">
-		/// The store the client secret is read from. When <c>null</c>, a <see cref="DpapiFileSecretStore"/> using the default
-		/// DocumentHub security folder is used.
-		/// </param>
-		internal SharePointCredentialProvider(ISecretReader secretReader = null)
+		internal SharePointCredentialProvider(Func<string> getSecret)
 		{
-			_secretReader = secretReader ?? new DpapiFileSecretStore();
+			_getSecret = getSecret ?? throw new ArgumentNullException(nameof(getSecret));
 		}
 
 		/// <summary>
@@ -61,27 +50,9 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API.Security
 		/// <param name="clientId">The application identifier.</param>
 		/// <returns>A provider that acquires tokens without exposing the secret.</returns>
 		/// <exception cref="ArgumentException">Thrown for invalid identifiers.</exception>
-		/// <exception cref="FileNotFoundException">Thrown when no saved or legacy secret exists.</exception>
-		/// <exception cref="System.Security.Cryptography.CryptographicException">Thrown when decryption fails.</exception>
 		internal IAuthenticationProvider CreateCredential(string tenantId, string clientId)
 		{
-			return CreateCredential(tenantId, clientId, GetSecret(SharePointSecrets.ClientSecret(tenantId, clientId)));
-		}
-
-		private string GetSecret(SecretKey key)
-		{
-			if (_secretReader.Exists(key))
-			{
-				return _secretReader.Read(key);
-			}
-
-			// Legacy fallback: single global secret file used before per-configuration secrets existed.
-			if (!File.Exists(LegacySecretPath))
-			{
-				throw new FileNotFoundException($"Secret '{key}' not found.", LegacySecretPath);
-			}
-
-			return DPAPIHelper.Decrypt(File.ReadAllText(LegacySecretPath));
+			return CreateCredential(tenantId, clientId, _getSecret());
 		}
 	}
 }

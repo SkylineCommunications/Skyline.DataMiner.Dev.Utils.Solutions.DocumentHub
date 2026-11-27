@@ -7,67 +7,67 @@
 namespace SLC_DH_AS_ManageSharePointSecret
 {
 	using System;
+	using System.Globalization;
 	using Skyline.DataMiner.Automation;
-	using Skyline.DataMiner.Solutions.DocumentHub.API.Security;
+	using Skyline.DataMiner.Solutions.DocumentHub.API;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient;
 
 	/// <summary>
-	/// Saves or deletes a SharePoint client secret on the agent this script runs on.
-	/// Executed on every agent by the DevPack (<c>DocHubClient.Secrets</c>), because secrets are DPAPI-encrypted per machine.
+	/// Runs SharePoint operations for callers that cannot declare a credential, and the explicit agent-local migration.
+	/// No secret is accepted as a script parameter.
 	/// </summary>
-	/// <remarks>
-	/// The script has no dependency on the DevPack DLL: it compiles the shared secret-store sources directly, so it works
-	/// on an agent where the DevPack has not been deployed yet.
-	/// </remarks>
 	public class Script
 	{
-		/// <summary>Action value that saves the secret.</summary>
-		public const string SaveAction = "Save";
-
-		/// <summary>Action value that deletes the secret.</summary>
-		public const string DeleteAction = "Delete";
-
-		/// <summary>
-		/// The script entry point.
-		/// </summary>
-		/// <param name="engine">Provides access to the Automation engine.</param>
+		/// <summary>Runs the requested action with the credentials this script declares.</summary>
+		/// <param name="engine">The current user's Automation engine.</param>
 		public void Run(IEngine engine)
 		{
+			var failure = "Local credential migration is incomplete.";
 			try
 			{
-				Apply(
-					new DpapiFileSecretStore(),
-					engine.GetScriptParam("Action")?.Value,
-					engine.GetScriptParam("TenantId")?.Value,
-					engine.GetScriptParam("ClientId")?.Value,
-					engine.GetScriptParam("Secret")?.Value);
-			}
-			catch (Exception e)
-			{
-				// Only the exception message: never include parameter values, they contain the secret.
-				engine.ExitFail($"Failed to apply the client secret on this agent: {e.GetType().Name}: {e.Message}");
-			}
-		}
-
-		internal static void Apply(ISecretStore store, string action, string tenantId, string clientId, string clientSecret)
-		{
-			var key = SharePointSecrets.ClientSecret(tenantId, clientId);
-
-			if (String.Equals(action, DeleteAction, StringComparison.OrdinalIgnoreCase))
-			{
-				store.Delete(key);
-			}
-			else if (String.IsNullOrEmpty(action) || String.Equals(action, SaveAction, StringComparison.OrdinalIgnoreCase))
-			{
-				if (String.IsNullOrEmpty(clientSecret))
+				var action = engine.GetScriptParam("Action")?.Value;
+				if (action == "Execute")
 				{
-					throw new ArgumentException("The client secret cannot be null or empty.", nameof(clientSecret));
+					// Each source's credential is declared under its library name, which selects it among several.
+					failure = "DocumentHub credential operation failed.";
+					var result = SharePointScriptHost.Execute(
+						engine.GetUserConnection(),
+						name => engine.GetCredential(name)?.GetToken(),
+						engine.GetScriptParam("Request")?.Value);
+					engine.AddScriptOutput("Result", result);
+					return;
 				}
 
-				store.Save(key, clientSecret);
+				if (action == "RestoreAssignments")
+				{
+					// A package upgrade replaces the DocumentHub scripts and with them their credential declarations.
+					failure = "The credential declarations were not restored.";
+					var sources = new SharePointSources(engine.GetUserConnection()).RestoreAssignments();
+					engine.AddScriptOutput("RestoredSources", sources.ToString(CultureInfo.InvariantCulture));
+					return;
+				}
+
+				if (action != "MigrateLocal" && action != "MigrateLocalWithGlobal")
+					engine.ExitFail("Only Execute, RestoreAssignments and the explicit migration actions are supported. Secret Save and Delete actions have been removed.");
+
+				var count = new DocHubClient(engine.GetUserConnection()).Secrets.MigrateLocalSharePointSecrets(action == "MigrateLocalWithGlobal");
+				engine.AddScriptOutput("MigratedLocalFiles", count.ToString(CultureInfo.InvariantCulture));
 			}
-			else
+			catch (ScriptAbortException)
 			{
-				throw new ArgumentException($"Unknown action '{action}'. Expected '{SaveAction}' or '{DeleteAction}'.", nameof(action));
+				throw;
+			}
+			catch (ScriptForceAbortException)
+			{
+				throw;
+			}
+			catch (ScriptTimeoutException)
+			{
+				throw;
+			}
+			catch (Exception error)
+			{
+				engine.ExitFail($"{failure} {CredentialFailure.Describe(error)}");
 			}
 		}
 	}

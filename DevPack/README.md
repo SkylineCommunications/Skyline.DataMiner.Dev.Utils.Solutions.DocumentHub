@@ -4,6 +4,13 @@
 
 NuGet Class Library API to interact with DocumentHub functionality.
 
+Version 1.3 targets .NET Framework 4.8 and requires DataMiner 10.6.10 / 10.7.0
+for source-scoped native Automation credentials. Use `SharePointSources.Save`
+with a stable source GUID and the caller's connection; do not persist a secret
+in source metadata or Automation parameters. Existing DPAPI data requires
+explicit verified migration, not a fallback. See the repository's
+`Documentation/CredentialStorage.md`.
+
 ### About DataMiner
 
 DataMiner is a transformational platform that provides vendor-independent control and monitoring of devices and services. Out of the box and by design, it addresses key challenges such as security, complexity, multi-cloud, and much more. It has a pronounced open architecture and powerful capabilities enabling users to evolve easily and continuously.
