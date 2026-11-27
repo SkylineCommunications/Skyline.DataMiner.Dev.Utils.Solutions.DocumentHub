@@ -4,6 +4,13 @@
 
 Provides GQI extensions to communicate with DocumentHub
 
+Use version 2.0.0 with the matching core package and DataMiner 10.6.10 / 10.7.0.
+GQI cannot declare an Automation credential; SharePoint operations use the
+installed `SLC-DH-AS-ManageSharePointSecret` script with non-secret requests.
+Rebuild consumers and restore source credential declarations after script
+package upgrades. See the
+[migration guide](https://github.com/SkylineCommunications/Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub/blob/main/Documentation/CredentialStorage.md).
+
 ### About DataMiner
 
 DataMiner is a transformational platform that provides vendor-independent control and monitoring of devices and services. Out of the box and by design, it addresses key challenges such as security, complexity, multi-cloud, and much more. It has a pronounced open architecture and powerful capabilities enabling users to evolve easily and continuously.

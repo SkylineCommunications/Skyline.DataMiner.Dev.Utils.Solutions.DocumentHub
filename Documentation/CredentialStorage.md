@@ -1,4 +1,4 @@
-# Native credential storage (DocumentHub 1.3)
+# Native credential storage (DocumentHub 2.0.0)
 
 DocumentHub no longer writes or distributes its own DPAPI secret files. Normal
 operations have no DPAPI fallback. Upgrade the core DevPack, backend scripts,
@@ -250,11 +250,15 @@ the running script has no entry for it.
    source saves, rotations and file consumers across the DMS. Disable obsolete
    secret-distribution scripts, including any installed `SaveClientSecret`
    artifacts. Do not delete their data yet.
-2. Install matching 1.3 core/Automation/GQI/Protocol dependencies, migration
+2. Install matching 2.0.0 core/Automation/GQI/Protocol dependencies, migration
    script, backend/App and updated Assistant registrations. Ensure long-lived
    Automation/GQI hosts load the new DLLs; an approved process restart may be
    necessary. Refresh the browser after the App update. No live upgrade/restart
    is performed by these repository changes.
+   Once both script packages are installed, execute
+   `SLC-DH-AS-ManageSharePointSecret` with **Action (ID 2)** =
+   `RestoreAssignments` to restore declarations for existing native sources.
+   Migration also restores declarations for the sources it verifies.
 3. On **each DMA holding legacy files**, execute
    `SLC-DH-AS-ManageSharePointSecret` as an administrator with parameter
    **Action (ID 2)** = `MigrateLocal`. There is no Secret parameter; **Request
@@ -357,20 +361,25 @@ consent and real Windows DPAPI decryption of **synthetic** fixtures.
 Backend tests cover shared/classic-message guards; frontend tests
 mock the native dialog and verify secret-free launch arguments and confirmation.
 
-Local verification on 2026-11-19: 259 core, 159 backend and 9 frontend tests
-passed. All three repositories built without errors and without warnings that
-are absent from a build of the base commit. The core/migration and App installers
-built; their core DLL and production JavaScript bundle matched the local builds.
-The full backend installer remained blocked at Catalog dependency download.
+Run `dotnet test DevPack.Tests -c Release` for the core's offline checks.
+Regenerate the Graph client with the pinned tooling and require no generated
+diff before release. The runtime size gate validates resolved DLLs against
+20,971,520 bytes and rejects the full Graph SDK; verify the installed package's
+dependency closure as well as the NuGet artifacts.
 
-Backend package creation requires the SDK's configured
+The Storage Installer uses Skyline SDK 2.6.2. Its script-reference harvesting
+resolves the DevPack's Debug output even when the outer build is Release.
+Build the solution in Debug before building the Release installer, and verify
+the harvested DLL against that Debug build rather than assuming a Release DLL
+was selected. NuGet consumers should use the Release packages.
+
+Coordinated backend package creation may require the SDK's configured
 `skyline:sdk:dataminertoken` secret or `skyline__sdk__dataminertoken` environment
-variable; do not put that value in source or chat. Compilation against the local
-1.3.1 NuGets is not proof of a clean restore from a published feed. The App build
-also reports feed/dependency warnings from its unchanged installer dependencies.
-Existing `MinimumRequiredDmWebVersion` values use an SDK-rejected format and are
-not enforced; the verified DataMiner runtime floor is present in both generated
-package manifests. No packages were deployed or published.
+variable for Catalog dependencies; do not put that value in source or chat.
+Validate consumers against the exact local 2.0.0 packages and source commit
+before any publication. The API itself has no minimum web version; a consuming
+App or headless IAS can have a separate, stricter web prerequisite. A successful
+build or package manifest does not prove live runtime compatibility.
 
 These are **not live DataMiner/gRPC/Graph integration tests**. Before production,
 use an authenticated 10.6.10+ test DMA, administrator and denied-user identities,

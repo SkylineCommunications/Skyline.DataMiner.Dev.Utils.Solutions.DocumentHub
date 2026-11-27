@@ -19,8 +19,9 @@ Depending on your project type, one of the following additional packages is also
 > **Note**
 > This library targets `.NET Framework 4.8`.
 
-Version 1.3 requires DataMiner **10.6.10 / 10.7.0** for native Automation
-credentials. Source management is administrator-only. SharePoint secrets use
+Version 2.0.0 requires DataMiner **10.6.10 / 10.7.0** for native Automation
+credentials. Source management requires native credential and Automation permissions;
+legacy migration requires an unrestricted administrator. SharePoint secrets use
 source-scoped Credentials Library entries declared on the DocumentHub scripts that
 call `engine.GetCredential`; DOM shares use native username/password credentials. There are no normal
 DPAPI writes or fallbacks. Existing installations require the explicit, per-agent
@@ -59,12 +60,20 @@ existing SharePoint site/library lookups, file/folder operations, recursive pagi
 KQL search, and batched file-URL resolution. Local and DOM storage are unchanged.
 SharePoint deletion and resumable uploads have not been added.
 
-Upgrade the core, Automation, Protocol, and GQI NuGet libraries together and rebuild
+Upgrade the core, Automation, Protocol, and GQI NuGet libraries to **2.0.0** together and rebuild
 consumers. `SharePointPageData.PageRemainderBuffer` and
 `SharePointSearchPageData.PageRemainderBuffer` are now internal. Consumers must use
 the public paging-context APIs instead of reading or changing these buffers.
 The high-level file APIs remain unchanged, but existing binaries that depend on
 Graph model types or these removed public members are not compatible.
+
+Install the matching Storage Installer, backend/Assistant scripts and App as one
+coordinated upgrade. Stop legacy secret writers first. After both script packages
+are installed, run `SLC-DH-AS-ManageSharePointSecret` with Action
+`RestoreAssignments`, then migrate legacy credentials explicitly on every agent
+before resuming source operations. See the [migration procedure](Documentation/CredentialStorage.md#migration-and-deployment).
+The App alone controls whether a disabled SharePoint provider is available; the
+backend file/source contracts are unchanged by that frontend setting.
 
 Build and pack targets reject each shipping DLL larger than **20,971,520 bytes
 (20 MiB)** and reject reintroduction of the full Graph SDK. This includes resolved
@@ -81,7 +90,7 @@ After updating the API definition, run this command from the repository root:
 .\DevPack\API\StorageHandlers\Graph\Generate-Client.ps1
 ```
 
-The script restores the pinned local Kiota tool and regenerates only the `Generated`
+The script restores the pinned Kiota 1.30.0 local tool and regenerates only the `Generated`
 directory. Do not hand-edit its C# files or `kiota-lock.json`.
 The handwritten partial client supplies Graph's site/file path aliases and batches
 metadata GETs in groups of at most 20. Inner batch failures are surfaced, even when

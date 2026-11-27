@@ -4,7 +4,7 @@
 
 NuGet Class Library API to interact with DocumentHub functionality.
 
-The 1.3 installer requires DataMiner `10.6.10.0 - 17716` and deploys the native
+The 2.0.0 installer requires DataMiner `10.6.10.0 - 17716` and deploys the native
 credential-capable DevPack and `SLC-DH-AS-ManageSharePointSecret` migration script.
 Install matching backend/App content, quiesce legacy writers and invoke
 `Action` (parameter ID 2) = `MigrateLocal` on each agent. Global legacy files
@@ -12,6 +12,11 @@ require explicit `MigrateLocalWithGlobal` consent and an unambiguous app
 registration. Nothing migrates automatically during installation; retain
 unverified legacy data. See `Documentation/CredentialStorage.md` in the repository
 for permissions, verification, recovery and deployment ordering.
+
+The focused Kiota client replaces the full Microsoft.Graph SDK. Upgrade all four
+DocumentHub NuGet libraries to 2.0.0 and rebuild consumers before installation.
+Restore source credential assignments after the matching script packages are
+installed; package installation does not migrate secrets or verify Graph access.
 
 ### About DataMiner
 

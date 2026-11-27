@@ -4,6 +4,18 @@
 
 NuGet Class Library API to interact with DocumentHub functionality.
 
+Version 2.0.0 replaces the full Microsoft.Graph SDK with a focused Kiota client
+and uses source-scoped native Credentials Library secrets. Requires DataMiner
+10.6.10 / 10.7.0 and .NET Framework 4.8. Upgrade the Automation, Protocol and GQI
+packages together and rebuild consumers; Graph model types and public SharePoint
+remainder buffers are no longer exposed.
+
+Existing installations must stop legacy secret writers, install matching
+backend/Assistant/App content, restore credential assignments after script
+upgrades, and explicitly migrate legacy secrets on every agent. There is no
+automatic migration or DPAPI fallback. See the
+[credential and migration guide](https://github.com/SkylineCommunications/Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub/blob/main/Documentation/CredentialStorage.md).
+
 ### About DataMiner
 
 DataMiner is a transformational platform that provides vendor-independent control and monitoring of devices and services. Out of the box and by design, it addresses key challenges such as security, complexity, multi-cloud, and much more. It has a pronounced open architecture and powerful capabilities enabling users to evolve easily and continuously.

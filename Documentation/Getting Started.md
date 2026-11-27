@@ -19,6 +19,12 @@ Depending on your project type, one of the following additional packages is also
 > **Note**
 > This library targets `.NET Framework 4.8`.
 
+Use version **2.0.0** of the core and project-specific extension packages together.
+Native Automation credentials require DataMiner **10.6.10 / 10.7.0**; the
+Storage Installer enforces `10.6.10.0 - 17716`. Existing installations must follow
+the [explicit credential migration](CredentialStorage.md) and rebuild consumers
+for the Kiota-backed API before resuming operations.
+
 ## Entry Point
 
 The `DocHubClient` class is the main entry point to the DocumentHub API.
@@ -145,8 +151,9 @@ and verifies that it remains inside the bucket.
 
 SharePoint configurations hold non-secret Entra identifiers and site/library
 metadata. Each immutable source owns a native Credentials Library client secret,
-declared on the DocumentHub scripts that reach SharePoint. Source management requires a DataMiner
-administrator and DataMiner 10.6.10 / 10.7.0 or later.
+declared on the DocumentHub scripts that reach SharePoint. Source management requires native
+credential/Automation permissions and DataMiner 10.6.10 / 10.7.0 or later;
+agent-local migration requires an unrestricted administrator.
 
 ```csharp
 using Skyline.DataMiner.Solutions.DocumentHub.SDM.Helpers;
