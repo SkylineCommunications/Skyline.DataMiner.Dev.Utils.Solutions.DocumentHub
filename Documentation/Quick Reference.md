@@ -128,7 +128,8 @@ Stored in a source-scoped native Credentials Library entry, never ordinary DOM
 data or secret files. The DocumentHub scripts that reach SharePoint declare it
 under its library name and use `engine.GetCredential(name).GetToken()`.
 Management requires a DataMiner administrator
-and 10.6.10 / 10.7.0. See [Credential storage](CredentialStorage.md) for verified
+and the supported 2.0.0 release minimum, 10.6.11.0 - 17830.
+See [Credential storage](CredentialStorage.md) for verified
 references, exact assignments and explicit legacy migration.
 
 ```csharp

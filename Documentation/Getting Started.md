@@ -20,8 +20,10 @@ Depending on your project type, one of the following additional packages is also
 > This library targets `.NET Framework 4.8`.
 
 Use version **2.0.0** of the core and project-specific extension packages together.
-Native Automation credentials require DataMiner **10.6.10 / 10.7.0**; the
-Storage Installer enforces `10.6.10.0 - 17716`. Existing installations must follow
+The supported release minimum is DataMiner **10.6.11.0 - 17830**, enforced by the
+Storage Installer. Native Automation credential retrieval first became available
+in 10.6.10 / 10.7.0; the release deliberately requires the newer minimum.
+Existing installations must follow
 the [explicit credential migration](CredentialStorage.md) and rebuild consumers
 for the Kiota-backed API before resuming operations.
 
@@ -152,7 +154,7 @@ and verifies that it remains inside the bucket.
 SharePoint configurations hold non-secret Entra identifiers and site/library
 metadata. Each immutable source owns a native Credentials Library client secret,
 declared on the DocumentHub scripts that reach SharePoint. Source management requires native
-credential/Automation permissions and DataMiner 10.6.10 / 10.7.0 or later;
+credential/Automation permissions and the supported DataMiner 10.6.11.0 - 17830 minimum;
 agent-local migration requires an unrestricted administrator.
 
 ```csharp

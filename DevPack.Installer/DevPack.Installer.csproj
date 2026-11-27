@@ -7,7 +7,7 @@
   <PropertyGroup>
     <DataMinerType>Package</DataMinerType>
     <GenerateDataMinerPackage>True</GenerateDataMinerPackage>
-    <MinimumRequiredDmVersion>10.6.10.0 - 17716</MinimumRequiredDmVersion>
+    <MinimumRequiredDmVersion>10.6.11.0 - 17830</MinimumRequiredDmVersion>
     <PackageVersion>2.0.0</PackageVersion>
     <Version>2.0.0</Version>
     <VersionComment>Source-scoped native credentials with explicit legacy migration (no DPAPI fallback), and a focused Kiota Graph client replacing the full Microsoft.Graph SDK. Upgrade all DocumentHub consumers together.</VersionComment>

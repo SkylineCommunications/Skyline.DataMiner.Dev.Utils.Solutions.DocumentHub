@@ -6,7 +6,7 @@ NuGet Class Library API to interact with DocumentHub functionality.
 
 Version 2.0.0 replaces the full Microsoft.Graph SDK with a focused Kiota client
 and uses source-scoped native Credentials Library secrets. Requires DataMiner
-10.6.10 / 10.7.0 and .NET Framework 4.8. Upgrade the Automation, Protocol and GQI
+10.6.11.0 - 17830 and .NET Framework 4.8. Upgrade the Automation, Protocol and GQI
 packages together and rebuild consumers; Graph model types and public SharePoint
 remainder buffers are no longer exposed.
 

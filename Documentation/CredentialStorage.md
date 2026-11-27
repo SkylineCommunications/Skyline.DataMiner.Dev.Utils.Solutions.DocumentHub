@@ -123,8 +123,11 @@ verified GUID to its attachment settings, and require module reinitialization to
 
 ## Permissions, assignment and versions
 
-- Minimum runtime: **DataMiner 10.6.10 / 10.7.0**; package floor
-  `10.6.10.0 - 17716`, compiled with Automation/Common SDK `10.6.10.1`.
+- Supported 2.0.0 release minimum and package floor: **DataMiner 10.6.11.0 - 17830**,
+  compiled with Automation/Common SDK `10.6.10.1`.
+  Native `Engine.GetCredential` retrieval first became available in
+  **10.6.10 / 10.7.0**; that historical API availability does not lower the
+  supported release minimum.
   Cube's credential-declaration editor requires **10.6.11 / 10.7.0**.
   Programmatic declarations do not require that newer Cube UI.
 - DocumentHub stores source and bucket metadata in DOM. On a self-managed DMA,
@@ -382,7 +385,8 @@ App or headless IAS can have a separate, stricter web prerequisite. A successful
 build or package manifest does not prove live runtime compatibility.
 
 These are **not live DataMiner/gRPC/Graph integration tests**. Before production,
-use an authenticated 10.6.10+ test DMA, administrator and denied-user identities,
+use an authenticated test DMA meeting the 10.6.11.0 - 17830 release minimum,
+administrator and denied-user identities,
 an Automation license, the matching installed DLLs, a test Entra app/site/library
 and per-agent legacy fixtures. Verify real script save/readback/retrieval, engine
 and gRPC parity, native encrypted persistence/backup recovery, concurrency,

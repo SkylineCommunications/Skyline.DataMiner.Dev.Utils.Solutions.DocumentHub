@@ -3,7 +3,7 @@
 ## About
 
 Provides Automation extensions to communicate with DocumentHub. Version 2.0.0
-requires the matching core package and DataMiner 10.6.10 / 10.7.0. Rebuild consumers
+requires the matching core package and DataMiner 10.6.11.0 - 17830. Rebuild consumers
 for the focused Kiota client and restore source credential declarations after
 script package upgrades. Legacy secrets require explicit per-agent migration;
 there is no DPAPI fallback. See the

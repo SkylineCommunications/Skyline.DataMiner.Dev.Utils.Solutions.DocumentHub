@@ -19,8 +19,10 @@ Depending on your project type, one of the following additional packages is also
 > **Note**
 > This library targets `.NET Framework 4.8`.
 
-Version 2.0.0 requires DataMiner **10.6.10 / 10.7.0** for native Automation
-credentials. Source management requires native credential and Automation permissions;
+Version 2.0.0 has a supported DataMiner minimum of **10.6.11.0 - 17830**.
+Native Automation credential retrieval first became available in 10.6.10 / 10.7.0;
+that historical API availability is not the supported release minimum.
+Source management requires native credential and Automation permissions;
 legacy migration requires an unrestricted administrator. SharePoint secrets use
 source-scoped Credentials Library entries declared on the DocumentHub scripts that
 call `engine.GetCredential`; DOM shares use native username/password credentials. There are no normal

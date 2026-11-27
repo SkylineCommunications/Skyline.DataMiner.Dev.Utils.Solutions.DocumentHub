@@ -4,7 +4,7 @@
 
 Provides Protocol extensions to communicate with DocumentHub
 
-Use version 2.0.0 with the matching core package and DataMiner 10.6.10 / 10.7.0.
+Use version 2.0.0 with the matching core package and DataMiner 10.6.11.0 - 17830.
 Connector-owned credentials remain native protocol password parameters;
 DocumentHub SharePoint operations use the installed credential-consuming
 Automation script. Rebuild consumers and follow the

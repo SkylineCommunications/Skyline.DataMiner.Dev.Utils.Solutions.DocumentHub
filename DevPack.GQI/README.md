@@ -4,7 +4,7 @@
 
 Provides GQI extensions to communicate with DocumentHub
 
-Use version 2.0.0 with the matching core package and DataMiner 10.6.10 / 10.7.0.
+Use version 2.0.0 with the matching core package and DataMiner 10.6.11.0 - 17830.
 GQI cannot declare an Automation credential; SharePoint operations use the
 installed `SLC-DH-AS-ManageSharePointSecret` script with non-secret requests.
 Rebuild consumers and restore source credential declarations after script

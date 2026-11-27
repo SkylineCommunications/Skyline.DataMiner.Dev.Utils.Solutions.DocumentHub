@@ -4,7 +4,7 @@
 
 NuGet Class Library API to interact with DocumentHub functionality.
 
-The 2.0.0 installer requires DataMiner `10.6.10.0 - 17716` and deploys the native
+The 2.0.0 installer requires DataMiner `10.6.11.0 - 17830` and deploys the native
 credential-capable DevPack and `SLC-DH-AS-ManageSharePointSecret` migration script.
 Install matching backend/App content, quiesce legacy writers and invoke
 `Action` (parameter ID 2) = `MigrateLocal` on each agent. Global legacy files
