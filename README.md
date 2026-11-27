@@ -122,18 +122,19 @@ and mocked HTTP responses for MSAL and Kiota; no live DataMiner or SharePoint co
 | API - DOM File Adapter | `DomFileAdapter_Tests` | 6 |
 | API - DOM Attachment Paths | `DomAttachmentsHandler_Tests` | 7 |
 | API - Secret Keys | `SecretKey_Tests` | 22 |
-| API - Encrypted Secret Storage | `DpapiFileSecretStore_Tests` | 10 |
-| API - Secrets | `Secrets_Tests` | 5 |
-| API - Secret Management Script | `ManageSharePointSecretScript_Tests` | 5 |
+| API - Encrypted Secret Storage | `DpapiFileSecretStore_Tests` | 7 |
+| API - Secrets | `Secrets_Tests` | 14 |
+| API - Secret Management Script | `ManageSharePointSecretScript_Tests` | 6 |
 | SharePoint Authentication | `SharePointDependency_Tests` | 12 |
 | SharePoint Kiota Client | `KiotaClient_Tests` | 7 |
+| Credentials | `NativeCredentialMessaging_Tests` | 34 |
 | SDM - SharePoint CRUD | `SharepointDomRepository_CRUD_Tests` | 6 |
 | SDM - SharePoint Filters | `SharepointDomRepository_FilterTests_Tests` | 7 |
 | SDM - DomSource CRUD | `DomSourceDomRepository_CRUD_Tests` | 6 |
 | SDM - DomSource Filters | `DomSourceDomRepository_FilterTests_Tests` | 7 |
 | SDM - DocumentBucket CRUD and Middleware | `DocumentBucketDomRepository_CRUD_Tests` | 16 |
 | SDM - DocumentBucket Filters | `DocumentBucketDomRepository_FilterTests_Tests` | 10 |
-| **Total** | **24 classes** | **238** |
+| **Total** | **25 classes** | **279** |
 
 ### Kiota Client Tests
 
