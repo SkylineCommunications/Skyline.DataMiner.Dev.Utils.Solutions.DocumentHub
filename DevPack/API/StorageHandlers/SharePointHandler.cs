@@ -7,9 +7,6 @@
 	using System.IO;
 	using System.Linq;
 	using System.Threading.Tasks;
-	using Microsoft.Graph;
-	using Microsoft.Graph.Models;
-	using Microsoft.Graph.Models.ODataErrors;
 	using Microsoft.Kiota.Abstractions;
 	using Skyline.DataMiner.Net;
 	using Skyline.DataMiner.Net.Messages.SLDataGateway;
@@ -19,10 +16,10 @@
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Security;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.DTOs;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.Graph.Generated;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.Graph.Generated.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Exposers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
-	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Repositories.SharePointConfiguration;
-	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Validation;
 	using File = System.IO.File;
 
 	/// <summary>
@@ -37,12 +34,12 @@
 	/// </para>
 	/// </remarks>
 	/// <seealso cref="IStorageHandler"/>
-	/// <seealso cref="GraphServiceClient"/>
+	/// <seealso cref="DocumentHubGraphClient"/>
 	/// <seealso cref="SharePointPageData"/>
 	/// <example>
 	/// Typical usage:
 	/// <code>
-	/// var handler = new SharePointHandler(helpers, connection);
+	/// var handler = new SharePointHandler(configuration, () => engine.GetCredential(credentialName).GetToken());
 	/// var files = handler.ReadFiles(new WebFileReadData { Bucket = bucket });
 	/// </code>
 	/// </example>
@@ -51,24 +48,14 @@
 		#region Globals
 
 		/// <summary>
-		/// SharePoint DOM repository used to retrieve configurations from DataMiner Object Model.
-		/// </summary>
-		private readonly IRepository<SharePointConfiguration> _sharePointRepository;
-
-		/// <summary>
 		/// SharePoint configuration retrieved from the Document Hub configuration model.
 		/// </summary>
 		private readonly SharePointConfiguration _sharePoint;
 
 		/// <summary>
-		/// Creates the Azure AD credential; the client secret never leaves it.
-		/// </summary>
-		private readonly SharePointCredentialProvider _credentialProvider;
-
-		/// <summary>
 		/// Microsoft Graph client used for SharePoint API operations.
 		/// </summary>
-		private readonly GraphServiceClient _graphClient;
+		private readonly DocumentHubGraphClient _graphClient;
 
 		/// <summary>
 		/// SharePoint site resolved from the configured Site URL.
@@ -91,62 +78,29 @@
 		/// <summary>
 		/// Initializes a new instance of the <see cref="SharePointHandler"/> class.
 		/// </summary>
-		/// <param name="connection">
-		/// An active DataMiner connection used to communicate with the system.
+		/// <param name="configuration">The caller-visible source already verified for this bucket.</param>
+		/// <param name="getSecret">
+		/// Retrieves the source's credential as declared by the running Automation script.
 		/// </param>
-		/// <param name="bucket">
-		/// The <see cref="DocumentBucket"/> containing the storage type and related configuration for which this handler is being created.
-		/// </param>
-		/// <param name="secretReader">
-		/// The store used to retrieve the Azure AD client secret of the configured tenant and client
-		/// (see <see cref="SharePointSecrets.ClientSecret(Guid, Guid)"/>).
-		/// Optional; when <c>null</c>, a <see cref="DpapiFileSecretStore"/> using the default DocumentHub security folder is used.
-		/// If no secret exists for the configuration, the legacy <c>graphsecret.dat</c> file is used as a fallback.
-		/// </param>
-		/// <exception cref="ArgumentException">
-		/// Thrown when the bucket has no valid SharePoint reference, or when no SharePoint configuration tied to the bucket can be found.
-		/// </exception>
-		/// <exception cref="System.IO.FileNotFoundException">
-		/// Thrown when the client secret exists neither in the secret store nor in the legacy secret file.
-		/// </exception>
-		/// <exception cref="System.Security.Cryptography.CryptographicException">
-		/// Thrown when the client secret exists but cannot be decrypted, for example when it was saved on another machine.
+		/// <exception cref="InvalidOperationException">
+		/// Thrown when the consuming script's native credential is unavailable.
 		/// </exception>
 		/// <exception cref="NullReferenceException">
 		/// Thrown when the configured SharePoint document library cannot be found.
 		/// </exception>
-		internal SharePointHandler(IConnection connection, DocumentBucket bucket, ISecretReader secretReader = null)
+		internal SharePointHandler(SharePointConfiguration configuration, Func<string> getSecret)
 		{
-			_sharePointRepository = new SharePointConfigurationDomRepository(connection);
-			_credentialProvider = new SharePointCredentialProvider(secretReader);
-
-			// Defensive check to avoid reinitialization
-			if (_graphClient != null && _drive != null)
-				return;
-
-			if (!bucket.SharePointConfiguration.IsValidReference(out Guid identifierGuid))
-			{
-				throw new ArgumentException($"The provided {nameof(bucket)} does not have a SharePoint reference.");
-			}
-
-			// Retrieve SharePoint configuration from DOM
-			var sharePointFilter = SharePointConfigurationExposers.Identifier.Equal(identifierGuid.ToString());
-			_sharePoint = _sharePointRepository.Read(sharePointFilter).FirstOrDefault()
-				?? throw new ArgumentException("No SharePoint configuration tied to the provided bucket could be found.", nameof(bucket));
-
-			// Create the credential; the client secret is handled inside the provider and never reaches this class
-			var credential = _credentialProvider.CreateCredential(_sharePoint.TenantID, _sharePoint.ClientID);
+			_sharePoint = configuration ?? throw new ArgumentNullException(nameof(configuration));
+			var credential = new SharePointCredentialProvider(getSecret).CreateCredential(_sharePoint.TenantID, _sharePoint.ClientID);
 
 			// Initialize Graph client
-			_graphClient = new GraphServiceClient(credential);
+			_graphClient = DocumentHubGraphClient.Create(credential);
 
 			// Build site URI components
 			var uri = new UriBuilder("https://" + _sharePoint.SiteURL).Uri;
-			string hostname = uri.Host;
-			string path = uri.AbsolutePath;
 
 			// Resolve SharePoint site
-			_site = _graphClient.Sites[$"{hostname}:{path}"]
+			_site = _graphClient.SiteByPath(uri)
 				.GetAsync()
 				.GetAwaiter()
 				.GetResult();
@@ -169,6 +123,16 @@
 		internal SharePointHandler(Func<DriveItem, Stream> openDownloadStream)
 		{
 			_openDownloadStream = openDownloadStream ?? throw new ArgumentNullException(nameof(openDownloadStream));
+		}
+
+		/// <summary>Uses an existing client and resolved SharePoint configuration without performing discovery.</summary>
+		internal SharePointHandler(DocumentHubGraphClient graphClient, SharePointConfiguration sharePoint, Site site, Drive drive)
+		{
+			_graphClient = graphClient ?? throw new ArgumentNullException(nameof(graphClient));
+			_sharePoint = sharePoint ?? throw new ArgumentNullException(nameof(sharePoint));
+			_site = site ?? throw new ArgumentNullException(nameof(site));
+			_drive = drive ?? throw new ArgumentNullException(nameof(drive));
+			_openDownloadStream = OpenDownloadStream;
 		}
 
 		#endregion
@@ -442,9 +406,7 @@
 				else
 				{
 					folder = await _graphClient
-						.Drives[_drive.Id]
-						.Root
-						.ItemWithPath(trimmedPath)
+						.ItemByPath(_drive.Id, trimmedPath)
 						.GetAsync();
 				}
 
@@ -535,7 +497,7 @@
 		/// so they are returned on the next call rather than being lost.
 		/// </remarks>
 		/// <param name="filter">
-		/// Optional substring filter applied to <see cref="BaseItem.Name"/> of the <see cref="DriveItem"/> object. (case-insensitive).
+		/// Optional substring filter applied to <see cref="DriveItem.Name"/>. (case-insensitive).
 		/// Pass <c>null</c> or empty to skip name filtering.
 		/// </param>
 		/// <param name="allowedExtensions">
@@ -636,9 +598,7 @@
 			try
 			{
 				var searchResponse = await _graphClient
-					.Drives[_drive.Id]
-					.Root
-					.ItemWithPath($"{directory}/{name}")
+					.ItemByPath(_drive.Id, $"{directory}/{name}")
 					.GetAsync();
 
 				return searchResponse != null && searchResponse.File != null;
@@ -684,10 +644,7 @@
 					}
 
 					item = await _graphClient
-							.Drives[_drive.Id]
-							.Root
-							.ItemWithPath(pathPart)
-							.Content
+							.ContentByPath(_drive.Id, pathPart)
 							.PutAsync(stream);
 
 					return item?.WebUrl;
@@ -733,10 +690,7 @@
 					}
 
 					var item = await _graphClient
-						.Drives[_drive.Id]
-						.Root
-						.ItemWithPath(path)
-						.Content
+						.ContentByPath(_drive.Id, path)
 						.PutAsync(jpegStream);
 				}
 			}
@@ -774,9 +728,7 @@
 				{
 					// Check if folder exists
 					await _graphClient
-						.Drives[_drive.Id]
-						.Root
-						.ItemWithPath(currentPath)
+						.ItemByPath(_drive.Id, currentPath)
 						.GetAsync();
 				}
 				catch (ODataError ex) when (ex.ResponseStatusCode == (int)System.Net.HttpStatusCode.NotFound)
@@ -802,10 +754,7 @@
 					else
 					{
 						await _graphClient
-							.Drives[_drive.Id]
-							.Root
-							.ItemWithPath(parentPath)
-							.Children
+							.ChildrenByPath(_drive.Id, parentPath)
 							.PostAsync(folder);
 					}
 				}
@@ -916,29 +865,9 @@
 			return result;
 		}
 
-		private async Task ResolveSearchFileUrlsAsync(IList<DriveItem> items)
+		private Task ResolveSearchFileUrlsAsync(IList<DriveItem> items)
 		{
-			if (items.Count == 0)
-				return;
-
-			// The SDK splits the metadata lookups into batches of at most 20 requests.
-			var batch = new BatchRequestContentCollection(_graphClient);
-			var requests = new Dictionary<string, DriveItem>();
-			foreach (var item in items)
-			{
-				var requestId = await batch.AddBatchRequestStepAsync(CreateSearchFileMetadataRequest(item));
-				requests.Add(requestId, item);
-			}
-
-			var response = await _graphClient.Batch.PostAsync(batch);
-			foreach (var request in requests)
-			{
-				var resolved = await response.GetResponseByIdAsync<DriveItem>(request.Key);
-				if (string.IsNullOrWhiteSpace(resolved?.WebUrl))
-					throw new InvalidOperationException($"SharePoint returned no file URL for search result '{request.Value.Name}'.");
-
-				request.Value.WebUrl = resolved.WebUrl;
-			}
+			return _graphClient.ResolveFileUrlsAsync(items, CreateSearchFileMetadataRequest);
 		}
 
 		private RequestInformation CreateSearchFileMetadataRequest(DriveItem item)
@@ -1001,9 +930,7 @@
 			}
 
 			var folder = await _graphClient
-				.Drives[_drive.Id]
-				.Root
-				.ItemWithPath(trimmedPath)
+				.ItemByPath(_drive.Id, trimmedPath)
 				.GetAsync();
 
 			if (folder == null || folder.Folder == null)
@@ -1063,7 +990,7 @@
 			// express "everything under this folder" reliably for driveItem hits.
 			var fullQuery = "(" + context.ScopingClause + ") AND (" + args.Query + ")";
 
-			var body = new Microsoft.Graph.Search.Query.QueryPostRequestBody
+			var body = new SearchRequestBody
 			{
 				Requests = new List<SearchRequest>
 				{
@@ -1078,7 +1005,7 @@
 				},
 			};
 
-			var response = await _graphClient.Search.Query.PostAsQueryPostResponseAsync(body);
+			var response = await _graphClient.Search.Query.PostAsync(body);
 			var container = response?.Value?.FirstOrDefault()?.HitsContainers?.FirstOrDefault();
 
 			context.SearchStarted = true;

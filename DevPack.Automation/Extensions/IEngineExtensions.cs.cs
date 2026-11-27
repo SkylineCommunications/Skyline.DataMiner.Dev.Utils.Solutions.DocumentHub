@@ -35,6 +35,11 @@
         /// <param name="engine">The <see cref="IEngine"/> instance.</param>
         /// <returns>Instance of the <see cref="DocHubClient"/> interface.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="engine"/> is <see langword="null" />.</exception>
+        /// <remarks>
+        /// A script that declares a SharePoint source's library credential under the credential's name reads
+        /// SharePoint itself through <c>engine.GetCredential(name)</c>. Without that declaration, DocumentHub's
+        /// own script performs the SharePoint operations.
+        /// </remarks>
         public static DocHubClient GetDocHubClient(this IEngine engine)
         {
             if (engine is null)
@@ -42,7 +47,7 @@
                 throw new ArgumentNullException(nameof(engine), "Engine cannot be null.");
             }
 
-            return engine.GetUserConnection().GetDocHubClient();
+            return new DocHubClient(engine.GetUserConnection(), name => engine.GetCredential(name)?.GetToken());
         }
     }
 }

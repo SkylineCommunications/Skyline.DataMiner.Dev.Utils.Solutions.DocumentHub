@@ -19,6 +19,16 @@ Depending on your project type, one of the following additional packages is also
 > **Note**
 > This library targets `.NET Framework 4.8`.
 
+Version 2.0.0 has a supported DataMiner minimum of **10.6.11.0 - 17830**.
+Native Automation credential retrieval first became available in 10.6.10 / 10.7.0;
+that historical API availability is not the supported release minimum.
+Source management requires native credential and Automation permissions;
+legacy migration requires an unrestricted administrator. SharePoint secrets use
+source-scoped Credentials Library entries declared on the DocumentHub scripts that
+call `engine.GetCredential`; DOM shares use native username/password credentials. There are no normal
+DPAPI writes or fallbacks. Existing installations require the explicit, per-agent
+[credential migration](Documentation/CredentialStorage.md) before resuming use.
+
 ### Authentication dependency compatibility
 
 SharePoint uses MSAL (`Microsoft.Identity.Client`) client-credentials authentication through
@@ -29,8 +39,11 @@ Graph host. Claims challenges and cancellation are forwarded to MSAL.
 
 The executing authentication path does not use Azure.Identity or Azure.Core's
 `TokenCredential.GetTokenAsync`/`ValueTask<T>` contract, avoiding its assembly-identity
-conflict with DataMiner's authentication dependencies. Graph can still include Azure
-packages transitively; their presence does not mean this credential path is used.
+conflict with DataMiner's authentication dependencies. The focused client uses Kiota's
+HTTP and JSON runtime packages, not the full Microsoft.Graph SDK, Graph.Core, or the
+Kiota Azure authentication package. MSAL and both authentication providers are unchanged.
+Shared runtime versions previously supplied transitively by Graph are retained explicitly
+to avoid dependency downgrades when restoring the smaller package.
 No changes to DataMiner-owned DLLs or executable configuration are required.
 `SharePointDependency_Tests` covers token acquisition with mocked OAuth responses, caching,
 claims, cancellation, trusted-host restrictions, and the absence of direct Azure references.
@@ -42,12 +55,57 @@ assemblies already loaded by the Agent; an Agent still running an earlier DevPac
 need a process restart to pick up the replacement.
 Do not delete shared DLL folders indiscriminately, as other solutions may depend on them.
 
+### Version 2 migration and DLL size
+
+Version 2 replaces the full Graph SDK with an internal Kiota-generated client for the
+existing SharePoint site/library lookups, file/folder operations, recursive paging,
+KQL search, and batched file-URL resolution. Local and DOM storage are unchanged.
+SharePoint deletion and resumable uploads have not been added.
+
+Upgrade the core, Automation, Protocol, and GQI NuGet libraries to **2.0.0** together and rebuild
+consumers. `SharePointPageData.PageRemainderBuffer` and
+`SharePointSearchPageData.PageRemainderBuffer` are now internal. Consumers must use
+the public paging-context APIs instead of reading or changing these buffers.
+The high-level file APIs remain unchanged, but existing binaries that depend on
+Graph model types or these removed public members are not compatible.
+
+Install the matching Storage Installer, backend/Assistant scripts and App as one
+coordinated upgrade. Stop legacy secret writers first. After both script packages
+are installed, run `SLC-DH-AS-ManageSharePointSecret` with Action
+`RestoreAssignments`, then migrate legacy credentials explicitly on every agent
+before resuming source operations. See the [migration procedure](Documentation/CredentialStorage.md#migration-and-deployment).
+The App alone controls whether a disabled SharePoint provider is available; the
+backend file/source contracts are unchanged by that frontend setting.
+
+Build and pack targets reject each shipping DLL larger than **20,971,520 bytes
+(20 MiB)** and reject reintroduction of the full Graph SDK. This includes resolved
+runtime dependencies, not only the DocumentHub DLL or the compressed NuGet size.
+MSAL remains a supported dependency and is checked against the same size limit.
+
+### Regenerating the Graph client
+
+The small OpenAPI definition and generated C# sources are checked in under
+`DevPack\API\StorageHandlers\Graph`. Normal builds do not run Kiota or download a schema.
+After updating the API definition, run this command from the repository root:
+
+```powershell
+.\DevPack\API\StorageHandlers\Graph\Generate-Client.ps1
+```
+
+The script restores the pinned Kiota 1.30.0 local tool and regenerates only the `Generated`
+directory. Do not hand-edit its C# files or `kiota-lock.json`.
+The handwritten partial client supplies Graph's site/file path aliases and batches
+metadata GETs in groups of at most 20. Inner batch failures are surfaced, even when
+the outer HTTP status is 200; the handler retains the pending search page for a retry.
+OAuth remains implemented by MSAL, not by this generated client.
+
 ## Documentation
 
 | Document                                              | Description                                                                  |
 | ----------------------------------------------------- | ---------------------------------------------------------------------------- |
 | [Getting Started](Documentation/Getting%20Started.md) | Installation, prerequisites, and basic usage                                 |
 | [Quick Reference](Documentation/Quick%20Reference.md) | Common code snippets for file operations, repositories, and storage backends |
+| [Credential storage](Documentation/CredentialStorage.md) | Verified APIs, permissions, deterministic references, migration and integration prerequisites |
 
 External resources:
 
@@ -55,37 +113,59 @@ External resources:
 
 ## Unit Tests
 
-The `DevPack.Tests` project contains unit tests using an in-memory DOM mock (`DomSLNetMessageHandler`).
+The `DevPack.Tests` project contains an in-memory DOM mock (`DomSLNetMessageHandler`), temporary local files,
+and mocked HTTP responses for MSAL and Kiota; no live DataMiner or SharePoint connection is required.
 
 ### Test Coverage
 
-| Area                           | Test Classes                                                                                           | Tests |
-|--------------------------------|--------------------------------------------------------------------------------------------------------|-------|
-| **API - DocHubClient**         | `DocHubClient_Tests`                                                                                   | 3     |
-| **API - Files Upload**         | `Files_UploadFile_Tests`                                                                               | 16    |
-| **API - Files Read**           | `Files_ReadFiles_Tests`                                                                                | 5     |
-| **API - Files Delete**         | `Files_DeleteFile_Tests`                                                                               | 6     |
-| **API - Local Public Storage** | `LocalHandler_Tests`                                                                                   | 19    |
-| **API - Files Search**         | `Files_SearchFiles_Tests`                                                                              | 5     |
-| **API - File Download**        | `Files_DownloadFile_Tests`                                                                             | 9     |
-| **API - File Validator**       | `FileValidator_ValidateAndSanitizeFile_Tests`, `FileValidator_FileName_Tests`                          | 38    |
-| **API - File Adapters**        | `FileInfoAdapter_GetRelativePath_Tests`, `DomFileAdapter_Tests`                                        | 17    |
-| **API - DOM Attachment Paths** | `DomAttachmentsHandler_Tests`                                                                         | 7     |
-| **API - Secrets**              | `SecretKey_Tests`, `DpapiFileSecretStore_Tests`, `Secrets_Tests`, `ManageSharePointSecretScript_Tests` | 42    |
-| **SharePoint authentication**  | `SharePointDependency_Tests`                                                                           | 12    |
-| **SDM - SharePoint**           | `SharepointDomRepository_CRUD_Tests`, `SharepointDomRepository_FilterTests_Tests`                      | 13    |
-| **SDM - DomSource**            | `DomSourceDomRepository_CRUD_Tests`, `DomSourceDomRepository_FilterTests_Tests`                        | 13    |
-| **SDM - DocumentBucket**       | `DocumentBucketDomRepository_CRUD_Tests`, `DocumentBucketDomRepository_FilterTests_Tests`              | 26    |
+| Area | Test class | Test cases |
+| --- | --- | ---: |
+| API - DocHubClient | `DocHubClient_Tests` | 3 |
+| API - Files Upload | `Files_UploadFile_Tests` | 16 |
+| API - Files Read | `Files_ReadFiles_Tests` | 5 |
+| API - Files Delete | `Files_DeleteFile_Tests` | 6 |
+| API - Local Public Storage | `LocalHandler_Tests` | 19 |
+| API - Files Search | `Files_SearchFiles_Tests` | 5 |
+| API - File Download | `Files_DownloadFile_Tests` | 9 |
+| API - File Validation | `FileValidator_ValidateAndSanitizeFile_Tests` | 19 |
+| API - File Name Validation | `FileValidator_FileName_Tests` | 19 |
+| API - Local File Adapter | `FileInfoAdapter_GetRelativePath_Tests` | 11 |
+| API - DOM File Adapter | `DomFileAdapter_Tests` | 6 |
+| API - DOM Attachment Paths | `DomAttachmentsHandler_Tests` | 7 |
+| API - Secret Keys | `SecretKey_Tests` | 22 |
+| API - Encrypted Secret Storage | `DpapiFileSecretStore_Tests` | 7 |
+| API - Secrets | `Secrets_Tests` | 14 |
+| API - Secret Management Script | `ManageSharePointSecretScript_Tests` | 6 |
+| SharePoint Authentication | `SharePointDependency_Tests` | 12 |
+| SharePoint Kiota Client | `KiotaClient_Tests` | 7 |
+| Credentials | `NativeCredentialMessaging_Tests` | 34 |
+| SDM - SharePoint CRUD | `SharepointDomRepository_CRUD_Tests` | 6 |
+| SDM - SharePoint Filters | `SharepointDomRepository_FilterTests_Tests` | 7 |
+| SDM - DomSource CRUD | `DomSourceDomRepository_CRUD_Tests` | 6 |
+| SDM - DomSource Filters | `DomSourceDomRepository_FilterTests_Tests` | 7 |
+| SDM - DocumentBucket CRUD and Middleware | `DocumentBucketDomRepository_CRUD_Tests` | 16 |
+| SDM - DocumentBucket Filters | `DocumentBucketDomRepository_FilterTests_Tests` | 10 |
+| **Total** | **25 classes** | **279** |
 
+### Kiota Client Tests
 
-**Total: 231 tests**
+The focused Kiota tests use mocked HTTP responses with the real generated client
+and JSON serialization. They cover encoded root/nested file operations, upload
+bytes and folder request bodies, search-result metadata, 20+1 metadata batching
+with out-of-order responses, search-page recovery after inner 403/429 failures,
+and binary downloads through Kiota's redirect middleware without forwarding the
+Graph bearer token. They require no live DataMiner or SharePoint connection.
+Existing MSAL authentication tests are unchanged.
 
 ### SDM Repository Tests
 
-Each repository test class covers:
-- **CRUD**: Create, Update, CreateOrUpdate, ReadPaged, DeleteSingle, DeleteBulk, Count
-- **Filters**: Equal, Contains, AND, OR, TRUE
-- **Middleware**: Path sanitization (DocumentBucket)
+The **SDM module cases** are split across **SharePoint**,
+**DomSource**, and **DocumentBucket**. Each module has separate CRUD
+and filter test classes:
+
+- **CRUD**: Create, Update, ReadPaged, DeleteSingle, DeleteBulk, and Count for all three modules; CreateOrUpdate for DocumentBucket.
+- **Filters**: Equality, substring matching, AND/OR combinations, and unfiltered TRUE queries for module-specific fields.
+- **Middleware**: DocumentBucket upload-path sanitization on both create and update, with parameterized inputs.
 
 ### API Tests
 
@@ -129,6 +209,10 @@ API tests validate parameter handling:
 - Tenant/client ID validation for SharePoint client secrets
 - The public `DocHubClient.Secrets` API being write-only (no member returns a secret, no secret store types are exposed)
 - The in-memory store used as a test double
+
+`ManageSharePointSecretScript_Tests` adds five cases for saving and deleting secrets,
+defaulting an empty action to Save, rejecting invalid input, and matching the
+script action constants to the DevPack contract.
 
 ### Running Tests
 

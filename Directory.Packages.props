@@ -5,8 +5,13 @@
   <ItemGroup>
     <!-- Graph authentication uses MSAL through Kiota's Task-based interface, not Azure.Identity/TokenCredential. -->
     <PackageVersion Include="Microsoft.Identity.Client" Version="4.83.1" />
+    <!-- Preserve shared runtime versions previously supplied by Graph.Core/Azure. -->
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+    <PackageVersion Include="Microsoft.IdentityModel.Abstractions" Version="8.15.0" />
     <PackageVersion Include="FluentAssertions" Version="7.2.0" />
-    <PackageVersion Include="Microsoft.Graph" Version="5.105.0" />
+    <PackageVersion Include="Microsoft.Kiota.Abstractions" Version="1.22.2" />
+    <PackageVersion Include="Microsoft.Kiota.Http.HttpClientLibrary" Version="1.22.2" />
+    <PackageVersion Include="Microsoft.Kiota.Serialization.Json" Version="1.22.2" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
     <PackageVersion Include="Moq" Version="4.20.72" />
     <PackageVersion Include="MSTest" Version="4.5.1" />
@@ -15,8 +20,8 @@
     <PackageVersion Include="Skyline.DataMiner.Core.AppPackageInstaller" Version="4.0.0" />
     <!-- Avoid Channels 10 / AsyncInterfaces 10 conflicting with the UDAPI toolkit's DI 8 runtime. -->
     <PackageVersion Include="Skyline.DataMiner.Core.DataMinerSystem.Common" Version="1.2.0.3" />
-    <PackageVersion Include="Skyline.DataMiner.Dev.Automation" Version="10.6.3.1" />
-    <PackageVersion Include="Skyline.DataMiner.Dev.Common" Version="10.6.3.1" />
+    <PackageVersion Include="Skyline.DataMiner.Dev.Automation" Version="10.6.10.1" />
+    <PackageVersion Include="Skyline.DataMiner.Dev.Common" Version="10.6.10.1" />
     <PackageVersion Include="StyleCop.Analyzers" Version="1.1.118" />
     <PackageVersion Include="Skyline.DataMiner.Dev.Protocol" Version="10.6.3.1" />
     <PackageVersion Include="Skyline.DataMiner.SDM" Version="1.0.3" />
@@ -24,7 +29,10 @@
     <PackageVersion Include="Skyline.DataMiner.Utils.DOM" Version="10.5.2.8" />
     <PackageVersion Include="Skyline.DataMiner.Utils.SecureCoding" Version="3.0.1" />
     <PackageVersion Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers" Version="3.0.1" />
-    <PackageVersion Include="System.Collections.Immutable" Version="5.0.0" />
+    <PackageVersion Include="System.Collections.Immutable" Version="9.0.0" />
     <PackageVersion Include="System.Drawing.Common" Version="10.0.1" />
+    <!-- Preserve the existing JSON runtime when removing Graph.Core/Azure's dependency chain. -->
+    <PackageVersion Include="System.Text.Json" Version="8.0.6" />
+    <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.0" />
   </ItemGroup>
 </Project>

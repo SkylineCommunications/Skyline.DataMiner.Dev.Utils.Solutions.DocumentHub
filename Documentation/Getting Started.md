@@ -19,6 +19,14 @@ Depending on your project type, one of the following additional packages is also
 > **Note**
 > This library targets `.NET Framework 4.8`.
 
+Use version **2.0.0** of the core and project-specific extension packages together.
+The supported release minimum is DataMiner **10.6.11.0 - 17830**, enforced by the
+Storage Installer. Native Automation credential retrieval first became available
+in 10.6.10 / 10.7.0; the release deliberately requires the newer minimum.
+Existing installations must follow
+the [explicit credential migration](CredentialStorage.md) and rebuild consumers
+for the Kiota-backed API before resuming operations.
+
 ## Entry Point
 
 The `DocHubClient` class is the main entry point to the DocumentHub API.
@@ -143,33 +151,37 @@ and verifies that it remains inside the bucket.
 
 ### SharePoint Configurations
 
-SharePoint configurations hold the Azure AD credentials and site information needed to connect to SharePoint Online document libraries. Multiple configurations are supported, allowing different document buckets to connect to different SharePoint sites or libraries.
+SharePoint configurations hold non-secret Entra identifiers and site/library
+metadata. Each immutable source owns a native Credentials Library client secret,
+declared on the DocumentHub scripts that reach SharePoint. Source management requires native
+credential/Automation permissions and the supported DataMiner 10.6.11.0 - 17830 minimum;
+agent-local migration requires an unrestricted administrator.
 
 ```csharp
 using Skyline.DataMiner.Solutions.DocumentHub.SDM.Helpers;
+using Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient;
 
 var helper = engine.GetDocumentHubApiHelper();
 
-// Create a configuration for one SharePoint site
-var marketingConfig = helper.SharePointConfigurations.Create(new SharePointConfiguration
+// sourceId is generated once by the caller and reused on every retry.
+var marketingConfig = new SharePointConfiguration
 {
+    Identifier = sourceId,
     Name = "Marketing Site",
-    TenantID = "your-tenant-id",
-    ClientID = "your-client-id",
+    TenantID = organizationId,
+    ClientID = clientId,
     SiteURL = "https://contoso.sharepoint.com/sites/Marketing",
     DocumentLibraryName = "Shared Documents",
-});
-
-// Create a configuration for another SharePoint site
-var engineeringConfig = helper.SharePointConfigurations.Create(new SharePointConfiguration
-{
-    Name = "Engineering Site",
-    TenantID = "your-tenant-id",
-    ClientID = "your-client-id",
-    SiteURL = "https://contoso.sharepoint.com/sites/Engineering",
-    DocumentLibraryName = "Technical Docs",
-});
+};
+new SharePointSources(engine.GetUserConnection())
+    .Save(marketingConfig, clientSecretFromNativePasswordControl);
 ```
+
+The ID variables above are nonempty GUID strings supplied by the source form.
+The secret variable is transient native-password input, never a script parameter,
+DOM field or environment setting. Do not use the low-level repository `Create`
+as a substitute: it persists metadata without provisioning credentials.
+Separate sources may share tenant/client identifiers; their secrets remain isolated.
 
 Each SharePoint document bucket references a specific configuration via its `SharePointConfiguration` property:
 
@@ -186,33 +198,40 @@ var bucket = helper.DocumentBuckets.Create(new DocumentBucket
 
 #### Client Secret
 
-The Azure AD client secret is **not** part of the SharePoint configuration and is never stored in DOM. It is stored encrypted (DPAPI) on the DataMiner Agent under `C:\Skyline DataMiner\Security\DocumentHub\sharepoint\<tenantId>\<clientId>.dat`, so every app registration of a tenant has its own secret.
-
-Secrets are write-only through `DocHubClient.Secrets`: they can be validated, saved, checked and deleted, but never read back.
+The client secret is **not** part of SharePoint configuration or ordinary DOM
+data. SLNet provisions a native `PasswordCredential`; only the DocumentHub
+scripts that declare it retrieve it as a Token through
+`engine.GetCredential(name).GetToken()`, where `name` is the credential's library
+name. General SDK/GQI callers proxy non-secret operations to
+`SLC-DH-AS-ManageSharePointSecret` instead of reading secret files.
 
 ```csharp
 var client = engine.GetDocHubClient();
 
-// Optionally validate a new secret before saving it (the secret is not stored)
-if (client.Secrets.IsSharePointConnected(marketingConfig, clientSecret))
-{
-    client.Secrets.SaveSharePointClientSecret(marketingConfig.TenantID, marketingConfig.ClientID, clientSecret);
-}
-
-// Check whether a secret is saved, and whether the saved secret still works
-bool hasSecret = client.Secrets.HasSharePointClientSecret(marketingConfig.TenantID, marketingConfig.ClientID);
+// These checks use the saved source's authorized native consumer.
+bool hasSecret = client.Secrets.HasSharePointClientSecret(marketingConfig);
 bool connected = client.Secrets.IsSharePointConnected(marketingConfig);
 
-// Remove the secret
-client.Secrets.DeleteSharePointClientSecret(marketingConfig.TenantID, marketingConfig.ClientID);
+// An administrator can preserve the existing value on a metadata-only save.
+new SharePointSources(engine.GetUserConnection()).Save(marketingConfig, null);
 ```
 
 > **Note**
-> `TenantID` and `ClientID` must be valid GUIDs.
+> Changing tenant/client requires a replacement secret. Pair-only save/has/delete
+> overloads are obsolete and fail explicitly; a tenant/client pair is not unique.
+> Removing an unlinked source through `SharePointSources.Delete(sourceId)` revokes
+> only its managed binding and retains the native credential for other consumers.
+> Follow [Credential storage](CredentialStorage.md) for the deterministic
+> name/GUID convention, assignments, permissions and explicit legacy migration.
 
 ### DOM Sources
 
 DOM Sources configure DOM-based storage by specifying the module where file attachments are stored.
+
+For network shares, use Settings/native password controls or the authorized HTTP
+source API. Username/password values belong in a native
+`UserNameAndPasswordCredential`; source/module settings retain its GUID only.
+Do not add password string fields to this model.
 
 ```csharp
 using Skyline.DataMiner.Solutions.DocumentHub.SDM.Helpers;
@@ -229,6 +248,10 @@ var source = helper.DomSources.Create(new DomSource
 ### File Operations
 
 The `DocHubClient.Files` property provides access to all file operations.
+SharePoint calls require the native source consumer to be provisioned. Ordinary
+users' local upload/download paths are restricted to DataMiner/DocumentHub
+staging; the arbitrary local paths illustrated below require administrator access.
+See the credential guide for the exact roots and live file-transfer prerequisites.
 
 #### Uploading Files
 

@@ -85,6 +85,10 @@
 		/// </summary>
 		public int PageSize { get; set; } = 100;
 
+		internal int NativeOffset { get; set; }
+
+		internal bool? NativeHasMore { get; set; }
+
 		/// <summary>
 		/// Abstract level member function checks if there are more pages left.
 		/// </summary>

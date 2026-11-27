@@ -4,6 +4,12 @@
 
 Provides Protocol extensions to communicate with DocumentHub
 
+Use version 2.0.0 with the matching core package and DataMiner 10.6.11.0 - 17830.
+Connector-owned credentials remain native protocol password parameters;
+DocumentHub SharePoint operations use the installed credential-consuming
+Automation script. Rebuild consumers and follow the
+[migration guide](https://github.com/SkylineCommunications/Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub/blob/main/Documentation/CredentialStorage.md).
+
 ### About DataMiner
 
 DataMiner is a transformational platform that provides vendor-independent control and monitoring of devices and services. Out of the box and by design, it addresses key challenges such as security, complexity, multi-cloud, and much more. It has a pronounced open architecture and powerful capabilities enabling users to evolve easily and continuously.

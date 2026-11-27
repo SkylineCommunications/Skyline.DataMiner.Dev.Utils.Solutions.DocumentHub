@@ -7,10 +7,10 @@
   <PropertyGroup>
     <DataMinerType>Package</DataMinerType>
     <GenerateDataMinerPackage>True</GenerateDataMinerPackage>
-    <MinimumRequiredDmVersion>10.6.5.0 - 17061</MinimumRequiredDmVersion>
-    <PackageVersion>1.2.1</PackageVersion>
-    <Version>1.2.1</Version>
-    <VersionComment>Added per-configuration SharePoint secret storage; legacy graphsecret.dat remains supported as a fallback.</VersionComment>
+    <MinimumRequiredDmVersion>10.6.11.0 - 17830</MinimumRequiredDmVersion>
+    <PackageVersion>2.0.0</PackageVersion>
+    <Version>2.0.0</Version>
+    <VersionComment>Source-scoped native credentials with explicit legacy migration (no DPAPI fallback), and a focused Kiota Graph client replacing the full Microsoft.Graph SDK. Upgrade all DocumentHub consumers together.</VersionComment>
     <!-- Do NOT fill in the Organization Token here. This points to either an Environment Variable skyline__sdk__dataminertoken holding the organization token or a Visual Studio User Secret holding the token. -->
     <CatalogPublishKeyName>skyline:sdk:dataminertoken</CatalogPublishKeyName>
     <CatalogDefaultDownloadKeyName>skyline:sdk:dataminertoken</CatalogDefaultDownloadKeyName>
@@ -22,6 +22,7 @@
     </PackageReference>
     <PackageReference Include="Skyline.DataMiner.Core.AppPackageInstaller" />
     <PackageReference Include="Skyline.DataMiner.Dev.Automation" />
+    <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="Skyline.DataMiner.SDM.SourceGenerator.Runtime" />
     <PackageReference Include="Skyline.DataMiner.Utils.DOM" />
     <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers">

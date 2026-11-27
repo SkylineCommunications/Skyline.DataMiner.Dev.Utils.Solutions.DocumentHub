@@ -142,13 +142,30 @@
 		/// </exception>
 		internal static IStorageHandler Create(IConnection connection, DocumentBucket bucket)
 		{
+			return Create(connection, bucket, null);
+		}
+
+		/// <summary>
+		/// Creates a storage handler for a caller that may declare SharePoint credentials itself.
+		/// </summary>
+		/// <param name="connection">An active DataMiner connection used to communicate with the system.</param>
+		/// <param name="bucket">The bucket for which a handler is to be created.</param>
+		/// <param name="scriptCredentials">
+		/// Returns the secret of a credential the running script declares under the given name, or <c>null</c>.
+		/// </param>
+		/// <returns>An instance of <see cref="IStorageHandler"/> corresponding to the bucket's storage type.</returns>
+		/// <exception cref="ArgumentException">
+		/// Thrown if no handler is registered for the specified storage type.
+		/// </exception>
+		internal static IStorageHandler Create(IConnection connection, DocumentBucket bucket, Func<string, string> scriptCredentials)
+		{
 			// Select the appropriate storage handler based on the given storage type.
 			var storage = bucket?.StorageType;
 			switch (storage)
 			{
 				case StorageType.SharePoint:
 					// SharePoint-based storage implementation.
-					return new SharePointHandler(connection, bucket);
+					return NativeSharePointHandler.Create(connection, bucket, scriptCredentials);
 
 				case StorageType.Local:
 					// Local file system storage implementation.

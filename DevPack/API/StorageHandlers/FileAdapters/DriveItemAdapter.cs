@@ -2,7 +2,7 @@
 {
     using System;
     using System.IO;
-    using Microsoft.Graph.Models;
+    using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.Graph.Generated.Models;
 
 	/// <summary>
 	/// Represents a file that is accessible via web-based operations within DocHub.

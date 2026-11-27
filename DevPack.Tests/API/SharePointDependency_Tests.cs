@@ -9,11 +9,11 @@ namespace DevPack.Tests.API
 	using System.Threading;
 	using System.Threading.Tasks;
 	using FluentAssertions;
-	using Microsoft.Graph;
 	using Microsoft.Identity.Client;
 	using Microsoft.Kiota.Abstractions;
 	using Microsoft.Kiota.Abstractions.Authentication;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Security;
+	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.Graph.Generated;
 	using Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup;
 
 	[TestClass]
@@ -64,9 +64,7 @@ namespace DevPack.Tests.API
 		[TestMethod]
 		public void SavedSecret_CreatesTheSameAuthenticationProvider()
 		{
-			var store = new InMemorySecretStore();
-			store.Save(SharePointSecrets.ClientSecret(TenantId, ClientId), "synthetic-test-secret");
-			var authentication = new SharePointCredentialProvider(store).CreateCredential(TenantId, ClientId);
+			var authentication = new SharePointCredentialProvider(() => "synthetic-test-secret").CreateCredential(TenantId, ClientId);
 			((BaseBearerTokenAuthenticationProvider)authentication).AccessTokenProvider.Should().BeOfType<SharePointAccessTokenProvider>();
 		}
 
@@ -89,7 +87,7 @@ namespace DevPack.Tests.API
 		[TestMethod]
 		public async Task GraphClient_UsesMsalProviderForRequests()
 		{
-			using (var graph = new GraphServiceClient(this.httpClient, new BaseBearerTokenAuthenticationProvider(this.provider)))
+			using (var graph = DocumentHubGraphClient.Create(new BaseBearerTokenAuthenticationProvider(this.provider), this.httpClient))
 			{
 				var first = await graph.Sites["synthetic-site"].GetAsync();
 				var second = await graph.Sites["synthetic-site"].GetAsync();
