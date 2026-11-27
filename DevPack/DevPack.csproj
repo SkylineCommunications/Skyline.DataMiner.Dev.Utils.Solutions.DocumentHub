@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
     <LangVersion>8.0</LangVersion>
@@ -55,6 +55,7 @@
   <ItemGroup>
     <InternalsVisibleTo Include="DevPack.Tests" />
     <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+    <InternalsVisibleTo Include="Skyline.DataMiner.Dev.Utils.Solutions.DocumentHub.Automation" />
   </ItemGroup>
   <Import Project="..\SharedMappers\SharedMappers.projitems" Label="Shared" />
   <Import Project="..\SharedSecurity\SharedSecurity.projitems" Label="Shared" />

@@ -3,8 +3,10 @@
 	using System;
 	using System.IO;
 	using System.Security.Cryptography;
+	using System.Text;
 	using FluentAssertions;
 	using Skyline.DataMiner.Solutions.DocumentHub.API.Security;
+	using Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup;
 
 	[TestClass]
 	public class DpapiFileSecretStore_Tests
@@ -29,122 +31,99 @@
 		}
 
 		[TestMethod]
-		public void SaveThenRead_ReturnsOriginalSecret()
+		public void LegacyStore_RejectsAllNewWrites()
 		{
-			var key = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
-
-			_store.Save(key, "my-secret");
-
-			_store.Read(key).Should().Be("my-secret");
+			_store.Invoking(s => s.Save(SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid()), "synthetic-secret"))
+				.Should().Throw<NotSupportedException>();
+			Directory.Exists(_root).Should().BeFalse();
 		}
 
 		[TestMethod]
-		public void Save_DoesNotStorePlainText()
+		public void LegacyRead_DecryptsCorrectScopeAndDeletesOnlyReadSnapshot()
 		{
 			var key = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
-
-			_store.Save(key, "my-secret");
-
-			var content = File.ReadAllText(Path.Combine(_root, key.RelativePath));
-			content.Should().NotContain("my-secret");
-		}
-
-		[TestMethod]
-		public void Save_ExistingSecret_ReplacesValueAndLeavesNoTempFile()
-		{
-			var key = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
-			_store.Save(key, "old");
-
-			_store.Save(key, "new");
-
-			_store.Read(key).Should().Be("new");
-			File.Exists(Path.Combine(_root, key.RelativePath) + ".tmp").Should().BeFalse();
-		}
-
-		[TestMethod]
-		public void Save_EmptyValue_Throws()
-		{
-			var key = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
-
-			Action act = () => _store.Save(key, string.Empty);
-
-			act.Should().Throw<ArgumentException>();
-		}
-
-		[TestMethod]
-		public void Read_MissingSecret_ThrowsFileNotFound()
-		{
-			var key = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
-
-			Action act = () => _store.Read(key);
-
-			act.Should().Throw<FileNotFoundException>();
-		}
-
-		[TestMethod]
-		public void Exists_ReflectsSaveAndDelete()
-		{
-			var key = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
-			_store.Exists(key).Should().BeFalse();
-
-			_store.Save(key, "my-secret");
-			_store.Exists(key).Should().BeTrue();
-
+			WriteFixture(key, "synthetic-legacy-secret");
+			_store.Read(key).Should().Be("synthetic-legacy-secret");
 			_store.Delete(key);
 			_store.Exists(key).Should().BeFalse();
 		}
 
 		[TestMethod]
-		public void Delete_MissingSecret_DoesNotThrow()
+		public void LegacyDelete_WithoutReadOrAfterConcurrentWriteRetainsData()
 		{
 			var key = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
-
-			Action act = () => _store.Delete(key);
-
-			act.Should().NotThrow();
+			WriteFixture(key, "before");
+			_store.Invoking(s => s.Delete(key)).Should().Throw<InvalidOperationException>();
+			_store.Read(key).Should().Be("before");
+			WriteFixture(key, "concurrent-change");
+			_store.Invoking(s => s.Delete(key)).Should().Throw<IOException>();
+			_store.Read(key).Should().Be("concurrent-change");
 		}
 
 		[TestMethod]
-		public void Secrets_AreIsolatedPerScope()
+		public void LegacyRead_CopiedCiphertextCannotBeUsedForAnotherOrganization()
 		{
-			var keyA = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
-			var keyB = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
-
-			_store.Save(keyA, "secret-a");
-			_store.Save(keyB, "secret-b");
-
-			_store.Read(keyA).Should().Be("secret-a");
-			_store.Read(keyB).Should().Be("secret-b");
+			var first = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
+			var second = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
+			WriteFixture(first, "synthetic-legacy-secret");
+			var target = Path.Combine(_root, second.RelativePath);
+			Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+			File.Copy(Path.Combine(_root, first.RelativePath), target);
+			_store.Invoking(s => s.Read(second)).Should().Throw<CryptographicException>();
 		}
 
 		[TestMethod]
-		public void Read_FileCopiedToAnotherKey_FailsToDecrypt()
+		public void LegacyRead_InterruptedWriterMustBeResolvedBeforeMigration()
 		{
-			var keyA = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
-			var keyB = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
-			_store.Save(keyA, "secret-a");
-
-			var pathB = Path.Combine(_root, keyB.RelativePath);
-			Directory.CreateDirectory(Path.GetDirectoryName(pathB));
-			File.Copy(Path.Combine(_root, keyA.RelativePath), pathB);
-
-			Action act = () => _store.Read(keyB);
-
-			act.Should().Throw<CryptographicException>();
+			var key = SharePointSecrets.ClientSecret(Guid.NewGuid(), Guid.NewGuid());
+			WriteFixture(key, "synthetic-legacy-secret");
+			File.WriteAllText(Path.Combine(_root, key.RelativePath) + ".tmp", "unfinished-ciphertext");
+			_store.Invoking(s => s.Read(key)).Should().Throw<IOException>();
+			_store.Exists(key).Should().BeTrue();
 		}
 
 		[TestMethod]
-		public void NullKey_Throws()
+		public void GlobalLegacyFile_RequiresExplicitMigrationAndAssignedConsumer()
 		{
-			Action save = () => _store.Save(null, "x");
-			Action read = () => _store.Read(null);
-			Action exists = () => _store.Exists(null);
-			Action delete = () => _store.Delete(null);
+			Directory.CreateDirectory(_root);
+			var path = Path.Combine(_root, "graphsecret.dat");
+			File.WriteAllText(path, Convert.ToBase64String(ProtectedData.Protect(Encoding.UTF8.GetBytes("synthetic-global-secret"), null, DataProtectionScope.LocalMachine)));
+			var source = CredentialPlatformFake.Source();
+			var platform = new CredentialPlatformFake();
+			var migration = new CredentialMigration(platform, _store, c => true);
+			migration.Invoking(m => m.Migrate(new[] { source }, false)).Should().Throw<InvalidOperationException>();
+			File.Exists(path).Should().BeTrue();
+			platform.FailureAt = "Assign";
+			migration.Invoking(m => m.Migrate(new[] { source }, true)).Should().Throw<InvalidOperationException>();
+			File.Exists(path).Should().BeTrue();
+			platform.FailureAt = null;
+			migration.Migrate(new[] { source }, true).Should().Be(1);
+			File.Exists(path).Should().BeFalse();
+		}
 
-			save.Should().Throw<ArgumentNullException>();
-			read.Should().Throw<ArgumentNullException>();
-			exists.Should().Throw<ArgumentNullException>();
-			delete.Should().Throw<ArgumentNullException>();
+		[TestMethod]
+		public void GlobalLegacyFile_WithMultipleRegistrationsIsRetained()
+		{
+			Directory.CreateDirectory(_root);
+			var path = Path.Combine(_root, "graphsecret.dat");
+			File.WriteAllText(path, "retained-encrypted-content");
+			var first = CredentialPlatformFake.Source();
+			var second = CredentialPlatformFake.Source(Guid.NewGuid().ToString());
+			second.TenantID = Guid.NewGuid().ToString();
+			var platform = new CredentialPlatformFake();
+			new CredentialProvisioner(platform).Save(first, "first");
+			new CredentialProvisioner(platform).Save(second, "second");
+			new CredentialMigration(platform, _store, c => true).Invoking(m => m.Migrate(new[] { first, second }, true))
+				.Should().Throw<InvalidOperationException>();
+			File.ReadAllText(path).Should().Be("retained-encrypted-content");
+		}
+
+		private void WriteFixture(SecretKey key, string value)
+		{
+			var path = Path.Combine(_root, key.RelativePath);
+			Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+			var cipher = ProtectedData.Protect(Encoding.UTF8.GetBytes(value), Encoding.UTF8.GetBytes(key.Entropy), DataProtectionScope.LocalMachine);
+			File.WriteAllText(path, Convert.ToBase64String(cipher));
 		}
 	}
 }

@@ -36,6 +36,9 @@
 
 		public override bool HasNextPage()
 		{
+			if (NativeHasMore.HasValue)
+				return NativeHasMore.Value;
+
 			return FolderQueue.Count > 0
 				|| NextPageLink != null
 				|| PageRemainderBuffer.Count > 0;

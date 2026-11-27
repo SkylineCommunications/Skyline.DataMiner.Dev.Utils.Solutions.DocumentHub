@@ -22,6 +22,7 @@
     </PackageReference>
     <PackageReference Include="Skyline.DataMiner.Core.AppPackageInstaller" />
     <PackageReference Include="Skyline.DataMiner.Dev.Automation" />
+    <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="Skyline.DataMiner.SDM.SourceGenerator.Runtime" />
     <PackageReference Include="Skyline.DataMiner.Utils.DOM" />
     <PackageReference Include="Skyline.DataMiner.Utils.SecureCoding.Analyzers">

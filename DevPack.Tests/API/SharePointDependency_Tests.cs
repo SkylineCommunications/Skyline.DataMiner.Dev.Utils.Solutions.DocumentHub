@@ -64,9 +64,7 @@ namespace DevPack.Tests.API
 		[TestMethod]
 		public void SavedSecret_CreatesTheSameAuthenticationProvider()
 		{
-			var store = new InMemorySecretStore();
-			store.Save(SharePointSecrets.ClientSecret(TenantId, ClientId), "synthetic-test-secret");
-			var authentication = new SharePointCredentialProvider(store).CreateCredential(TenantId, ClientId);
+			var authentication = new SharePointCredentialProvider(() => "synthetic-test-secret").CreateCredential(TenantId, ClientId);
 			((BaseBearerTokenAuthenticationProvider)authentication).AccessTokenProvider.Should().BeOfType<SharePointAccessTokenProvider>();
 		}
 

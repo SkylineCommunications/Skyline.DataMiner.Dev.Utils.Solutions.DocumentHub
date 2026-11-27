@@ -4,40 +4,6 @@
 
 NuGet Class Library API to interact with DocumentHub functionality.
 
-## Version 2 compatibility
-
-The full Microsoft.Graph SDK has been replaced with a focused internal Kiota client.
-Existing SharePoint file operations, recursive paging, KQL search, and metadata
-batching are retained. Authentication still uses Microsoft.Identity.Client (MSAL)
-and the existing credential/token providers without changes.
-
-Upgrade the core, Automation, Protocol, and GQI packages together and rebuild consumers.
-The `PageRemainderBuffer` properties on `SharePointPageData` and
-`SharePointSearchPageData` are now internal. Use the public paging-context APIs
-instead of manipulating Graph model buffers. Other high-level file APIs, local
-storage, and DOM storage are unchanged.
-
-Repository build/pack targets check the shipping DLLs and resolved runtime
-dependencies against a **20,971,520-byte (20 MiB)** per-DLL limit. They also reject
-the full Graph SDK and its Azure authentication dependency chain. MSAL is retained
-and is subject to the same size limit.
-
-## Graph client maintenance
-
-The source repository includes a small OpenAPI definition in
-`DevPack\API\StorageHandlers\Graph\documenthub.openapi.yaml` and checked-in generated
-sources. From the repository root, regenerate with:
-
-```powershell
-.\DevPack\API\StorageHandlers\Graph\Generate-Client.ps1
-```
-
-This restores the pinned Kiota tool and replaces only the generated directory.
-Ordinary builds use the checked-in sources. Keep handwritten path/batch helpers
-outside that directory and update the definition before adding Graph operations.
-ID-based request builders are reused for Graph's documented site-by-path and
-`root:/path:` aliases, with path segments escaped individually.
-
 ### About DataMiner
 
 DataMiner is a transformational platform that provides vendor-independent control and monitoring of devices and services. Out of the box and by design, it addresses key challenges such as security, complexity, multi-cloud, and much more. It has a pronounced open architecture and powerful capabilities enabling users to evolve easily and continuously.

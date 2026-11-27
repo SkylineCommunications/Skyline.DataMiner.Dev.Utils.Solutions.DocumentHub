@@ -1,5 +1,6 @@
 ﻿namespace Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient
 {
+	using System;
 	using Skyline.DataMiner.Net;
 
 	/// <summary>
@@ -16,9 +17,22 @@
 		/// An active DataMiner connection used to communicate with the system.
 		/// </param>
 		public DocHubClient(IConnection connection)
+			: this(connection, null)
 		{
-			Files = new Files(connection);
-			Secrets = new Secrets(connection);
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DocHubClient"/> class for an Automation script.
+		/// </summary>
+		/// <param name="connection">An active DataMiner connection used to communicate with the system.</param>
+		/// <param name="scriptCredentials">
+		/// Returns the secret of a credential the running script declares under the given name, or <c>null</c>.
+		/// SharePoint is then read by the script itself; without a declaration, DocumentHub's own script is called.
+		/// </param>
+		internal DocHubClient(IConnection connection, Func<string, string> scriptCredentials)
+		{
+			Files = new Files(connection, scriptCredentials);
+			Secrets = new Secrets(connection, scriptCredentials);
 		}
 
 		/// <summary>
