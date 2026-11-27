@@ -55,15 +55,20 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API.Security
 			// A metadata-only edit must not rewrite a canonical credential; it still repairs the declarations below.
 			if (existing == null || !string.IsNullOrEmpty(secret) || existing.Info.Name != reference.Name || existing.Info.Groups == null)
 			{
-				// SLNet replaces the groups on every update: an existing credential keeps its own, a new one gets the saving user's.
-				var groups = existing == null ? platform.CallerGroups() : existing.Info.Groups?.ToList() ?? new List<int>();
-				var credential = new PasswordCredential(reference.Id, reference.Name, groups);
-				if (!string.IsNullOrEmpty(secret))
-					credential.Password = secret;
-				platform.Write(credential);
+				WriteCredential(reference, existing, secret);
 			}
 
 			platform.Assign(reference);
+		}
+
+		private void WriteCredential(SharePointCredentialReference reference, ALibraryCredential existing, string secret)
+		{
+			// SLNet replaces the groups on every update: an existing credential keeps its own, a new one gets the saving user's.
+			var groups = existing == null ? platform.CallerGroups() : existing.Info.Groups?.ToList() ?? new List<int>();
+			var credential = new PasswordCredential(reference.Id, reference.Name, groups);
+			if (!string.IsNullOrEmpty(secret))
+				credential.Password = secret;
+			platform.Write(credential);
 		}
 	}
 }

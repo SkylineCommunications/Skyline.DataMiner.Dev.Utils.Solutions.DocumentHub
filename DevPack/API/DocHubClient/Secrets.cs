@@ -55,18 +55,11 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient
 			if (existing == null && (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password)))
 				throw CredentialFailure.At("A new DOM attachment credential requires a username and password.");
 
-			if (string.IsNullOrEmpty(username) && string.IsNullOrEmpty(password)
+			if (existing != null && string.IsNullOrEmpty(username) && string.IsNullOrEmpty(password)
 				&& existing.Info.Name == name && existing.Info.Groups != null)
 				return id;
 
-			// SLNet replaces the groups on every update: an existing credential keeps its own, a new one gets the saving user's.
-			var groups = existing == null ? _platform.CallerGroups() : existing.Info.Groups?.ToList() ?? new List<int>();
-			var credential = new UserNameAndPasswordCredential(id, name, groups);
-			if (!string.IsNullOrEmpty(username))
-				credential.UserName = username;
-			if (!string.IsNullOrEmpty(password))
-				credential.Password = password;
-			_platform.Write(credential);
+			WriteDomCredential(id, name, existing, username, password);
 			var saved = _platform.Read().SingleOrDefault(c => c.Info.GUID == id);
 			if (!(saved is UserNameAndPasswordCredential) || saved.Info.Name != name)
 				throw CredentialFailure.At("The DOM attachment credential could not be verified.");
@@ -178,6 +171,18 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API.DocHubClient
 
 		/// <summary>Checks administrative access before performing agent-local operations not authorized by SLNet.</summary>
 		internal void RequireManagementPermission() => _platform.RequireAdministrator("This agent-local operation requires an unrestricted DataMiner administrator.");
+
+		private void WriteDomCredential(Guid id, string name, ALibraryCredential existing, string username, string password)
+		{
+			// SLNet replaces the groups on every update: an existing credential keeps its own, a new one gets the saving user's.
+			var groups = existing == null ? _platform.CallerGroups() : existing.Info.Groups?.ToList() ?? new List<int>();
+			var credential = new UserNameAndPasswordCredential(id, name, groups);
+			if (!string.IsNullOrEmpty(username))
+				credential.UserName = username;
+			if (!string.IsNullOrEmpty(password))
+				credential.Password = password;
+			_platform.Write(credential);
+		}
 
 		private bool ReadSharePointFlag(SharePointConfiguration sharePoint, string operation)
 		{

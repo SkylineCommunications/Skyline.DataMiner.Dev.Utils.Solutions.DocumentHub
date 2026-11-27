@@ -18,7 +18,7 @@ namespace Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.Graph.Gene
 	using Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.Graph.Generated.Sites.Item;
 
 	/// <summary>Graph path aliases and metadata batching omitted from the general Kiota runtime.</summary>
-	internal partial class DocumentHubGraphClient : IDisposable
+	internal sealed partial class DocumentHubGraphClient : IDisposable
 	{
 		private const string GraphBaseUrl = "https://graph.microsoft.com/v1.0";
 		private const int BatchSize = 20;
