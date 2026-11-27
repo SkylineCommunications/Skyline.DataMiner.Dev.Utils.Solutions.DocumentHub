@@ -20,13 +20,12 @@
     <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
   </ItemGroup>
 
-  <ItemGroup>
-	<ProjectReference Include="..\DevPack\DevPack.csproj" />
-  </ItemGroup>
-
   <!-- The per-agent secret script cannot be referenced as a project (DataMiner SDK script), so its source is linked in to test its logic. -->
   <ItemGroup>
     <Compile Include="..\SLC-DH-AS-ManageSharePointSecret\SLC-DH-AS-ManageSharePointSecret.cs" Link="Scripts\SLC-DH-AS-ManageSharePointSecret.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DevPack\DevPack.csproj" />
   </ItemGroup>
 
 </Project>

@@ -22,6 +22,7 @@ namespace DevPack.Tests.API
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Helpers;
 	using Skyline.DataMiner.Solutions.DocumentHub.SDM.Models;
 	using Skyline.DataMiner.Solutions.DocumentHub.Tests.Setup;
+	using DriveItem = Skyline.DataMiner.Solutions.DocumentHub.API.StorageHandlers.Graph.Generated.Models.DriveItem;
 
 	[TestClass]
 	public class NativeCredentialMessaging_Tests
@@ -376,7 +377,7 @@ namespace DevPack.Tests.API
 			var searchable = handler.As<ISearchableStorageHandler>();
 			var files = new List<IDocHubFile>
 			{
-				new DriveItemAdapter { DriveItem = new Microsoft.Graph.Models.DriveItem { Id = "item", Name = "file.pdf", WebUrl = "https://contoso.sharepoint.com/sites/test/file.pdf" } },
+				new DriveItemAdapter { DriveItem = new DriveItem { Id = "item", Name = "file.pdf", WebUrl = "https://contoso.sharepoint.com/sites/test/file.pdf" } },
 			};
 			if (search)
 			{
